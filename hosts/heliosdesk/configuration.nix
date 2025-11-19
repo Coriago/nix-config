@@ -1,7 +1,7 @@
 {config, ...}: {
   imports = [
     # Mostly system related configuration
-    ../../nixos/nvidia.nix # CHANGEME: Remove this line if you don't have an Nvidia GPU
+    ../../nixos/nvidia.nix
     ../../nixos/audio.nix
     ../../nixos/bluetooth.nix
     ../../nixos/fonts.nix
