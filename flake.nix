@@ -31,8 +31,7 @@
 
   outputs = inputs @ {nixpkgs, ...}: {
     nixosConfigurations = {
-      nixy =
-        # CHANGEME: This should match the 'hostname' in your variables.nix file
+      heliosdesk =
         nixpkgs.lib.nixosSystem {
           modules = [
             {
@@ -41,24 +40,22 @@
                 inherit inputs;
               };
             }
-            inputs.nixos-hardware.nixosModules.omen-16-n0005ne # CHANGEME: check https://github.com/NixOS/nixos-hardware
             inputs.home-manager.nixosModules.home-manager
             inputs.stylix.nixosModules.stylix
-            ./hosts/laptop/configuration.nix # CHANGEME: change the path to match your host folder
+            ./hosts/heliosdesk/configuration.nix
           ];
         };
-      # Jack is my server
-      jack = nixpkgs.lib.nixosSystem {
-        modules = [
-          {_module.args = {inherit inputs;};}
-          inputs.home-manager.nixosModules.home-manager
-          inputs.stylix.nixosModules.stylix
-          inputs.sops-nix.nixosModules.sops
-          inputs.nixarr.nixosModules.default
-          inputs.eleakxir.nixosModules.eleakxir
-          ./hosts/server/configuration.nix
-        ];
-      };
+      # jack = nixpkgs.lib.nixosSystem {
+      #   modules = [
+      #     {_module.args = {inherit inputs;};}
+      #     inputs.home-manager.nixosModules.home-manager
+      #     inputs.stylix.nixosModules.stylix
+      #     inputs.sops-nix.nixosModules.sops
+      #     inputs.nixarr.nixosModules.default
+      #     inputs.eleakxir.nixosModules.eleakxir
+      #     ./hosts/server/configuration.nix
+      #   ];
+      # };
     };
   };
 }
