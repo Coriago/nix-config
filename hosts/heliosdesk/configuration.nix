@@ -14,6 +14,7 @@
     ../../nixos/tailscale.nix
     ../../nixos/hyprland.nix
     ../../nixos/docker.nix
+    ../../nixos/steam.nix
 
     # ../../nixos/omen.nix # For my laptop only
 
