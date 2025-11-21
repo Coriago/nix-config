@@ -67,10 +67,11 @@ in {
       ];
 
       monitor = [
-        "eDP-2,highres,0x0,1" # My internal laptop screen
-        "desc:AOC U34G2G1 0x00000E06,3440x1440@99.98,auto,1" # My external monitor
-        "desc:United Microelectr Corporation UMC SHARP,3840x2160,auto,2" # TV
-        ",prefered,auto,1" # default
+        # Primary: Dell external monitor
+        "HDMI-A-2,1920x1080@60,0x0,1"
+
+        # Sony TV mirroring the Dell monitor
+        "HDMI-A-3,1920x1080@60,1920x0,1,mirror,HDMI-A-2"
       ];
 
       env = [
@@ -93,14 +94,14 @@ in {
         "WLR_BACKEND,vulkan"
         "WLR_RENDERER,vulkan"
         "WLR_NO_HARDWARE_CURSORS,1"
-        "SDL_VIDEODRIVER,wayland"
+        # "SDL_VIDEODRIVER,wayland"
         "CLUTTER_BACKEND,wayland"
         # "AQ_DRM_DEVICES,/dev/dri/card2:/dev/dri/card1" # Related to the GPU
       ];
 
       cursor = {
         no_hardware_cursors = true;
-        default_monitor = "eDP-2";
+        default_monitor = "HDMI-A-2";
       };
 
       general = {

@@ -100,6 +100,7 @@
 
       # Backup
       vscode
+      code-cursor
     ];
 
     # Import my profile picture, used by the hyprpanel dashboard
