@@ -31,20 +31,19 @@
 
   outputs = inputs @ {nixpkgs, ...}: {
     nixosConfigurations = {
-      heliosdesk =
-        nixpkgs.lib.nixosSystem {
-          modules = [
-            {
-              nixpkgs.overlays = [];
-              _module.args = {
-                inherit inputs;
-              };
-            }
-            inputs.home-manager.nixosModules.home-manager
-            inputs.stylix.nixosModules.stylix
-            ./hosts/heliosdesk/configuration.nix
-          ];
-        };
+      heliosdesk = nixpkgs.lib.nixosSystem {
+        modules = [
+          {
+            nixpkgs.overlays = [];
+            _module.args = {
+              inherit inputs;
+            };
+          }
+          inputs.home-manager.nixosModules.home-manager
+          inputs.stylix.nixosModules.stylix
+          ./hosts/heliosdesk/configuration.nix
+        ];
+      };
       # jack = nixpkgs.lib.nixosSystem {
       #   modules = [
       #     {_module.args = {inherit inputs;};}
