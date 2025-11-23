@@ -101,6 +101,10 @@
       # Backup
       vscode
       code-cursor
+
+      # NixTools
+      nixd
+      alejandra
     ];
 
     # Import my profile picture, used by the hyprpanel dashboard
