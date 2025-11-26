@@ -27,15 +27,15 @@
     ../../home/scripts # All scripts
 
     # System (Desktop environment like stuff)
-    ../../home/system/hyprland
-    ../../home/system/hyprlock
-    ../../home/system/hyprpanel
-    ../../home/system/hyprpaper
-    ../../home/system/zathura
-    ../../home/system/mime
-    ../../home/system/udiskie
+    # ../../home/system/hyprland
+    # ../../home/system/hyprlock
+    # ../../home/system/hyprpanel
+    # ../../home/system/hyprpaper
+    # ../../home/system/zathura
+    # ../../home/system/mime
+    # ../../home/system/udiskie
     # ../../home/system/vicinae
-    ../../home/system/wofi
+    # ../../home/system/wofi
     # ../../home/system/hypridle
 
     # ./secrets
@@ -47,7 +47,7 @@
 
     packages = with pkgs; [
       # Apps
-      bitwarden # Password manager
+      bitwarden-desktop # Password manager
       vlc # Video player
       blanket # White-noise app
       obsidian # Note taking app

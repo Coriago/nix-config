@@ -4,15 +4,16 @@
     ../../nixos/nvidia.nix
     ../../nixos/audio.nix
     ../../nixos/bluetooth.nix
-    ../../nixos/fonts.nix
+    # ../../nixos/fonts.nix
     ../../nixos/home-manager.nix
     ../../nixos/nix.nix
     ../../nixos/systemd-boot.nix
-    ../../nixos/sddm.nix
     ../../nixos/users.nix
     ../../nixos/utils.nix
     ../../nixos/tailscale.nix
-    ../../nixos/hyprland.nix
+    # ../../nixos/sddm.nix
+    # ../../nixos/hyprland.nix
+    ../../nixos/gnome.nix
     ../../nixos/docker.nix
     ../../nixos/steam.nix
 
