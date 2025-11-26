@@ -56,10 +56,10 @@ in {
   environment.variables = {
     XDG_DATA_HOME = "$HOME/.local/share";
     PASSWORD_STORE_DIR = "$HOME/.local/share/password-store";
-    EDITOR = "nvim";
+    EDITOR = "cursor";
     TERMINAL = "kitty";
     TERM = "kitty";
-    BROWSER = "zen-beta";
+    BROWSER = "brave";
   };
 
   services.libinput.enable = true;
