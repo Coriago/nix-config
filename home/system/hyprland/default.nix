@@ -67,11 +67,14 @@ in {
       ];
 
       monitor = [
-        # Primary: Dell external monitor
-        "HDMI-A-2,1920x1080@60,0x0,1"
+        # Primary: AOC Q27G4ZD (DP-4) - 2560x1440@240Hz
+        "DP-4,2560x1440@240,0x0,1"
 
-        # Sony TV mirroring the Dell monitor
-        "HDMI-A-3,1920x1080@60,1920x0,1,mirror,HDMI-A-2"
+        # Sony TV (HDMI-A-3) mirroring DP-4 at 1920x1080@60Hz
+        "HDMI-A-3,1920x1080@60,-2560x0,1,mirror,DP-4"
+
+        # Dell P2219H (HDMI-A-2) - 1920x1080@60Hz portrait mode on the right
+        "HDMI-A-2,1920x1080@60,2560x0,1,transform,1"
       ];
 
       env = [
@@ -101,7 +104,7 @@ in {
 
       cursor = {
         no_hardware_cursors = true;
-        default_monitor = "HDMI-A-2";
+        default_monitor = "DP-4";
       };
 
       general = {
