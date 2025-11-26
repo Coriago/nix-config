@@ -1,4 +1,4 @@
-# Nvidia configuration for NixOS with Wayland and Hyprland support
+# Nvidia configuration for NixOS with Wayland support
 # Import this module only if you have an Nvidia GPU
 {
   pkgs,
@@ -11,7 +11,7 @@ in {
   # Video drivers configuration for Xorg and Wayland
   services.xserver.videoDrivers = ["nvidia"]; # Simplified - other modules are loaded automatically
 
-  # Kernel parameters for better Wayland and Hyprland integration
+  # Kernel parameters for better Wayland integration
   boot.kernelParams = [
     "nvidia-drm.modeset=1" # Enable mode setting for Wayland
     "nvidia.NVreg_PreserveVideoMemoryAllocations=1" # Improves resume after sleep
@@ -24,14 +24,15 @@ in {
   # Environment variables for better compatibility
   environment.variables = {
     LIBVA_DRIVER_NAME = "nvidia"; # Hardware video acceleration
-    XDG_SESSION_TYPE = "wayland"; # Force Wayland
+    # Note: XDG_SESSION_TYPE should NOT be forced here - GNOME sets it automatically
+    # Forcing it can break Electron apps like Cursor/VSCode that check this variable
     GBM_BACKEND = "nvidia-drm"; # Graphics backend for Wayland
     __GLX_VENDOR_LIBRARY_NAME = "nvidia"; # Use Nvidia driver for GLX
-    WLR_NO_HARDWARE_CURSORS = "1"; # Fix for cursors on Wayland
-    NIXOS_OZONE_WL = "1"; # Wayland support for Electron apps
+    # Force Electron apps to use XWayland (X11) to avoid EGL/dmabuf issues with NVIDIA on Wayland
+    # This is necessary due to compatibility issues between Electron and NVIDIA drivers on Wayland
+    ELECTRON_OZONE_PLATFORM_HINT = "x11"; # Use XWayland for Electron apps
     __GL_GSYNC_ALLOWED = "1"; # Enable G-Sync if available
     __GL_VRR_ALLOWED = "1"; # Enable VRR (Variable Refresh Rate)
-    WLR_DRM_NO_ATOMIC = "1"; # Fix for some issues with Hyprland
     NVD_BACKEND = "direct"; # Configuration for new driver
     MOZ_ENABLE_WAYLAND = "1"; # Wayland support for Firefox
   };

@@ -109,16 +109,12 @@ in {
     xdgOpenUsePortal = true;
     config = {
       common.default = ["gtk"];
-      #hyprland.default = ["gtk" "hyprland"];
     };
 
     extraPortals = [pkgs.xdg-desktop-portal-gtk];
   };
 
   security = {
-    # allow wayland lockers to unlock the screen
-    pam.services.hyprlock.text = "auth include login";
-
     # userland niceness
     rtkit.enable = true;
 
