@@ -82,6 +82,8 @@
       inputs.eleakxir.packages.${pkgs.system}.leak-utils
       caido
       wireshark
+      ddcui
+      # ddcutil
 
       # Utils
       zip

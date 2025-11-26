@@ -64,6 +64,9 @@ in {
 
   services.libinput.enable = true;
   programs.dconf.enable = true;
+
+  # Enable I2C support for ddcui/ddcutil (monitor control via DDC/CI)
+  hardware.i2c.enable = true;
   services = {
     dbus = {
       enable = true;
@@ -102,6 +105,7 @@ in {
     vim
     go
     comma
+    ddcutil
   ];
 
   xdg.portal = {
