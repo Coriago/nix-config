@@ -16,6 +16,7 @@
     ../../nixos/gnome.nix
     ../../nixos/docker.nix
     ../../nixos/steam.nix
+    ../../nixos/flatpak.nix
 
     # ../../nixos/omen.nix # For my laptop only
 

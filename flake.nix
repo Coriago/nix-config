@@ -27,9 +27,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     eleakxir.url = "github:anotherhadi/eleakxir";
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
-  outputs = inputs @ {nixpkgs, ...}: {
+  outputs = inputs @ {
+    nixpkgs,
+    nix-flatpak,
+    ...
+  }: {
     nixosConfigurations = {
       heliosdesk = nixpkgs.lib.nixosSystem {
         modules = [
@@ -41,6 +46,7 @@
           }
           inputs.home-manager.nixosModules.home-manager
           inputs.stylix.nixosModules.stylix
+          inputs.nix-flatpak.nixosModules.nix-flatpak
           ./hosts/heliosdesk/configuration.nix
         ];
       };

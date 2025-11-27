@@ -84,7 +84,6 @@
       wireshark
       ddcui
       # ddcutil
-
       # Utils
       zip
       unzip
@@ -103,6 +102,7 @@
       # Backup
       vscode
       code-cursor
+      # stremio
 
       # NixTools
       nixd
