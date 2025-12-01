@@ -3,6 +3,7 @@
     ./nixy
     ./sounds
     ./brightness
+    ./switch-input
     ./caffeine
     ./hyprpanel
     ./hyprfocus
