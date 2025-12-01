@@ -83,8 +83,8 @@
 
     polarity = "dark";
     image = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/anotherhadi/awesome-wallpapers/refs/heads/main/app/static/wallpapers/cat-watching-the-star_pixelart_purple_static.png";
-      sha256 = "sha256-P8gCiCC9CZPJyGL4kpvAaOqlNor010s/BUA0muBVfK0=";
+      url = "https://raw.githubusercontent.com/ItsTerm1n4l/Wallpapers/refs/heads/main/images/Sea-rocks.jpeg";
+      sha256 = "sha256-k64ll5VLNyEW+RpqB2FJBNjIMzXFV4hJPm1ZajhOem4=";
     };
   };
 }
