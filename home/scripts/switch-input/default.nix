@@ -92,11 +92,11 @@
 
     # Toggle inputs for both monitors
     if [ "$device" = "desktop" ]; then
-      set_monitor_input "$dell_bus" "$dell_desktop_input"
-      set_monitor_input "$aoc_bus" "$aoc_desktop_input"
+      set_monitor_input "$dell_bus" "$dell_desktop_input" &
+      set_monitor_input "$aoc_bus" "$aoc_desktop_input" &
     elif [ "$device" = "laptop" ]; then
-      set_monitor_input "$dell_bus" "$dell_laptop_input"
-      set_monitor_input "$aoc_bus" "$aoc_laptop_input"
+      set_monitor_input "$dell_bus" "$dell_laptop_input" &
+      set_monitor_input "$aoc_bus" "$aoc_laptop_input" &
     fi
 
     total_time=$(awk "BEGIN {printf \"%.3f\", $(date +%s.%N) - $start_time}")
