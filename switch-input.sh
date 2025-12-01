@@ -24,6 +24,28 @@ toggle_monitor_input() {
   ddcutil $ddcutil_flags setvcp 60 "$new_value"
 }
 
+read_monitor_input() {
+  local bus="$1"
+  
+  # Performance flags: reduce sleep times and enable dynamic sleep adjustment
+  local ddcutil_flags="--bus=$bus --sleep-multiplier=0.2 --enable-dynamic-sleep"
+  
+  echo $(ddcutil $ddcutil_flags getvcp -t 60 | grep -oP 'x[0-9a-f]+' | head -1)
+}
+
+# Function to toggle monitor input between two values
+set_monitor_input() {
+  local bus="$1"
+  local input_val="$2"
+  
+  # Performance flags: reduce sleep times and enable dynamic sleep adjustment
+  local ddcutil_flags="--bus=$bus --sleep-multiplier=0.2 --enable-dynamic-sleep"
+  
+  ddcutil $ddcutil_flags setvcp 60 "$input_val"
+}
+
+device="desktop"
+
 # Monitor configurations
 dell_model='DELL P2219H'
 dell_hdmi_1=x11
@@ -48,9 +70,26 @@ detect_output=$(ddcutil $detect_flags detect 2>/dev/null)
 dell_bus=$(get_bus_id "$dell_model" "$detect_output")
 aoc_bus=$(get_bus_id "$aoc_model" "$detect_output")
 
+# Get current input of primary monitor
+primary_input=$(read_monitor_input "$aoc_bus")
+# Toggle based on current value
+if [ "$primary_input" = "$aoc_desktop_input" ]; then
+  device="laptop"
+else
+  device="desktop"
+fi
+
+echo "dell_bus: $dell_bus"
+echo "aoc_bus: $aoc_bus"
+
 # Toggle inputs for both monitors
-toggle_monitor_input "$dell_bus" "$dell_desktop_input" "$dell_laptop_input"
-toggle_monitor_input "$aoc_bus" "$aoc_desktop_input" "$aoc_laptop_input"
+if [ "$device" = "desktop" ]; then
+  set_monitor_input "$dell_bus" "$dell_desktop_input"
+  set_monitor_input "$aoc_bus" "$aoc_desktop_input"
+elif [ "$device" = "laptop" ]; then
+  set_monitor_input "$dell_bus" "$dell_laptop_input"
+  set_monitor_input "$aoc_bus" "$aoc_laptop_input"
+fi
 
 total_time=$(awk "BEGIN {printf \"%.3f\", $(date +%s.%N) - $start_time}")
 echo "Total time: ${total_time}s"

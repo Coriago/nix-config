@@ -1,4 +1,8 @@
-{config, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   imports = [
     # Mostly system related configuration
     ../../nixos/nvidia.nix
@@ -27,6 +31,13 @@
 
   home-manager.users."${config.var.username}" = import ./home.nix;
 
+  programs.nix-ld = {
+    enable = true;
+    # libraries = with pkgs; [
+    #   libxcrypt
+    #   libcryptui
+    # ];
+  };
   # Don't touch this
   system.stateVersion = "25.05";
 }

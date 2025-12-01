@@ -92,6 +92,8 @@
       pfetch
       btop
       fastfetch
+      devenv
+      uv
 
       # Just cool
       peaclock
