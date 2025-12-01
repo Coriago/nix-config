@@ -31,6 +31,7 @@ in {
       download-buffer-size = 262144000; # 250 MB (250 * 1024 * 1024)
       auto-optimise-store = true;
       experimental-features = ["nix-command" "flakes"];
+      trusted-users = ["root" "${config.var.username}" "@wheel"];
       substituters = [
         # high priority since it's almost always used
         "https://cache.nixos.org?priority=10"

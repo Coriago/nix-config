@@ -28,10 +28,14 @@ in {
       size = 10000;
     };
 
-    profileExtra = lib.optionalString (config.home.sessionPath != []) ''
-      export PATH="$PATH''${PATH:+:}${
-        lib.concatStringsSep ":" config.home.sessionPath
-      }"
+    profileExtra = ''
+      ${lib.optionalString (config.home.sessionPath != []) ''
+        export PATH="$PATH''${PATH:+:}${
+          lib.concatStringsSep ":" config.home.sessionPath
+        }"
+      ''}
+      # Include flatpak export directories so flatpak apps appear in application menus
+      export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share"
     '';
 
     shellAliases = {

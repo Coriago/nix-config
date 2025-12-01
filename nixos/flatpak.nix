@@ -1,5 +1,4 @@
 {...}: {
-  # Enable flatpak system service (required for nix-flatpak home-manager module)
   services.flatpak = {
     enable = true;
     remotes = [
@@ -9,10 +8,8 @@
       }
     ];
     packages = [
-      {
-        appId = "com.stremio.Stremio";
-        origin = "flathub";
-      }
+      "com.stremio.Stremio"
     ];
+    update.onActivation = true;
   };
 }
