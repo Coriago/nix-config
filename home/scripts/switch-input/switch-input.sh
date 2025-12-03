@@ -92,4 +92,4 @@ elif [ "$device" = "laptop" ]; then
 fi
 
 total_time=$(awk "BEGIN {printf \"%.3f\", $(date +%s.%N) - $start_time}")
-echo "Total time: ${total_time}s"
+echo "Total time: $total_time seconds"
