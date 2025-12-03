@@ -83,6 +83,8 @@ This module provides a set of scripts to control the volume of the default audio
 - `sound-set [value]` sets the volume to the given value.
 - `sound-toggle` toggles the mute state of the default audio sink.
 
+
+
 ## System
 
 Usefull quick scripts
