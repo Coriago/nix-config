@@ -47,19 +47,19 @@ set_monitor_input() {
 device="desktop"
 
 # Monitor configurations
-dell_model='DELL P2219H'
-dell_hdmi_1=x11
-dell_displayport_1=x0f
-dell_desktop_input=$dell_hdmi_1
-dell_laptop_input=$dell_displayport_1
+monitor_1_model='Q27G3XMN'
+monitor_1_displayport_1=x0f
+monitor_1_hdmi_1=x11
+monitor_1_hdmi_2=x12
+monitor_1_desktop_input=$monitor_1_displayport_1
+monitor_1_laptop_input=$monitor_1_hdmi_2
 
-aoc_model='Q27G4ZD'
-aoc_displayport_1=x0f
-aoc_hdmi_1=x11
-aoc_hdmi_2=x12
-aoc_desktop_input=$aoc_displayport_1
-aoc_laptop_input=$aoc_hdmi_2
-
+monitor_2_model='Q27G4ZD'
+monitor_2_displayport_1=x0f
+monitor_2_hdmi_1=x11
+monitor_2_hdmi_2=x12
+monitor_2_desktop_input=$monitor_2_displayport_1
+monitor_2_laptop_input=$monitor_2_hdmi_2
 start_time=$(date +%s.%N)
 
 # Run detect once to get all bus IDs
@@ -67,28 +67,28 @@ detect_flags="--ignore-mmid=SNY-SONY_TV___00-31748 --sleep-multiplier=0.2"
 detect_output=$(ddcutil $detect_flags detect 2>/dev/null)
 
 # Extract bus IDs for all monitors
-dell_bus=$(get_bus_id "$dell_model" "$detect_output")
-aoc_bus=$(get_bus_id "$aoc_model" "$detect_output")
+monitor_1_bus=$(get_bus_id "$monitor_1_model" "$detect_output")
+monitor_2_bus=$(get_bus_id "$monitor_2_model" "$detect_output")
 
 # Get current input of primary monitor
-primary_input=$(read_monitor_input "$aoc_bus")
+primary_input=$(read_monitor_input "$monitor_1_bus")
 # Toggle based on current value
-if [ "$primary_input" = "$aoc_desktop_input" ]; then
+if [ "$primary_input" = "$monitor_1_desktop_input" ]; then
   device="laptop"
 else
   device="desktop"
 fi
 
-echo "dell_bus: $dell_bus"
-echo "aoc_bus: $aoc_bus"
+echo "monitor_1_bus: $monitor_1_bus"
+echo "monitor_2_bus: $monitor_2_bus"
 
 # Toggle inputs for both monitors
 if [ "$device" = "desktop" ]; then
-  set_monitor_input "$dell_bus" "$dell_desktop_input" &
-  set_monitor_input "$aoc_bus" "$aoc_desktop_input" &
+  set_monitor_input "$monitor_1_bus" "$monitor_1_desktop_input" &
+  set_monitor_input "$monitor_2_bus" "$monitor_2_desktop_input" &
 elif [ "$device" = "laptop" ]; then
-  set_monitor_input "$dell_bus" "$dell_laptop_input" &
-  set_monitor_input "$aoc_bus" "$aoc_laptop_input" &
+  set_monitor_input "$monitor_1_bus" "$monitor_1_laptop_input" &
+  set_monitor_input "$monitor_2_bus" "$monitor_2_laptop_input" &
 fi
 
 total_time=$(awk "BEGIN {printf \"%.3f\", $(date +%s.%N) - $start_time}")

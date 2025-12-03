@@ -1,8 +1,4 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{config, ...}: {
   imports = [
     # Mostly system related configuration
     ../../nixos/nvidia.nix
