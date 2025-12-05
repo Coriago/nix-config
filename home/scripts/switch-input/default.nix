@@ -71,9 +71,9 @@
     monitor_2_bus=$(get_bus_id "$monitor_2_model" "$detect_output")
 
     # Get current input of primary monitor
-    primary_input=$(read_monitor_input "$monitor_1_bus")
+    primary_input=$(read_monitor_input "$monitor_2_bus")
     # Toggle based on current value
-    if [ "$primary_input" = "$monitor_1_desktop_input" ]; then
+    if [ "$primary_input" = "$monitor_2_desktop_input" ]; then
       device="laptop"
     else
       device="desktop"

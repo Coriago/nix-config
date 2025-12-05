@@ -54,10 +54,10 @@ serial, physical_monitors, logical_monitors, properties = display_config_interfa
 
 updated_logical_monitors = [
     dbus.Struct((dbus.Int32(0), dbus.Int32(0), dbus.Double(1.0), dbus.UInt32(0), dbus.Boolean(True), [
-        dbus.Struct((dbus.String('DP-4'), dbus.String('1920x1080@60.000'), {}), signature=None),
+        dbus.Struct((dbus.String('DP-5'), dbus.String('1920x1080@60.000'), {}), signature=None),
         dbus.Struct((dbus.String('HDMI-3'), dbus.String('1920x1080@60.000'), {}), signature=None)
     ]), signature=None),
-    dbus.Struct((dbus.Int32(1920), dbus.Int32(0), dbus.Double(1.0), dbus.UInt32(1.0), dbus.Boolean(False), [dbus.Struct((dbus.String('HDMI-2'), dbus.String('1920x1080@60.000'), {}), signature=None)]), signature=None)
+    dbus.Struct((dbus.Int32(1920), dbus.Int32(0), dbus.Double(1.0), dbus.UInt32(1.0), dbus.Boolean(False), [dbus.Struct((dbus.String('DP-4'), dbus.String('1920x1080@60.000'), {}), signature=None)]), signature=None)
 ]
 
 
