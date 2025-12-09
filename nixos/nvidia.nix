@@ -7,6 +7,7 @@
 }: let
   # Using beta driver for recent GPUs like RTX 4070
   nvidiaDriverChannel = config.boot.kernelPackages.nvidiaPackages.beta;
+  # nvidiaDriverChannel = config.boot.kernelPackages.nvidiaPackages.alpha;
 in {
   # Video drivers configuration for Xorg and Wayland
   services.xserver.videoDrivers = ["nvidia"]; # Simplified - other modules are loaded automatically
@@ -47,28 +48,29 @@ in {
     nvidia = {
       open = false; # Proprietary driver for better performance
       nvidiaSettings = true; # Nvidia settings utility
-      powerManagement = {
-        enable = true; # Power management
-        finegrained = true; # More precise power consumption control
-      };
+      # powerManagement = {
+      #   enable = true; # Power management
+      #   finegrained = true; # More precise power consumption control
+      # };
       modesetting.enable = true; # Required for Wayland
-      package = nvidiaDriverChannel;
-      forceFullCompositionPipeline = true; # Prevents screen tearing
+      package = nvidiaDriverChannel; # 580.105.08
+      # package = config.boot.kernelPackages.nvidiaPackages.production;
+      # forceFullCompositionPipeline = true; # Prevents screen tearing
 
       # Configuration for hybrid AMD+Nvidia laptop
-      prime = {
-        # Optimized configuration for switchable graphics laptops
-        offload = {
-          enable = true; # Mode optimized for power saving
-          enableOffloadCmd =
-            true; # Allows running applications with dedicated GPU
-        };
-        # sync.enable disabled as offload is generally better for laptops
-        sync.enable = false;
-        # PCI IDs verified for your hardware
-        amdgpuBusId = "PCI:5:0:0"; # Integrated AMD GPU
-        nvidiaBusId = "PCI:1:0:0"; # Dedicated Nvidia GPU
-      };
+      # prime = {
+      #   # Optimized configuration for switchable graphics laptops
+      #   offload = {
+      #     enable = true; # Mode optimized for power saving
+      #     enableOffloadCmd =
+      #       true; # Allows running applications with dedicated GPU
+      #   };
+      #   # sync.enable disabled as offload is generally better for laptops
+      #   sync.enable = false;
+      #   # PCI IDs verified for your hardware
+      #   amdgpuBusId = "PCI:5:0:0"; # Integrated AMD GPU
+      #   nvidiaBusId = "PCI:1:0:0"; # Dedicated Nvidia GPU
+      # };
     };
 
     # Enhanced graphics support
@@ -85,6 +87,11 @@ in {
         vulkan-loader
         vulkan-validation-layers
         libva
+        # Wayland packages needed for gamescope
+        # wayland
+        # wayland-protocols
+        libxkbcommon
+        libdrm
       ];
     };
   };

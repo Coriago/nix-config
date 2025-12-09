@@ -106,7 +106,11 @@ in {
     go
     comma
     ddcutil
+    input-remapper
   ];
+  services.input-remapper = {
+    enable = true;
+  };
 
   xdg.portal = {
     enable = true;

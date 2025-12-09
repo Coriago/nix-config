@@ -60,6 +60,7 @@
       gnome-text-editor # Basic graphic text editor
       mpv # Video player
       brave # Web browser
+      rpi-imager
 
       # Privacy
       session-desktop # Session app, private messages
