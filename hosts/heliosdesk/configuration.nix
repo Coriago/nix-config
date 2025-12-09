@@ -13,7 +13,8 @@
     ../../nixos/tailscale.nix
     # ../../nixos/sddm.nix
     # ../../nixos/hyprland.nix
-    ../../nixos/gnome.nix
+    # ../../nixos/gnome.nix
+    ../../nixos/kde.nix
     ../../nixos/docker.nix
     ../../nixos/steam.nix
     ../../nixos/flatpak.nix
