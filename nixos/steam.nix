@@ -1,9 +1,15 @@
-{...}: let
+{
+  pkgs,
+  nixpkgs-unstable,
+  ...
+}: let
   gamescopeArgs = [
     "--rt"
-    # "--expose-wayland"
+    "--expose-wayland"
+    "--backend wayland"
     # "--adaptive-sync"
     # "--backend sdl"
+    # -W 2560 -H 1440 -w 2560 -h 1440 -r 240 -f --force-grab-cursor
   ];
 in {
   programs.steam = {
@@ -23,6 +29,12 @@ in {
   };
 
   programs.gamemode = {
-    enable = true;
+    enable = false;
   };
+
+  # services.ananicy = {
+  #   enable = true;
+  #   package = pkgs.ananicy-cpp;
+  #   rulesProvider = pkgs.ananicy-rules-cachyos;
+  # };
 }

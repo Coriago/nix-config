@@ -61,6 +61,7 @@
       mpv # Video player
       brave # Web browser
       rpi-imager
+      helvum
 
       # Privacy
       session-desktop # Session app, private messages

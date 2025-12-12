@@ -6,7 +6,7 @@
   ...
 }: let
   # Using beta driver for recent GPUs like RTX 4070
-  nvidiaDriverChannel = config.boot.kernelPackages.nvidiaPackages.beta;
+  nvidiaDriverChannel = config.boot.kernelPackages.nvidiaPackages.stable;
   # nvidiaDriverChannel = config.boot.kernelPackages.nvidiaPackages.alpha;
 in {
   # Video drivers configuration for Xorg and Wayland
