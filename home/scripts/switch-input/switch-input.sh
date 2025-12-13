@@ -60,7 +60,7 @@ monitor_2_serial='2OMR6UA000303'
 monitor_2_displayport_1=x0f
 monitor_2_hdmi_1=x11
 monitor_2_hdmi_2=x12
-monitor_2_desktop_input=$monitor_2_displayport_1
+monitor_2_desktop_input=$monitor_2_hdmi_1
 monitor_2_laptop_input=$monitor_2_hdmi_2
 
 monitor_3_model='Q27G3XMN'
