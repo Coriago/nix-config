@@ -9,19 +9,15 @@
     ];
   };
 
-  flake.nixosModules.heliosdeskHost = {
-    pkgs,
-    lib,
-    ...
-  }: {
+  flake.nixosModules.heliosdeskHost = {lib, ...}: {
     imports = [
-      self.nixosModules.base
+      self.nixosModules.variables
       # self.nixosModules.basic
       # # disko
       # inputs.disko.nixosModules.disko
       # self.diskoConfigurations.hostMain
     ];
-    # variables.user.name = "helios";
+    vars.user.name = "helios";
     # variables.stateVersion = "25.05";
 
     system.stateVersion = "25.05";

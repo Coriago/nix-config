@@ -1,6 +1,6 @@
 {
-  flake.nixosModules.base = {lib, ...}: {
-    options.baseVars = {
+  flake.nixosModules.variables = {lib, ...}: {
+    options.vars = {
       user.name = lib.mkOption {
         type = lib.types.str;
         description = "The name of the primary user.";
