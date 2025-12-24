@@ -10,16 +10,18 @@
   };
 
   flake.nixosModules.heliosdesk = {lib, ...}: {
-    # Top level Modules to use
+    # Import all reusable code here
     imports = [
       self.nixosModules.variables
       self.nixosModules.basic
     ];
 
-    # Global Variables
+    # Set Global Variables for this Host
     vars = {
       user.name = "helios";
       stateVersion = "25.05";
+      timeZone = "America/New_York";
+      locale = "en_US.UTF-8";
     };
 
     # System Config or Overrides
