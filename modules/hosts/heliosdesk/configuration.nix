@@ -5,23 +5,25 @@
 }: {
   flake.nixosConfigurations.heliosdesk = inputs.nixpkgs.lib.nixosSystem {
     modules = [
-      self.nixosModules.heliosdeskHost
+      self.nixosModules.heliosdesk # The module defined below
     ];
   };
 
-  flake.nixosModules.heliosdeskHost = {lib, ...}: {
+  flake.nixosModules.heliosdesk = {lib, ...}: {
+    # Top level Modules to use
     imports = [
       self.nixosModules.variables
-      # self.nixosModules.basic
-      # # disko
-      # inputs.disko.nixosModules.disko
-      # self.diskoConfigurations.hostMain
+      self.nixosModules.basic
     ];
-    vars.user.name = "helios";
-    # variables.stateVersion = "25.05";
 
-    system.stateVersion = "25.05";
+    # Global Variables
+    vars = {
+      user.name = "helios";
+      stateVersion = "25.05";
+    };
 
+    # System Config or Overrides
+    networking.hostName = "heliosdesk";
     boot.loader = {
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;

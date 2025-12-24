@@ -1,9 +1,7 @@
 {inputs, ...}: {
   # Setup Home Manager
-  flake.nixosModules.home-manager = {config, ...}: {
+  flake.nixosModules.basic = {config, ...}: {
     imports = [inputs.home-manager.nixosModules.home-manager];
-
-    programs.home-manager.enable = true;
 
     home-manager = {
       useGlobalPkgs = true;
@@ -11,8 +9,8 @@
       backupFileExtension = "backup";
     };
 
-    home-manager.users.${config.variables.user.name}.home = {
-      stateVersion = config.variables.stateVersion;
+    home-manager.users.${config.vars.user.name}.home = {
+      stateVersion = config.vars.stateVersion;
     };
   };
 }

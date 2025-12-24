@@ -1,6 +1,6 @@
 {inputs, ...}: {
   # Typical nix configuration
-  flake.nixosModules.nix = {
+  flake.nixosModules.basic = {
     pkgs,
     config,
     ...
@@ -14,7 +14,7 @@
     nix.settings = {
       auto-optimise-store = true;
       experimental-features = ["nix-command" "flakes"];
-      trusted-users = ["root" "${config.variables.user.name}" "@wheel"];
+      trusted-users = ["root" "${config.vars.user.name}" "@wheel"];
     };
 
     programs.nix-ld.enable = true;
