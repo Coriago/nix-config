@@ -14,6 +14,7 @@
     imports = [
       self.nixosModules.variables
       self.nixosModules.basic
+      self.nixosModules.desktop
     ];
 
     # Set Global Variables for this Host
