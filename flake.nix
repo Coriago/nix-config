@@ -9,6 +9,10 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # determinate = {
+    #   url = "github:determinate-software/determinate-flake/main";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
     import-tree.url = "github:vic/import-tree";
 
