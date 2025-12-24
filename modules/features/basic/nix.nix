@@ -32,7 +32,7 @@
 
     security.sudo.extraRules = [
       {
-        users = [config.var.username];
+        users = [config.vars.user.name];
         commands = [
           {
             command = "/run/current-system/sw/bin/nixos-rebuild";
