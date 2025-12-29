@@ -15,6 +15,10 @@
       self.nixosModules.variables
       self.nixosModules.basic
       self.nixosModules.desktop
+      self.nixosModules.gaming
+      self.nixosModules.development
+      self.nixosModules.audio
+      self.nixosModules.bluetooth
     ];
 
     # Set Global Variables for this Host

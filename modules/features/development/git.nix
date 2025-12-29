@@ -1,6 +1,6 @@
 {
   flake.nixosModules.development = {...}: {
-    programs.vscode = {
+    programs.git = {
       enable = true;
     };
   };
