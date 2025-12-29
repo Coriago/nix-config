@@ -1,6 +1,6 @@
 # Bluetooth configuration for NixOS
 {
-  flake.nixosModules.bluetooth = {pkgs, ...}: {
+  flake.modules.nixos.bluetooth = {pkgs, ...}: {
     environment.systemPackages = with pkgs; [blueman];
     hardware.bluetooth = {
       enable = true;

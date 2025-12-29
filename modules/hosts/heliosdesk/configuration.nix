@@ -13,15 +13,22 @@
     # Import all reusable code here
     imports = [
       self.nixosModules.variables
-      self.nixosModules.basic
+      self.modules.nixos.basic
+      self.modules.nixos.home-manager
       self.nixosModules.desktop
       self.nixosModules.gaming
       self.nixosModules.development
       self.nixosModules.audio
-      self.nixosModules.bluetooth
+      self.modules.nixos.bluetooth
     ];
 
-    # Set Global Variables for this Host
+    home-manager.users.helios = {
+      modules = [
+        self.modules.homeManager.basic
+      ];
+    };
+
+    # Set Global Variables
     vars = {
       user.name = "helios";
       stateVersion = "25.05";
@@ -36,5 +43,7 @@
       efi.canTouchEfiVariables = true;
       grub.enable = lib.mkForce false;
     };
+
+    # Integrated Home Manager
   };
 }

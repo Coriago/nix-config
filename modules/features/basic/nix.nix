@@ -1,15 +1,13 @@
 {inputs, ...}: {
   # Typical nix configuration
-  flake.nixosModules.basic = {
+  flake.modules.nixos.basic = {
     pkgs,
     config,
     ...
   }: {
     imports = [
       inputs.determinate.nixosModules.default
-      # inputs.nix-index-database.nixosModules.nix-index
     ];
-    # programs.nix-index-database.comma.enable = true;
 
     nixpkgs.config.allowUnfree = true;
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
