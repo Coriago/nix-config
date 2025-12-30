@@ -1,4 +1,6 @@
 {
+  # Common variables used across modules and hosts.
+  # Each configuration should set these variables accordingly.
   flake.modules.generic.variables = {lib, ...}: {
     options.vars = {
       username = lib.mkOption {

@@ -6,6 +6,9 @@
     # Blacklist nouveau to avoid conflicts
     boot.blacklistedKernelModules = ["nouveau"];
 
+    hardware.nvidia = {
+      open = true;
+    };
     hardware.graphics = {
       enable = true;
     };
