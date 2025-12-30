@@ -1,6 +1,6 @@
 {inputs, ...}: {
   # Typical nix configuration
-  flake.modules.nixos.basic = {
+  flake.modules.nixos.base = {
     pkgs,
     config,
     ...

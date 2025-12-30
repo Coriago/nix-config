@@ -2,7 +2,7 @@
   # General/Common settings
 
   # NixOS
-  flake.modules.nixos.basic = {config, ...}: {
+  flake.modules.nixos.base = {config, ...}: {
     # User
     users.users.${config.vars.user.name} = {
       isNormalUser = true;
@@ -32,7 +32,7 @@
   };
 
   # Home Manager
-  flake.modules.homeManager.basic = {
+  flake.modules.homeManager.base = {
     config,
     lib,
     pkgs,

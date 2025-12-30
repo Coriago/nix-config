@@ -9,21 +9,28 @@
     ];
   };
 
+  flake.homeConfigurations.helios = inputs.home-manager.lib.homeManagerConfiguration {
+    modules = [
+      self.nixosModules.heliosdesk.home-manager.users.helios
+    ];
+  };
+
   flake.nixosModules.heliosdesk = {lib, ...}: {
     # Import all reusable code here
     imports = [
-      self.nixosModules.variables
+      self.modules.generic.variables
       self.modules.nixos.basic
       self.modules.nixos.home-manager
-      self.nixosModules.desktop
-      self.nixosModules.gaming
-      self.nixosModules.development
-      self.nixosModules.audio
+      # self.nixosModules.desktop
+      # self.nixosModules.gaming
+      # self.nixosModules.development
+      self.modules.nixos.audio
       self.modules.nixos.bluetooth
     ];
 
-    home-manager.users.helios = {
-      modules = [
+    # Integrated Home Manager
+    home-manager.users.helios = {...}: {
+      imports = [
         self.modules.homeManager.basic
       ];
     };
@@ -43,7 +50,5 @@
       efi.canTouchEfiVariables = true;
       grub.enable = lib.mkForce false;
     };
-
-    # Integrated Home Manager
   };
 }
