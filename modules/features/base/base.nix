@@ -4,27 +4,27 @@
   # NixOS
   flake.modules.nixos.base = {config, ...}: {
     # User
-    users.users.${config.username} = {
+    users.users.${config.vars.username} = {
       isNormalUser = true;
       extraGroups = ["wheel"];
     };
 
     # Version
-    system.stateVersion = config.stateVersion;
+    system.stateVersion = config.vars.stateVersion;
 
     # Time and Locale
-    time.timeZone = config.timeZone;
-    i18n.defaultLocale = config.locale;
+    time.timeZone = config.vars.timeZone;
+    i18n.defaultLocale = config.vars.locale;
     i18n.extraLocaleSettings = {
-      LC_ADDRESS = config.locale;
-      LC_IDENTIFICATION = config.locale;
-      LC_MEASUREMENT = config.locale;
-      LC_MONETARY = config.locale;
-      LC_NAME = config.locale;
-      LC_NUMERIC = config.locale;
-      LC_PAPER = config.locale;
-      LC_TELEPHONE = config.locale;
-      LC_TIME = config.locale;
+      LC_ADDRESS = config.vars.locale;
+      LC_IDENTIFICATION = config.vars.locale;
+      LC_MEASUREMENT = config.vars.locale;
+      LC_MONETARY = config.vars.locale;
+      LC_NAME = config.vars.locale;
+      LC_NUMERIC = config.vars.locale;
+      LC_PAPER = config.vars.locale;
+      LC_TELEPHONE = config.vars.locale;
+      LC_TIME = config.vars.locale;
     };
 
     # Basic Networking
@@ -39,14 +39,14 @@
     ...
   }: {
     # Version
-    home.stateVersion = config.stateVersion;
+    home.stateVersion = config.vars.stateVersion;
 
     # User
-    home.username = config.username;
+    home.username = config.vars.username;
     home.homeDirectory = lib.mkDefault (
       if pkgs.stdenvNoCC.isDarwin
-      then "/Users/${config.username}"
-      else "/home/${config.username}"
+      then "/Users/${config.vars.username}"
+      else "/home/${config.vars.username}"
     );
   };
 }

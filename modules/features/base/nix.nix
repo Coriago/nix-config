@@ -14,7 +14,7 @@
     nix.settings = {
       auto-optimise-store = true;
       experimental-features = ["nix-command" "flakes"];
-      trusted-users = ["root" "${config.username}" "@wheel"];
+      trusted-users = ["root" "${config.vars.username}" "@wheel"];
       substituters = [
         "https://cache.nixos.org?priority=10"
         "https://nix-community.cachix.org"
@@ -30,7 +30,7 @@
 
     security.sudo.extraRules = [
       {
-        users = [config.username];
+        users = [config.vars.username];
         commands = [
           {
             command = "/run/current-system/sw/bin/nixos-rebuild";

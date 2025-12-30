@@ -1,42 +1,33 @@
 {
   inputs,
-  self,
+  config,
   ...
 }: {
   flake.nixosConfigurations.heliosdesk = inputs.nixpkgs.lib.nixosSystem {
     modules = [
-      self.nixosModules.heliosdesk # The module defined below
-    ];
-  };
-
-  flake.homeConfigurations.helios = inputs.home-manager.lib.homeManagerConfiguration {
-    modules = [
-      self.nixosModules.heliosdesk.home-manager.users.helios
+      config.flake.nixosModules.heliosdesk # The module defined below
     ];
   };
 
   flake.nixosModules.heliosdesk = {lib, ...}: {
     # Set Global Variables
-    username = "helios";
-    stateVersion = "25.05";
-    timeZone = "America/New_York";
-    locale = "en_US.UTF-8";
+    vars = {
+      username = "helios";
+      stateVersion = "25.05";
+      timeZone = "America/New_York";
+      locale = "en_US.UTF-8";
+    };
 
-    # Import all reusable code here
-    imports = [
-      # self.modules.generic.variables
-      self.modules.nixos.base
-      # self.nixosModules.desktop
-      # self.nixosModules.gaming
-      # self.nixosModules.development
-      # self.modules.nixos.audio
-      # self.modules.nixos.bluetooth
+    # Import modules for this host
+    imports = with config.flake.modules; [
+      generic.variables
+      nixos.base
     ];
 
     # Integrated Home Manager
-    home-manager.users.helios = {...}: {
+    home-manager.users.helios = {config, ...}: {
       imports = [
-        self.modules.homeManager.base
+        config.flake.modules.homeManager.base
       ];
     };
 
