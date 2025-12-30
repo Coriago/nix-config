@@ -7,13 +7,6 @@
     pkgs,
     ...
   }: {
-    # User
-    users.users.${config.vars.username} = {
-      isNormalUser = true;
-      description = "${config.vars.username} account";
-      extraGroups = ["wheel"];
-    };
-
     # Version
     system.stateVersion = config.vars.stateVersion;
 
@@ -47,19 +40,14 @@
   # Home Manager
   flake.modules.homeManager.base = {
     config,
-    lib,
     pkgs,
     ...
   }: {
     # Version
     home.stateVersion = config.vars.stateVersion;
 
-    # User
-    home.username = config.vars.username;
-    home.homeDirectory = lib.mkDefault (
-      if pkgs.stdenvNoCC.isDarwin
-      then "/Users/${config.vars.username}"
-      else "/home/${config.vars.username}"
-    );
+    # Basic Packages
+    home.packages = with pkgs; [
+    ];
   };
 }

@@ -3,18 +3,13 @@
   config,
   ...
 }: {
-  flake.nixosConfigurations.heliosdesk = inputs.nixpkgs.lib.nixosSystem {
-    modules = [
-      config.flake.modules.nixos.heliosdesk # The module defined below
-    ];
-  };
-
+  # Global Variables module
+  # reusable for different configurations
   flake.modules.generic.heliosdesk = {
     imports = with config.flake.modules; [
       generic.variables
     ];
 
-    # Global Variables
     vars = {
       username = "helios";
       stateVersion = "25.05";
@@ -24,6 +19,7 @@
     };
   };
 
+  # Nixos host configuration
   flake.modules.nixos.heliosdesk = {lib, ...}: {
     imports = with config.flake.modules; [
       # Import nixos modules for this host
@@ -54,5 +50,12 @@
       efi.canTouchEfiVariables = true;
       grub.enable = lib.mkForce false;
     };
+  };
+
+  # Final Configuration
+  flake.nixosConfigurations.heliosdesk = inputs.nixpkgs.lib.nixosSystem {
+    modules = [
+      config.flake.modules.nixos.heliosdesk # The module defined below
+    ];
   };
 }

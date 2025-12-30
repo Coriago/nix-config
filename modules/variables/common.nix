@@ -1,32 +1,34 @@
 {
   # Common variables used across modules and hosts.
   # Each configuration should set these variables accordingly.
-  flake.modules.generic.variables = {lib, ...}: {
+  flake.modules.generic.variables = {lib, ...}: let
+    inherit (lib) mkOption types;
+  in {
     options.vars = {
-      username = lib.mkOption {
-        type = lib.types.str;
+      username = mkOption {
+        type = types.str;
         description = "The name of the primary user.";
       };
 
-      stateVersion = lib.mkOption {
-        type = lib.types.str;
+      stateVersion = mkOption {
+        type = types.str;
         description = "The state version of the system.";
       };
 
-      timeZone = lib.mkOption {
-        type = lib.types.str;
+      timeZone = mkOption {
+        type = types.str;
         description = "The time zone for the system.";
         default = "America/New_York";
       };
 
-      locale = lib.mkOption {
-        type = lib.types.str;
+      locale = mkOption {
+        type = types.str;
         description = "The locale for the system.";
         default = "en_US.UTF-8";
       };
 
-      email = lib.mkOption {
-        type = lib.types.str;
+      email = mkOption {
+        type = types.str;
         description = "The email address of the primary user.";
       };
     };
