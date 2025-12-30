@@ -1,4 +1,8 @@
-{config, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   imports = [
     # Mostly system related configuration
     ../../nixos/nvidia.nix
@@ -18,6 +22,7 @@
     ../../nixos/docker.nix
     ../../nixos/steam.nix
     ../../nixos/flatpak.nix
+    ../../nixos/openrgb.nix
 
     # ../../nixos/omen.nix # For my laptop only
 
@@ -35,6 +40,12 @@
     #   libcryptui
     # ];
   };
+
+  virtualisation.waydroid = {
+    enable = true;
+    package = pkgs.waydroid-nftables;
+  };
+
   # Don't touch this
   system.stateVersion = "25.05";
 }

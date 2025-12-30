@@ -108,10 +108,13 @@
       vscode
       code-cursor
       # stremio
+      dig
 
       # NixTools
       nixd
+      nil
       alejandra
+      # deluge
     ];
 
     # Import my profile picture, used by the hyprpanel dashboard
