@@ -2,7 +2,11 @@
   # General/Common settings
 
   # NixOS
-  flake.modules.nixos.base = {config, ...}: {
+  flake.modules.nixos.base = {
+    config,
+    pkgs,
+    ...
+  }: {
     # User
     users.users.${config.vars.username} = {
       isNormalUser = true;
@@ -29,6 +33,14 @@
 
     # Basic Networking
     networking.networkmanager.enable = true;
+
+    # Basic Packages
+    environment.systemPackages = with pkgs; [
+      gcc
+      xdg-utils
+      wget
+      curl
+    ];
   };
 
   # Home Manager
