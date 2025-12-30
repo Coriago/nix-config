@@ -43,6 +43,7 @@
         generic.heliosdesk
         homeManager.base
         homeManager.development
+        homeManager.desktop
       ];
     };
 

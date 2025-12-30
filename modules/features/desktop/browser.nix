@@ -1,0 +1,11 @@
+{
+  flake.modules.homeManager.desktop = {pkgs, ...}: {
+    # home.packages = with pkgs; [
+    #   brave
+    # ];
+
+    programs.brave = {
+      enable = true;
+    };
+  };
+}
