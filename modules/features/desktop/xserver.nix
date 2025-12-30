@@ -5,9 +5,5 @@
       xkb.layout = "us";
       xkb.variant = "";
     };
-
-    services.psd = {
-      enable = true;
-    };
   };
 }
