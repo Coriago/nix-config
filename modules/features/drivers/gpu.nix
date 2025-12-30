@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.nvidia = {...}: {
+  flake.modules.nixos.gpu = {...}: {
     # Video drivers configuration for Xorg and Wayland
     services.xserver.videoDrivers = ["nvidia"];
 

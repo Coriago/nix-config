@@ -31,8 +31,8 @@
       nixos.base
       nixos.desktop
       nixos.gaming
-      # nixos.bluetooth
-      nixos.nvidia
+      nixos.bluetooth
+      nixos.gpu
       nixos.boot
       nixos.audio
     ];
