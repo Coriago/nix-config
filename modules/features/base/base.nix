@@ -10,6 +10,7 @@
     # User
     users.users.${config.vars.username} = {
       isNormalUser = true;
+      description = "${config.vars.username} account";
       extraGroups = ["wheel"];
     };
 
