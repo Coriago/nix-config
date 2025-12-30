@@ -20,6 +20,7 @@
       stateVersion = "25.05";
       timeZone = "America/New_York";
       locale = "en_US.UTF-8";
+      email = "gagemiller155@gmail.com";
     };
   };
 
@@ -29,6 +30,7 @@
       generic.heliosdesk
       nixos.base
       nixos.desktop
+      nixos.gaming
       nixos.bluetooth
       nixos.nvidia
       nixos.audio
@@ -39,6 +41,7 @@
         # Import Home Manager modules
         generic.heliosdesk
         homeManager.base
+        homeManager.development
       ];
     };
 

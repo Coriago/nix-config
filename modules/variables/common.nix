@@ -24,6 +24,11 @@
         description = "The locale for the system.";
         default = "en_US.UTF-8";
       };
+
+      email = lib.mkOption {
+        type = lib.types.str;
+        description = "The email address of the primary user.";
+      };
     };
   };
 }
