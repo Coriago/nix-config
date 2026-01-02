@@ -1,5 +1,5 @@
-{inputs}: {
-  flake.module.desktop = {
+{inputs, ...}: {
+  flake.modules.nixos.desktop = {...}: {
     imports = [
       inputs.nix-flatpak.nixosModules.nix-flatpak
     ];
@@ -15,7 +15,7 @@
       packages = [
         "com.stremio.Stremio"
       ];
-      update.onActivation = true;
+      # update.onActivation = true;
     };
   };
 }
