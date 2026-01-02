@@ -6,6 +6,11 @@
     programs.zsh.enable = true;
     users.defaultUserShell = pkgs.zsh;
     environment.pathsToLink = ["/share/zsh"];
+
+    fonts.packages = with pkgs; [
+      nerd-fonts.fira-code
+    ];
+    console.font = "FiraCode-Regular";
   };
 
   # Home Manager
@@ -20,6 +25,10 @@
         ignoreDups = true;
         save = 10000;
         size = 10000;
+      };
+      oh-my-zsh = {
+        enable = true;
+        theme = "robbyrussell";
       };
     };
   };
