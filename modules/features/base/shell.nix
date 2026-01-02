@@ -14,8 +14,8 @@
     fonts.packages = with pkgs; [
       nerd-fonts.fira-code
     ];
-    console.font = "FiraCode-Regular";
-    console.keyMap = config.vars.keyLayout;
+    # console.font = "FiraCode-Regular";
+    # console.keyMap = config.vars.keyLayout;
   };
 
   # Home Manager
