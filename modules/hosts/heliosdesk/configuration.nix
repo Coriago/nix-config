@@ -43,13 +43,17 @@
       ];
     };
 
-    # System Config or Overrides
+    # Host Overrides
+    ############################
     networking.hostName = "heliosdesk";
     boot.loader = {
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
       grub.enable = lib.mkForce false;
     };
+    # Disable integrated AMD iGPU
+    boot.blacklistedKernelModules = ["amdgpu"];
+    boot.kernelParams = ["module_blacklist=amdgpu"];
   };
 
   # Final Configuration
