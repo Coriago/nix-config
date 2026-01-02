@@ -6,15 +6,24 @@
     ...
   }: {
     imports = [
+      # Use determinate nix for better errors and performance improvements
       inputs.determinate.nixosModules.default
     ];
 
+    # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
+
+    # Set nix path for lsp
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
+
     nix.settings = {
       auto-optimise-store = true;
+
+      # Enable flakes
       experimental-features = ["nix-command" "flakes"];
-      trusted-users = ["root" "${config.vars.username}" "@wheel"];
+
+      # Additional nix caches to fetch from
+      trusted-users = ["root" "${config.vars.username}" "@wheel"]; # Required to allow for more caches
       substituters = [
         "https://cache.nixos.org?priority=10"
         "https://nix-community.cachix.org"
@@ -30,6 +39,7 @@
       ];
     };
 
+    # Allows nixos rebuild without password
     security.sudo.extraRules = [
       {
         users = [config.vars.username];
@@ -42,10 +52,11 @@
       }
     ];
 
+    # Allow for dynamic libraries in nix
     programs.nix-ld.enable = true;
 
+    # Nix tooling
     environment.systemPackages = with pkgs; [
-      # Nix tooling
       nil
       nixd
       statix
