@@ -67,6 +67,7 @@
       statix
       alejandra
       nvd
+      nix-inspect
       nix-output-monitor
     ];
 
