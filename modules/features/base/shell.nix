@@ -11,6 +11,7 @@
       nerd-fonts.fira-code
     ];
     console.font = "FiraCode-Regular";
+    console.keyMap = "us";
   };
 
   # Home Manager
