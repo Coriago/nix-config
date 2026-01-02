@@ -34,6 +34,11 @@
       xdg-utils
       wget
       curl
+      zip
+      unzip
+      jq
+      yq
+      git
     ];
   };
 
@@ -46,8 +51,10 @@
     # Version
     home.stateVersion = config.vars.stateVersion;
 
-    # Basic Packages
+    # Basic Packages for User
     home.packages = with pkgs; [
+      btop
+      dnsutils
     ];
   };
 }
