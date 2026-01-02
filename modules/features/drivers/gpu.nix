@@ -1,22 +1,29 @@
 {
-  flake.modules.nixos.gpu = {...}: {
+  flake.modules.nixos.gpu = {
+    pkgs,
+    config,
+    lib,
+    ...
+  }: {
     # Video drivers configuration for Xorg and Wayland
     services.xserver.videoDrivers = ["nvidia"];
 
-    # Blacklist nouveau to avoid conflicts
-    boot.blacklistedKernelModules = ["nouveau"];
-
+    # Enable NVIDIA-specific options
     hardware.nvidia = {
-      open = true;
+      open = false;
+      modesetting.enable = true;
+      nvidiaPersistenced = true;
     };
+
     hardware.graphics = {
       enable = true;
+      enable32Bit = true;
     };
 
     # Accept NVIDIA license
-    nixpkgs.config.nvidia.acceptLicense = true;
+    nixpkgs.config = lib.mkMerge [{nvidia = {acceptLicense = true;};}];
 
-    # Nix cache for CUDA
+    # Nix cache for CUDA (optional)
     nix.settings = {
       substituters = ["https://cuda-maintainers.cachix.org"];
       trusted-public-keys = [
