@@ -2,7 +2,11 @@
   # General/Common settings
 
   # NixOS
-  flake.modules.nixos.base = {pkgs, ...}: {
+  flake.modules.nixos.base = {
+    pkgs,
+    config,
+    ...
+  }: {
     programs.zsh.enable = true;
     users.defaultUserShell = pkgs.zsh;
     environment.pathsToLink = ["/share/zsh"];
@@ -11,7 +15,7 @@
       nerd-fonts.fira-code
     ];
     console.font = "FiraCode-Regular";
-    console.keyMap = "us";
+    console.keyMap = config.vars.keyLayout;
   };
 
   # Home Manager

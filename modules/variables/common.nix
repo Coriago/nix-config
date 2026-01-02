@@ -31,6 +31,12 @@
         type = types.str;
         description = "The email address of the primary user.";
       };
+
+      keyLayout = mkOption {
+        type = types.str;
+        description = "The country keyboard layout.";
+        default = "us";
+      };
     };
   };
 }

@@ -1,5 +1,9 @@
 {
-  flake.modules.nixos.desktop = {pkgs, ...}: {
+  flake.modules.nixos.desktop = {
+    pkgs,
+    config,
+    ...
+  }: {
     # Uses KDE Plasma for Desktop
     services.desktopManager.plasma6.enable = true;
     services.displayManager.sddm = {
@@ -10,7 +14,7 @@
     # Enable x11 for backwards compatibility
     services.xserver = {
       enable = true;
-      xkb.layout = "us";
+      xkb.layout = config.vars.keyLayout;
       xkb.variant = "";
     };
 
