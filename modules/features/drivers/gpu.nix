@@ -1,5 +1,9 @@
 {
-  flake.modules.nixos.gpu = {lib, ...}: {
+  flake.modules.nixos.gpu = {
+    config,
+    lib,
+    ...
+  }: {
     # Video drivers configuration for Xorg and Wayland
     services.xserver.videoDrivers = ["nvidia"];
 
@@ -8,15 +12,21 @@
       open = false;
       modesetting.enable = true;
       nvidiaPersistenced = true;
+      powerManagement.enable = true;
+      package = config.boot.kernelPackages.nvidiaPackages.beta;
     };
 
     hardware.graphics = {
       enable = true;
       enable32Bit = true;
+      package = config.boot.kernelPackages.nvidiaPackages.beta;
     };
 
     # Accept NVIDIA license
     nixpkgs.config = lib.mkMerge [{nvidia = {acceptLicense = true;};}];
+
+    # Debugging
+    powerManagement.enable = true;
 
     # Nix cache for CUDA (optional)
     nix.settings = {
