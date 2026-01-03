@@ -1,9 +1,12 @@
 {
   flake.modules.nixos.gpu = {
     config,
-    lib,
+    pkgs,
     ...
-  }: {
+  }: let
+    # Prefer a stable NVIDIA driver to reduce Xid/Wayland crash incidence.
+    nvidiaPackage = config.boot.kernelPackages.nvidiaPackages.stable;
+  in {
     # Video drivers configuration for Xorg and Wayland
     services.xserver.videoDrivers = ["nvidia"];
 
@@ -12,21 +15,24 @@
       open = false;
       modesetting.enable = true;
       nvidiaPersistenced = true;
-      powerManagement.enable = false;
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
+      powerManagement.enable = true;
+      package = nvidiaPackage;
     };
 
     hardware.graphics = {
       enable = true;
       enable32Bit = true;
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
+      extraPackages = with pkgs; [
+        nvidia-vaapi-driver
+        libva-vdpau-driver
+        egl-wayland
+        vulkan-loader
+        libva
+      ];
     };
 
     # Accept NVIDIA license
-    nixpkgs.config = lib.mkMerge [{nvidia = {acceptLicense = true;};}];
-
-    # Debugging
-    powerManagement.enable = false;
+    nixpkgs.config.nvidia.acceptLicense = true;
 
     # Nix cache for CUDA (optional)
     nix.settings = {
