@@ -16,6 +16,39 @@
       timeZone = "America/New_York";
       locale = "en_US.UTF-8";
       email = "gagemiller155@gmail.com";
+      monitors = {
+        "left" = {
+          width = 2560;
+          height = 1440;
+          refreshRate = 144;
+          x = 0;
+          y = 0;
+          serial = "1APR9UA001811";
+        };
+        "center" = {
+          primary = true;
+          width = 2560;
+          height = 1440;
+          refreshRate = 144;
+          x = 2560;
+          y = 0;
+          serial = "2OMR6UA000303";
+        };
+        "right" = {
+          width = 5120;
+          height = 1440;
+          refreshRate = 165;
+          x = 0;
+          y = 0;
+          serial = "1APR9UA001815";
+        };
+        "tv" = {
+          width = 1920;
+          height = 1080;
+          refreshRate = 60;
+          replicaOf = "center";
+        };
+      };
     };
   };
 

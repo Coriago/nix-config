@@ -4,7 +4,7 @@
   flake.modules.generic.variables = {lib, ...}: let
     inherit (lib) mkOption types;
   in {
-    options.preferences.monitors = mkOption {
+    options.vars.monitors = mkOption {
       type = types.attrsOf (types.submodule {
         options = {
           primary = mkOption {
@@ -35,6 +35,17 @@
           y = mkOption {
             type = types.int;
             default = 0;
+          };
+
+          serial = mkOption {
+            type = types.str;
+            default = "";
+          };
+
+          replicaOf = mkOption {
+            type = types.str;
+            default = "";
+            description = "If set, this monitor will mirror the monitor specified by this key.";
           };
 
           enabled = mkOption {
