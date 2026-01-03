@@ -2,6 +2,7 @@
   flake.modules.homeManager.development = {pkgs, ...}: {
     home.packages = with pkgs; [
       python311
+      rpi-imager
     ];
   };
 }
