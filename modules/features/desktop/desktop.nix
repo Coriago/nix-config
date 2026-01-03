@@ -1,10 +1,6 @@
 {
   # NixOS
-  flake.modules.nixos.desktop = {
-    pkgs,
-    config,
-    ...
-  }: {
+  flake.modules.nixos.desktop = {config, ...}: {
     # Uses KDE Plasma for Desktop
     services.xserver.enable = true;
     services.desktopManager.plasma6.enable = true;
