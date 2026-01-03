@@ -1,19 +1,24 @@
-{inputs}: {
+{inputs, ...}: {
   # NixOS
-  flake.modules.nixos.desktop = {
-    pkgs,
-    config,
-    ...
-  }: {
+  flake.modules.nixos.desktop = {pkgs, ...}: let
+    # Find themes here
+    # https://tinted-theming.github.io/tinted-gallery/
+    set_theme = "equilibrium-dark";
+  in {
+    # Enable Stylix
     imports = [
       inputs.stylix.nixosModules.stylix
     ];
-
     stylix.enable = true;
+
+    # Wallpaper
     stylix.image = pkgs.fetchurl {
-      url = "https://getwallpapers.com/wallpaper/full/7/3/0/168494.jpg";
-      hash = "sha256-S/6kgloXiIYI0NblT6YVXfqELApbdHGsuYe6S4JoQwQ=";
+      url = "https://getwallpapers.com/wallpaper/full/2/e/a/524916.jpg";
+      hash = "sha256-YqFWMRjdM8dGbSJQomvoNtwmq2ppfwq6r0UYYpx6sVA=";
     };
-    stylix.polarity = "dark";
+
+    # Theme
+    # Comment this out and theme will be set by wallpaper colors
+    stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/${set_theme}.yaml";
   };
 }
