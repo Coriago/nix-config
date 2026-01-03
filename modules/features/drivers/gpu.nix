@@ -12,7 +12,7 @@
       open = false;
       modesetting.enable = true;
       nvidiaPersistenced = true;
-      powerManagement.enable = true;
+      powerManagement.enable = false;
       package = config.boot.kernelPackages.nvidiaPackages.beta;
     };
 
@@ -26,7 +26,7 @@
     nixpkgs.config = lib.mkMerge [{nvidia = {acceptLicense = true;};}];
 
     # Debugging
-    powerManagement.enable = true;
+    powerManagement.enable = false;
 
     # Nix cache for CUDA (optional)
     nix.settings = {

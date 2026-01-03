@@ -12,7 +12,7 @@
 
     vars = {
       username = "helios";
-      stateVersion = "25.05";
+      stateVersion = "25.11";
       timeZone = "America/New_York";
       locale = "en_US.UTF-8";
       email = "gagemiller155@gmail.com";
