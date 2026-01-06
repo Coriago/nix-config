@@ -1,6 +1,5 @@
+# Shell
 {
-  # General/Common settings
-
   # NixOS
   flake.modules.nixos.base = {pkgs, ...}: {
     programs.zsh.enable = true;

@@ -1,3 +1,4 @@
+# Git configuration
 {
   flake.modules.homeManager.base = {config, ...}: {
     programs.git = {

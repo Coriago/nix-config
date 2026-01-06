@@ -1,6 +1,5 @@
+# General/Common settings
 {
-  # General/Common settings
-
   # NixOS
   flake.modules.nixos.base = {
     config,

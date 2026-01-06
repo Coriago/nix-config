@@ -1,5 +1,5 @@
+# Nix settings and tooling
 {inputs, ...}: {
-  # Typical nix configuration
   flake.modules.nixos.base = {
     pkgs,
     config,

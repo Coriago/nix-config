@@ -1,6 +1,5 @@
+# Basic User setup
 {
-  # General/Common settings
-
   # NixOS
   flake.modules.nixos.base = {config, ...}: {
     users.users.${config.vars.username} = {
