@@ -1,3 +1,4 @@
+# GPU Nvidia Drivers
 {
   flake.modules.nixos.gpu = {
     config,

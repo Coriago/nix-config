@@ -1,3 +1,4 @@
+# Common audio configuration
 {
   flake.modules.nixos.audio = {
     security.rtkit.enable = true;
@@ -11,27 +12,6 @@
       jack.enable = true;
       wireplumber = {
         enable = true;
-        # extraConfig = {
-        #   "99-disable-suspend" = {
-        #     "monitor.alsa.rules" = [
-        #       {
-        #         matches = [
-        #           {
-        #             "node.name" = "~alsa_input.*";
-        #           }
-        #           {
-        #             "node.name" = "~alsa_output.*";
-        #           }
-        #         ];
-        #         actions = {
-        #           update-props = {
-        #             "session.suspend-timeout-seconds" = 0;
-        #           };
-        #         };
-        #       }
-        #     ];
-        #   };
-        # };
       };
     };
   };

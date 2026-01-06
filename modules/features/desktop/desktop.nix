@@ -1,5 +1,5 @@
 # Linux Desktop Environment
-# Other desktop environments you can try: Gnome, KDE Plasma, Hyperland, Niri, etc.
+# Other possible desktop environments: Gnome, KDE Plasma, Hyperland, Niri, etc.
 {inputs, ...}: {
   # NixOS
   flake.modules.nixos.desktop = {config, ...}: {
