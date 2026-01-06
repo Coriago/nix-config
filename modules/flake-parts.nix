@@ -1,8 +1,7 @@
-# Top level flake parts config
+# This is config for flake-parts.
 {inputs, ...}: {
   # Flake parts addon modules
   imports = [
-    # https://flake.parts/options/flake-parts-modules.html
     inputs.flake-parts.flakeModules.modules
     inputs.home-manager.flakeModules.home-manager
   ];
