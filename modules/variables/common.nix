@@ -10,9 +10,14 @@
         description = "The name of the primary user.";
       };
 
+      email = mkOption {
+        type = types.str;
+        description = "The email address of the primary user.";
+      };
+
       stateVersion = mkOption {
         type = types.str;
-        description = "The state version of the system.";
+        description = "The state version of the system. Set this to the intial system version then DO NOT TOUCH.";
       };
 
       timeZone = mkOption {
@@ -27,15 +32,27 @@
         default = "en_US.UTF-8";
       };
 
-      email = mkOption {
-        type = types.str;
-        description = "The email address of the primary user.";
-      };
-
       keyLayout = mkOption {
         type = types.str;
         description = "The country keyboard layout.";
         default = "us";
+      };
+
+      wallpaper = mkOption {
+        type = types.str;
+        description = "Url to a wallpaper image.";
+      };
+
+      wallpaperHash = mkOption {
+        type = types.str;
+        description = "The sha256 hash of the wallpaper image.";
+        default = "";
+      };
+
+      theme = mkOption {
+        type = types.str;
+        description = "The desktop theme to use. More can be found here: https://tinted-theming.github.io/tinted-gallery";
+        default = "equilibrium-dark";
       };
     };
   };

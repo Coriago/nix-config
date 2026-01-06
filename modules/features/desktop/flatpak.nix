@@ -1,3 +1,6 @@
+# Flatpak apps
+# These are sandboxed apps typically installed in 'software center' or 'discover store'.
+# Some apps work great this way and others have limitations due to sandboxing.
 {inputs, ...}: {
   flake.modules.nixos.desktop = {...}: {
     imports = [
@@ -13,7 +16,7 @@
         }
       ];
       packages = [
-        "com.stremio.Stremio"
+        "com.stremio.Stremio" # Stremio
       ];
     };
   };

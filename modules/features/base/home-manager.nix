@@ -5,7 +5,8 @@
     home-manager = {
       useGlobalPkgs = true;
       useUserPackages = true;
-      sharedModules = [inputs.plasma-manager.homeModules.plasma-manager];
+
+      # This should automatically create dynamic backups for any conflicting files
       backupCommand = ''
         TIMESTAMP=$(date +%Y%m%d%H%M%S)
         # Move the conflicting file to a dated backup
