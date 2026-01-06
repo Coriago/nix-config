@@ -28,6 +28,12 @@
                 },
                 "home-manager": {
                     "expr": "(builtins.getFlake \"${workspaceFolder}\").nixosConfigurations.heliosdesk.options.home-manager.users.type.getSubOptions []"
+                },
+                "flake-parts": {
+                    "expr": "(builtins.getFlake \"${workspaceFolder}\").debug.options"
+                },
+                "flake-parts2": {
+                    "expr": "(builtins.getFlake \"${workspaceFolder}\").currentSystem.options"
                 }
             }
         }

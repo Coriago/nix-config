@@ -1,69 +1,30 @@
 {
-  # https://github.com/anotherhadi/nixy
-  description = ''
-    Nixy simplifies and unifies the Hyprland ecosystem with a modular, easily customizable setup.
-    It provides a structured way to manage your system configuration and dotfiles with minimal effort.
-  '';
-
+  # Declares flake inputs
   inputs = {
+    # Primary
+    ################################
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    # hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
-    # hyprpanel.url = "github:Jas-SinghFSU/HyprPanel";
-    stylix.url = "github:danth/stylix";
-    apple-fonts.url = "github:Lyndeno/apple-fonts.nix";
-    nixcord.url = "github:kaylorben/nixcord";
-    # sops-nix.url = "github:Mic92/sops-nix";
-    nixarr.url = "github:rasmus-kirk/nixarr";
-    nvf.url = "github:notashelf/nvf";
-    # vicinae.url = "github:vicinaehq/vicinae";
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    spicetify-nix = {
-      url = "github:Gerg-L/spicetify-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
     };
-    eleakxir.url = "github:anotherhadi/eleakxir";
-    nix-flatpak.url = "github:gmodena/nix-flatpak";
+
+    # Secondary
+    ################################
+    nixos-cli.url = "github:nix-community/nixos-cli"; # Better cli for nixos
+    import-tree.url = "github:vic/import-tree"; # Recursive import of nix files in a directory
+    nix-flatpak.url = "github:gmodena/nix-flatpak"; # Flatpak app management
+    stylix.url = "github:nix-community/stylix/release-25.11"; # Styling for desktop
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager"; # More options for managing plasma desktop
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
   };
 
-  outputs = inputs @ {
-    nixpkgs,
-    nix-flatpak,
-    ...
-  }: {
-    nixosConfigurations = {
-      heliosdesk = nixpkgs.lib.nixosSystem {
-        modules = [
-          {
-            nixpkgs.overlays = [
-              (import ./overlays/gamescope.nix)
-              (import ./overlays/kde.nix)
-            ];
-            _module.args = {
-              inherit inputs;
-            };
-          }
-          inputs.home-manager.nixosModules.home-manager
-          inputs.stylix.nixosModules.stylix
-          inputs.nix-flatpak.nixosModules.nix-flatpak
-          ./hosts/heliosdesk/configuration.nix
-        ];
-      };
-      # jack = nixpkgs.lib.nixosSystem {
-      #   modules = [
-      #     {_module.args = {inherit inputs;};}
-      #     inputs.home-manager.nixosModules.home-manager
-      #     inputs.stylix.nixosModules.stylix
-      #     inputs.sops-nix.nixosModules.sops
-      #     inputs.nixarr.nixosModules.default
-      #     inputs.eleakxir.nixosModules.eleakxir
-      #     ./hosts/server/configuration.nix
-      #   ];
-      # };
-    };
-  };
+  outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} (inputs.import-tree ./modules);
 }
