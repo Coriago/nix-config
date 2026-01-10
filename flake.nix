@@ -3,9 +3,9 @@
   inputs = {
     # Primary
     ################################
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-parts = {
@@ -18,7 +18,7 @@
     nixos-cli.url = "github:nix-community/nixos-cli"; # Better cli for nixos
     import-tree.url = "github:vic/import-tree"; # Recursive import of nix files in a directory
     nix-flatpak.url = "github:gmodena/nix-flatpak"; # Flatpak app management
-    stylix.url = "github:nix-community/stylix/release-25.11"; # Styling for desktop
+    stylix.url = "github:nix-community/stylix"; # Styling for desktop
     plasma-manager = {
       url = "github:nix-community/plasma-manager"; # More options for managing plasma desktop
       inputs.nixpkgs.follows = "nixpkgs";

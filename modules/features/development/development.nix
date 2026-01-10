@@ -12,6 +12,7 @@
 
       # VS Code extension tooling
       vsce # VS Code Extension Manager
+      opencode
     ];
   };
 }
