@@ -49,6 +49,7 @@
       nixos.boot
       nixos.audio
       nixos.monitor
+      nixos.openrgb
     ];
 
     home-manager.users.helios = {
