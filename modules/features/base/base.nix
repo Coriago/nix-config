@@ -38,6 +38,7 @@
       jq
       yq
       git
+      gnumake
     ];
 
     # User

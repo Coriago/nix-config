@@ -75,6 +75,9 @@ in {
     # Disable integrated AMD iGPU
     boot.blacklistedKernelModules = ["amdgpu"];
     boot.kernelParams = ["module_blacklist=amdgpu"];
+
+    # Allow cross platform building
+    boot.binfmt.emulatedSystems = ["aarch64-linux"];
   };
 
   # Final Configuration

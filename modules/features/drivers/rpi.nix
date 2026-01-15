@@ -21,6 +21,8 @@
       };
     };
 
+    boot.loader.raspberryPi.bootloader = "kernel";
+
     system.nixos.tags = [
       "raspberry-pi-${config.boot.loader.raspberryPi.variant}"
       config.boot.loader.raspberryPi.bootloader
@@ -101,4 +103,6 @@
       };
     };
   };
+
+  flake.nixosConfigurations.rpi5-installer = inputs.nixos-raspberrypi.nixosConfigurations.rpi5-installer;
 }
