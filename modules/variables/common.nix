@@ -41,6 +41,7 @@
       wallpaper = mkOption {
         type = types.str;
         description = "Url to a wallpaper image.";
+        default = "";
       };
 
       wallpaperHash = mkOption {

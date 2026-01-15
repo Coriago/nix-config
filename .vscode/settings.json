@@ -24,10 +24,10 @@
             },
             "options": {
                 "nixos": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}\").nixosConfigurations.heliosdesk.options",
+                    "expr": "(builtins.getFlake \"${workspaceFolder}\").nixosConfigurations.rpiserver1.options",
                 },
                 "home-manager": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}\").nixosConfigurations.heliosdesk.options.home-manager.users.type.getSubOptions []"
+                    "expr": "(builtins.getFlake \"${workspaceFolder}\").nixosConfigurations.rpiserver1.options.home-manager.users.type.getSubOptions []"
                 },
                 "flake-parts": {
                     "expr": "(builtins.getFlake \"${workspaceFolder}\").debug.options"
