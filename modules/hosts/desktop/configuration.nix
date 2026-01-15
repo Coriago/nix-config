@@ -2,16 +2,16 @@
   inputs,
   config,
   ...
-}: {
+}: let
+  hostname = "heliosdesk";
+  username = "helios";
+in {
   # Global Variables module
   ############################
-  flake.modules.generic.heliosdesk = {
-    imports = with config.flake.modules; [
-      generic.variables
-    ];
-
+  flake.modules.generic.${hostname} = {
+    imports = with config.flake.modules; [generic.variables];
     vars = {
-      username = "helios";
+      username = username;
       stateVersion = "25.11";
       timeZone = "America/New_York";
       locale = "en_US.UTF-8";
@@ -35,10 +35,10 @@
 
   # Nixos host configuration
   ###############################
-  flake.modules.nixos.heliosdesk = {lib, ...}: {
+  flake.modules.nixos.${hostname} = {lib, ...}: {
     # Import nixos modules for this host
     imports = with config.flake.modules; [
-      generic.heliosdesk
+      generic.${hostname}
       nixos.base
       nixos.desktop
       nixos.gaming
@@ -53,10 +53,10 @@
       nixos.openrgb
     ];
 
-    home-manager.users.helios = {
+    home-manager.users.${username} = {
       # Import Home Manager modules
       imports = with config.flake.modules; [
-        generic.heliosdesk
+        generic.${hostname}
         homeManager.base
         homeManager.development
         homeManager.desktop
@@ -65,7 +65,7 @@
 
     # Host Overrides
     #----------------------------------#
-    networking.hostName = "heliosdesk";
+    networking.hostName = hostname;
     boot.loader = {
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
@@ -79,9 +79,9 @@
 
   # Final Configuration
   ######################
-  flake.nixosConfigurations.heliosdesk = inputs.nixpkgs.lib.nixosSystem {
+  flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     modules = [
-      config.flake.modules.nixos.heliosdesk # The module defined above
+      config.flake.modules.nixos.${hostname} # The module defined above
     ];
   };
 }
