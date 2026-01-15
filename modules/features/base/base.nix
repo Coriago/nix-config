@@ -39,12 +39,35 @@
       yq
       git
     ];
+
+    # User
+    users.users.${config.vars.username} = {
+      isNormalUser = true;
+      description = "${config.vars.username} account";
+      extraGroups = ["wheel" "networkmanager" "video"];
+      openssh.authorizedKeys.keys = [
+        config.vars.sshPublicKey
+      ];
+    };
+
+    services.getty.autologinUser = config.vars.username; # Autologin
+    security.polkit.enable = true; # Don't require sudo for reboot or poweroff
+
+    # SSH
+    services.openssh = {
+      enable = true;
+      settings.PermitRootLogin = "yes";
+    };
+    users.users.root.openssh.authorizedKeys.keys = [
+      config.vars.sshPublicKey
+    ];
   };
 
   # Home Manager
   flake.modules.homeManager.base = {
     config,
     pkgs,
+    lib,
     ...
   }: {
     # Version
@@ -55,5 +78,13 @@
       btop
       dnsutils
     ];
+
+    # User
+    home.username = config.vars.username;
+    home.homeDirectory = lib.mkDefault (
+      if pkgs.stdenvNoCC.isDarwin
+      then "/Users/${config.vars.username}"
+      else "/home/${config.vars.username}"
+    );
   };
 }

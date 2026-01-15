@@ -27,6 +27,7 @@ in {
 
       # Drivers
       nixos.rpi5
+      nixos.rpi5-disks
     ];
 
     home-manager.users.${username} = {
@@ -45,6 +46,7 @@ in {
   # Final Configuration
   ######################
   flake.nixosConfigurations.${hostname} = inputs.nixos-raspberrypi.lib.nixosSystem {
+    specialArgs = inputs;
     modules = [
       config.flake.modules.nixos.${hostname} # The module defined above
     ];
