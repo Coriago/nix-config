@@ -42,6 +42,7 @@
       nixos.base
       nixos.desktop
       nixos.gaming
+      nixos.development
 
       # Drivers
       nixos.bluetooth
