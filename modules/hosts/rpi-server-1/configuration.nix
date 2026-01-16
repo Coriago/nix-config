@@ -51,4 +51,35 @@ in {
       config.flake.modules.nixos.${hostname} # The module defined above
     ];
   };
+
+  # Installer
+  flake.nixosConfigurations.rpi5-installer = inputs.nixos-raspberrypi.nixosConfigurations.rpi5-installer.extendModules {
+    modules = [
+      config.flake.modules.generic.rpiserver1
+      (nixargs: {
+        users.users.nixos.openssh.authorizedKeys.keys = [
+          nixargs.config.vars.sshPublicKey
+        ];
+        users.users.root.openssh.authorizedKeys.keys = [
+          nixargs.config.vars.sshPublicKey
+        ];
+      })
+    ];
+  };
+
+  flake.nixosConfigurations.rpi5-installer2 = inputs.nixos-raspberrypi.nixosConfigurations.rpi5-installer.extendModules {
+    modules = [
+      config.flake.modules.generic.rpiserver1
+      config.flake.modules.nixos.rpi5-disks
+      (nixargs: {
+        disko.devices.disk.primary.device = "";
+        users.users.nixos.openssh.authorizedKeys.keys = [
+          nixargs.config.vars.sshPublicKey
+        ];
+        users.users.root.openssh.authorizedKeys.keys = [
+          nixargs.config.vars.sshPublicKey
+        ];
+      })
+    ];
+  };
 }

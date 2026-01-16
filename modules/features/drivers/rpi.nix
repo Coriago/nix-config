@@ -44,7 +44,7 @@
     '';
 
     disko.devices = {
-      disk.nvme0 = {
+      disk.primary = {
         type = "disk";
         device = "/dev/nvme0n1";
         content = {
@@ -103,6 +103,4 @@
       };
     };
   };
-
-  flake.nixosConfigurations.rpi5-installer = inputs.nixos-raspberrypi.nixosConfigurations.rpi5-installer;
 }
