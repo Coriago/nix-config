@@ -1,11 +1,7 @@
 # GPU Nvidia Drivers
 {
-  flake.modules.nixos.gpu = {
-    config,
-    pkgs,
-    ...
-  }: let
-    # Prefer a stable NVIDIA driver to reduce Xid/Wayland crash incidence.
+  flake.modules.nixos.gpu = {config, ...}: let
+    # Prefer a stable NVIDIA driver
     nvidiaPackage = config.boot.kernelPackages.nvidiaPackages.stable;
   in {
     # Video drivers configuration for Xorg and Wayland
