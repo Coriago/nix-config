@@ -1,7 +1,7 @@
 {
-  flake.modulues.nixos.self-hosting = {config, ...}: {
+  flake.modules.nixos.self-hosting = {...}: {
   };
 
-  flake.modulues.homeManager.self-hosting = {
+  flake.modules.homeManager.self-hosting = {
   };
 }

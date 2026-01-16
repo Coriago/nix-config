@@ -51,8 +51,9 @@
       ];
     };
 
+    security.sudo.wheelNeedsPassword = false; # Passwordless sudo for wheel group
     services.getty.autologinUser = config.vars.username; # Autologin
-    security.polkit.enable = true; # Don't require sudo for reboot or poweroff
+    security.polkit.enable = true; # Don't require sudo for reboot or
 
     # SSH
     services.openssh = {
