@@ -13,23 +13,20 @@
 
     # Enable NVIDIA-specific options
     hardware.nvidia = {
-      open = false;
+      open = false; # Use proprietary driver - open driver has DRM atomic commit issues
       modesetting.enable = true;
       nvidiaPersistenced = true;
       powerManagement.enable = true;
       package = nvidiaPackage;
     };
+    hardware.nvidia-container-toolkit.enable = true;
+
+    # Early KMS loading - critical for preventing atomic commit failures
+    boot.initrd.kernelModules = ["nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
 
     hardware.graphics = {
       enable = true;
       enable32Bit = true;
-      extraPackages = with pkgs; [
-        nvidia-vaapi-driver
-        libva-vdpau-driver
-        egl-wayland
-        vulkan-loader
-        libva
-      ];
     };
 
     # Accept NVIDIA license
