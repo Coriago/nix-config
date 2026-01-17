@@ -87,7 +87,7 @@ in {
     networking.firewall.allowedTCPPorts = [3000 8000];
     networking.firewall.allowedUDPPorts = [3000 8000];
 
-    environment.systemPackages = [pkgs.qemu];
+    environment.systemPackages = [pkgs.qemu pkgs.disko];
   };
 
   # Final Configuration

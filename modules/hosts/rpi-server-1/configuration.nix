@@ -66,39 +66,4 @@ in {
       })
     ];
   };
-
-  # Installer Disko
-  # Come back later
-  flake.nixosConfigurations.rpi5-installer-disko = inputs.nixos-raspberrypi.lib.nixosSystem {
-    specialArgs = inputs;
-    modules = [
-      config.flake.modules.generic.rpiserver1
-      config.flake.modules.nixos.rpi5
-      config.flake.modules.nixos.rpi5-disks
-      inputs.nixos-images.nixosModules.image-installer
-      (nixargs: {
-        # From raspberrypi-installer.nix
-        imports = [
-          (nixargs.modulesPath + "/profiles/base.nix")
-          (nixargs.modulesPath + "/profiles/installation-device.nix")
-        ];
-        boot.swraid.enable = nixargs.lib.mkForce false;
-        installer.cloneConfig = false;
-        boot.loader.raspberryPi.bootloader = "kernel";
-        # environment.systemPackages = with nixargs.nixpkgs; [
-        #   raspberrypi-eeprom
-        # ];
-
-        disko.devices.disk.primary.device = ""; # For safety, this is left empty
-
-        # Personalization
-        users.users.nixos.openssh.authorizedKeys.keys = [
-          nixargs.config.vars.sshPublicKey
-        ];
-        users.users.root.openssh.authorizedKeys.keys = [
-          nixargs.config.vars.sshPublicKey
-        ];
-      })
-    ];
-  };
 }
