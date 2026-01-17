@@ -336,9 +336,11 @@
     "nixos-images": {
       "inputs": {
         "nixos-stable": [
+          "nixos-raspberrypi",
           "nixpkgs"
         ],
         "nixos-unstable": [
+          "nixos-raspberrypi",
           "nixpkgs"
         ]
       },

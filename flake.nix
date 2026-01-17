@@ -29,9 +29,11 @@
       url = "github:nix-community/disko"; # Disk management tool
       inputs.nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
     };
-    nixos-images.url = "github:nix-community/nixos-images";
-    nixos-images.inputs.nixos-stable.follows = "nixpkgs";
-    nixos-images.inputs.nixos-unstable.follows = "nixpkgs";
+    nixos-images = {
+      url = "github:nix-community/nixos-images";
+      inputs.nixos-stable.follows = "nixos-raspberrypi/nixpkgs";
+      inputs.nixos-unstable.follows = "nixos-raspberrypi/nixpkgs";
+    };
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} (inputs.import-tree ./modules);

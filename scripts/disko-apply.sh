@@ -83,7 +83,7 @@ if [[ "$confirmation" != "YES" ]]; then
 fi
 
 # Get flake configuration name
-FLAKE_CONFIG="${1:-rpi5-installer-disko}"
+FLAKE_CONFIG="${1:-rpi5-installer-disko2}"
 print_info "Using flake configuration: $FLAKE_CONFIG"
 echo ""
 

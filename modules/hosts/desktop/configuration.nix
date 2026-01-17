@@ -35,7 +35,11 @@ in {
 
   # Nixos host configuration
   ###############################
-  flake.modules.nixos.${hostname} = {lib, ...}: {
+  flake.modules.nixos.${hostname} = {
+    pkgs,
+    lib,
+    ...
+  }: {
     # Import nixos modules for this host
     imports = with config.flake.modules; [
       generic.${hostname}
@@ -78,6 +82,12 @@ in {
 
     # Allow cross platform building
     boot.binfmt.emulatedSystems = ["aarch64-linux"];
+
+    # TEMPORARY REMOVE
+    networking.firewall.allowedTCPPorts = [3000 8000];
+    networking.firewall.allowedUDPPorts = [3000 8000];
+
+    environment.systemPackages = [pkgs.qemu];
   };
 
   # Final Configuration
