@@ -52,8 +52,8 @@ in {
     ];
   };
 
-  # Installer
-  flake.nixosConfigurations.rpi5-installer = inputs.nixos-raspberrypi.nixosConfigurations.rpi5-installer.extendModules {
+  # Installer SD Card
+  flake.nixosConfigurations.rpi5-installer-sd-card = inputs.nixos-raspberrypi.nixosConfigurations.rpi5-installer.extendModules {
     modules = [
       config.flake.modules.generic.rpiserver1
       (nixargs: {
@@ -67,17 +67,29 @@ in {
     ];
   };
 
-  flake.nixosConfigurations.rpi5-installer2 = inputs.nixos-raspberrypi.nixosConfigurations.rpi5-installer.extendModules {
+  # Installer Disko
+  # Come back later
+  flake.nixosConfigurations.rpi5-installer-disko = inputs.nixos-raspberrypi.lib.nixosSystem {
+    specialArgs = inputs;
     modules = [
       config.flake.modules.generic.rpiserver1
+      config.flake.modules.nixos.rpi5
       config.flake.modules.nixos.rpi5-disks
+      inputs.nixos-images.nixosModules.image-installer
       (nixargs: {
-        disko.devices.disk.primary.device = "";
+        imports = [
+          (nixargs.modulesPath + "/profiles/installation-device.nix")
+        ];
+        boot.swraid.enable = nixargs.lib.mkForce false;
+        disko.devices.disk.primary.device = ""; # For safety, this is left empty
         users.users.nixos.openssh.authorizedKeys.keys = [
           nixargs.config.vars.sshPublicKey
         ];
         users.users.root.openssh.authorizedKeys.keys = [
           nixargs.config.vars.sshPublicKey
+        ];
+        environment.systemPackages = with nixargs.nixpkgs; [
+          raspberrypi-eeprom
         ];
       })
     ];

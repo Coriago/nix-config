@@ -31,7 +31,7 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-print_info "NixOS RPi5 Installer with Disko"
+print_info "NixOS Installer with Disko"
 echo ""
 
 # Get list of block devices (excluding loop devices, rom devices, and currently mounted root)
@@ -82,15 +82,8 @@ if [[ "$confirmation" != "YES" ]]; then
     exit 0
 fi
 
-# Check if device is mounted and try to unmount
-if mount | grep -q "$DEVICE"; then
-    print_warning "Device partitions are mounted. Attempting to unmount..."
-    umount -R "$DEVICE"* 2>/dev/null || true
-    sleep 1
-fi
-
 # Get flake configuration name
-FLAKE_CONFIG="${1:-rpi5-installer2}"
+FLAKE_CONFIG="${1:-rpi5-installer-disko}"
 print_info "Using flake configuration: $FLAKE_CONFIG"
 echo ""
 

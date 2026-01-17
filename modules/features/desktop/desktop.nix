@@ -20,5 +20,9 @@
       xkb.layout = config.vars.keyLayout;
       xkb.variant = "";
     };
+
+    # TEMPORARY REMOVE
+    networking.firewall.allowedTCPPorts = [3000 8000];
+    networking.firewall.allowedUDPPorts = [3000 8000];
   };
 }
