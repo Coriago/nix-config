@@ -16,6 +16,7 @@
   flake.modules.homeManager.development = {pkgs, ...}: {
     home.packages = with pkgs; [
       python311
+      gcc
 
       # Node.js for VS Code extension development
       nodejs_22

@@ -1,4 +1,14 @@
 {
+  nixConfig = {
+    extra-substituters = [
+      "https://nixos-raspberrypi.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
+    ];
+    connect-timeout = 5;
+  };
+
   # Declares flake inputs
   inputs = {
     # Primary
@@ -24,15 +34,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+
+    # RPI
+    ################################
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main"; # RPI Support
     disko = {
       url = "github:nix-community/disko"; # Disk management tool
       inputs.nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
-    };
-    nixos-images = {
-      url = "github:nix-community/nixos-images";
-      inputs.nixos-stable.follows = "nixos-raspberrypi/nixpkgs";
-      inputs.nixos-unstable.follows = "nixos-raspberrypi/nixpkgs";
     };
   };
 

@@ -29,7 +29,6 @@
 
     # Basic Packages
     environment.systemPackages = with pkgs; [
-      gcc
       xdg-utils
       wget
       curl
@@ -37,7 +36,6 @@
       unzip
       jq
       yq
-      git
       gnumake
     ];
 

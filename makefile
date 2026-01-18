@@ -39,3 +39,12 @@ write-sd:
 	echo "Syncing..."; \
 	sudo sync; \
 	echo "Done! SD card is ready."
+
+deploy-fresh:
+	nix run github:nix-community/nixos-anywhere -- --flake .#rpiserver1 --target-host root@192.168.8.104
+
+deploy-update:
+	nixos apply .#rpiserver1 --target-host root@192.168.8.104
+
+swap-boot:
+	./scripts/rpi-boot-priority.sh root@192.168.8.104

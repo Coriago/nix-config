@@ -345,31 +345,6 @@
         ]
       },
       "locked": {
-        "lastModified": 1766770015,
-        "narHash": "sha256-kUmVBU+uBUPl/v3biPiWrk680b8N9rRMhtY97wsxiJc=",
-        "owner": "nix-community",
-        "repo": "nixos-images",
-        "rev": "e4dba54ddb6b2ad9c6550e5baaed2fa27938a5d2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "nixos-images",
-        "type": "github"
-      }
-    },
-    "nixos-images_2": {
-      "inputs": {
-        "nixos-stable": [
-          "nixos-raspberrypi",
-          "nixpkgs"
-        ],
-        "nixos-unstable": [
-          "nixos-raspberrypi",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
         "lastModified": 1747747741,
         "narHash": "sha256-LUOH27unNWbGTvZFitHonraNx0JF/55h30r9WxqrznM=",
         "owner": "nvmd",
@@ -388,7 +363,7 @@
       "inputs": {
         "argononed": "argononed",
         "flake-compat": "flake-compat_3",
-        "nixos-images": "nixos-images_2",
+        "nixos-images": "nixos-images",
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
@@ -576,7 +551,6 @@
         "import-tree": "import-tree",
         "nix-flatpak": "nix-flatpak",
         "nixos-cli": "nixos-cli",
-        "nixos-images": "nixos-images",
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixpkgs": "nixpkgs_4",
         "plasma-manager": "plasma-manager",

@@ -1,5 +1,6 @@
 # Home manager for nixos
 {inputs, ...}: {
+  # NixOS
   flake.modules.nixos.base = {...}: {
     imports = [inputs.home-manager.nixosModules.home-manager];
     home-manager = {
