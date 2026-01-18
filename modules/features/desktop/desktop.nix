@@ -2,7 +2,11 @@
 # Other possible desktop environments: Gnome, KDE Plasma, Hyperland, Niri, etc.
 {inputs, ...}: {
   # NixOS
-  flake.modules.nixos.desktop = {config, ...}: {
+  flake.modules.nixos.desktop = {
+    config,
+    pkgs,
+    ...
+  }: {
     # Uses KDE Plasma for Desktop
     services.xserver.enable = true;
     services.desktopManager.plasma6.enable = true;
@@ -20,5 +24,15 @@
       xkb.layout = config.vars.keyLayout;
       xkb.variant = "";
     };
+
+    # AppImage Support
+    programs.fuse.enable = true;
+    programs.appimage = {
+      enable = true;
+      binfmt = true;
+    };
+    programs.nix-ld.libraries = with pkgs; [
+      zstd
+    ];
   };
 }

@@ -1,6 +1,6 @@
 .PHONY: build-rpi-image
 build-rpi-image:
-	nom build .#nixosConfigurations.rpi5-installer.config.system.build.sdImage
+	nom build .#nixosConfigurations.rpi5-installer-sd-card.config.system.build.sdImage
 
 .PHONY: list-disks
 list-disks:
