@@ -2,7 +2,7 @@
 # These are sandboxed apps typically installed in 'software center' or 'discover store'.
 # Some apps work great this way and others have limitations due to sandboxing.
 {inputs, ...}: {
-  flake.modules.nixos.desktop = {...}: {
+  flake.modules.nixos.desktop = {pkgs, ...}: {
     imports = [
       inputs.nix-flatpak.nixosModules.nix-flatpak
     ];
@@ -18,6 +18,18 @@
       packages = [
         "com.stremio.Stremio" # Stremio
       ];
+    };
+
+    # AppImage Support
+    programs.fuse.enable = true;
+    programs.appimage = {
+      enable = true;
+      binfmt = true;
+      package = pkgs.appimage-run.override {
+        extraPkgs = pkgs: [
+          pkgs.zstd
+        ];
+      };
     };
   };
 
