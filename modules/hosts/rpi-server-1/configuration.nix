@@ -42,6 +42,7 @@ in {
     # Host Overrides
     #----------------------------------#
     networking.hostName = hostname;
+    age.rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOshmG6Skkup8Y2xWNWuZSx5V3YCNla6H78ZX4a2OSjK";
   };
 
   # Final Configuration

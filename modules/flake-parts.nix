@@ -22,13 +22,12 @@
     pkgs,
     ...
   }: {
-    # Expose the agenix wrapper as a package
-    # Run with: nix run .#agenix -- <command>
-    packages.agenix = config.agenix-rekey.package;
-
     # DevShell with agenix available
     devShells.default = pkgs.mkShell {
-      nativeBuildInputs = [config.agenix-rekey.package];
+      nativeBuildInputs = [
+        config.agenix-rekey.package
+        pkgs.age
+      ];
     };
   };
 }

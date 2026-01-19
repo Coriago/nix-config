@@ -71,6 +71,7 @@ in {
     # Host Overrides
     #----------------------------------#
     networking.hostName = hostname;
+    age.rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAz7gDRD7wKds16rl9PPW0HKY3C3CWJbELtUfkXNIwAu root@heliosdesk";
     boot.loader = {
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
