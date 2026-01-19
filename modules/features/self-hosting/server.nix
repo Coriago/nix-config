@@ -14,11 +14,13 @@ local: {
       }
     ];
     networking.firewall.allowedTCPPorts = [6443 10250 5001 6443];
-    networking.firewall.allowedUDPPorts = [8472 51820 51821];
-    # systemd.network.networks = {
-    #   "99-ethernet-default-dhcp".networkConfig.MulticastDNS = "yes";
-    #   "99-wireless-client-dhcp".networkConfig.MulticastDNS = "yes";
-    # };
+    networking.firewall.allowedUDPPorts = [8472 51820 51821 5353];
+    systemd.network.networks = {
+      "99-ethernet-default-dhcp".networkConfig.MulticastDNS = "yes";
+      "99-wireless-client-dhcp".networkConfig.MulticastDNS = "yes";
+    };
+
+    # Try this in the future
     # networking.useNetworkd = true;
     # systemd.services = {
     #   systemd-networkd.stopIfChanged = false;
