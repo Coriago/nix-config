@@ -23,6 +23,13 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
+    # Secrets Management
+    ################################
+    agenix.url = "github:ryantm/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
+    agenix-rekey.url = "github:oddlama/agenix-rekey";
+    agenix-rekey.inputs.nixpkgs.follows = "nixpkgs";
+
     # Secondary
     ################################
     nixos-cli.url = "github:nix-community/nixos-cli"; # Better cli for nixos

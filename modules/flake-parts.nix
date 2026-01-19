@@ -4,6 +4,7 @@
   imports = [
     inputs.flake-parts.flakeModules.modules
     inputs.home-manager.flakeModules.home-manager
+    inputs.agenix-rekey.flakeModule
   ];
 
   # Debug for better intellisense
@@ -14,4 +15,20 @@
     "x86_64-linux"
     "aarch64-linux"
   ];
+
+  # agenix-rekey configuration
+  perSystem = {
+    config,
+    pkgs,
+    ...
+  }: {
+    # Expose the agenix wrapper as a package
+    # Run with: nix run .#agenix -- <command>
+    packages.agenix = config.agenix-rekey.package;
+
+    # DevShell with agenix available
+    devShells.default = pkgs.mkShell {
+      nativeBuildInputs = [config.agenix-rekey.package];
+    };
+  };
 }
