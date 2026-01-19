@@ -22,12 +22,16 @@
     pkgs,
     ...
   }: {
-    # DevShell with agenix available
+    # agenix-rekey.nixosConfigurations = inputs.self.nixosConfigurations;
+
+    # Devshells
     devShells.default = pkgs.mkShell {
       nativeBuildInputs = [
-        config.agenix-rekey.package
         pkgs.age
+        pkgs.disko
+        config.agenix-rekey.package
       ];
+      env.AGENIX_REKEY_ADD_TO_GIT = true;
     };
   };
 }
