@@ -4,6 +4,7 @@
   flake.modules.nixos.desktop = {...}: {
     environment.variables = {
       BROWSER = "brave";
+      EDITOR = "code -w";
     };
   };
 
