@@ -61,6 +61,9 @@
     users.users.root.openssh.authorizedKeys.keys = [
       config.vars.sshPublicKey
     ];
+
+    # SSH Agent
+    programs.ssh.startAgent = true;
   };
 
   # Home Manager
