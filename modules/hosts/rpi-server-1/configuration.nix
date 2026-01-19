@@ -14,6 +14,7 @@ in {
       username = username;
       stateVersion = "25.11";
       email = "gagemiller155@gmail.com";
+      local_ip = "192.168.8.104";
     };
   };
 
@@ -25,6 +26,7 @@ in {
       generic.${hostname}
       nixos.base
       nixos.base-homemanager-rpi
+      nixos.self-hosting
 
       # Drivers
       nixos.rpi5
@@ -42,6 +44,8 @@ in {
     # Host Overrides
     #----------------------------------#
     networking.hostName = hostname;
+    services.k3s.role = "server";
+    services.k3s.clusterInit = true;
   };
 
   # Final Configuration

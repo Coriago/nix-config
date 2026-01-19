@@ -48,14 +48,3 @@ deploy-update:
 
 swap-boot:
 	./scripts/rpi-boot-priority.sh root@192.168.8.104
-
-.PHONY: setup-age-key
-setup-age-key:
-	@mkdir -p ~/.config/age
-	@if [ -f ~/.config/age/keys.txt ]; then \
-		echo "Key already exists at ~/.config/age/keys.txt"; \
-		echo "Delete it first if you want to regenerate."; \
-		exit 1; \
-	fi
-	age-keygen -o ~/.config/age/keys.txt
-	@echo "Key created. Update your agenix config with the public key shown above."

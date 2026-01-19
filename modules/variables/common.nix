@@ -61,6 +61,12 @@
         description = "The SSH public key authorized for ssh.";
         default = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBYVacUQ/B11m2ycolJnoIKn4TS1alZKDbe1ssRnWZE2";
       };
+
+      local_ip = mkOption {
+        type = types.str;
+        description = "The local IP address of the host.";
+        default = "";
+      };
     };
   };
 }

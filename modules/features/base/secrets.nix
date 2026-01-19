@@ -10,5 +10,9 @@
     age.identityPaths = [
       "/etc/ssh/ssh_host_ed25519_key"
     ];
+
+    age.secrets = {
+      k3s.file = ../../../secrets/k3s.age;
+    };
   };
 }
