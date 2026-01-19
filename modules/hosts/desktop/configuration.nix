@@ -45,7 +45,6 @@ in {
       generic.${hostname}
       nixos.base
       nixos.base-homemanager
-      nixos.agenix
       nixos.desktop
       nixos.gaming
       nixos.development

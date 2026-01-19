@@ -1,7 +1,7 @@
 # Agenix module for secret management
 {inputs, ...}: {
   # Expose agenix as a NixOS module
-  flake.modules.nixos.agenix = {
+  flake.modules.nixos.base = {
     imports = [
       inputs.agenix.nixosModules.default
     ];

@@ -25,7 +25,6 @@ in {
       generic.${hostname}
       nixos.base
       nixos.base-homemanager-rpi
-      nixos.agenix
 
       # Drivers
       nixos.rpi5
