@@ -42,6 +42,10 @@
       url = "github:nix-community/disko"; # Disk management tool
       inputs.nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
     };
+    home-manager-rpi = {
+      url = "github:nix-community/home-manager/release-25.11";
+      inputs.nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
+    };
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} (inputs.import-tree ./modules);

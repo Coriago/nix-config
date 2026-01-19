@@ -24,19 +24,20 @@ in {
     imports = with config.flake.modules; [
       generic.${hostname}
       nixos.base
+      nixos.base-homemanager-rpi
 
       # Drivers
       nixos.rpi5
       nixos.rpi5-disks
     ];
 
-    # home-manager.users.${username} = {
-    #   # Import Home Manager modules
-    #   imports = with config.flake.modules; [
-    #     generic.${hostname}
-    #     homeManager.base
-    #   ];
-    # };
+    home-manager.users.${username} = {
+      # Import Home Manager modules
+      imports = with config.flake.modules; [
+        generic.${hostname}
+        homeManager.base
+      ];
+    };
 
     # Host Overrides
     #----------------------------------#

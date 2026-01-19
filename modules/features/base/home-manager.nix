@@ -15,4 +15,20 @@
       '';
     };
   };
+
+  # NixOS RPI
+  flake.modules.nixos.base-homemanager-rpi = {...}: {
+    imports = [inputs.home-manager-rpi.nixosModules.home-manager];
+    home-manager = {
+      useGlobalPkgs = true;
+      useUserPackages = true;
+
+      # This should automatically create dynamic backups for any conflicting files
+      backupCommand = ''
+        TIMESTAMP=$(date +%Y%m%d%H%M%S)
+        # Move the conflicting file to a dated backup
+        mv "$1" "$1.$TIMESTAMP.bak"
+      '';
+    };
+  };
 }
