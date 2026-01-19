@@ -48,6 +48,8 @@ in {
       nixos.desktop
       nixos.gaming
       nixos.development
+      nixos.self-hosting
+      nixos.self-hosting-agent
 
       # Drivers
       nixos.bluetooth

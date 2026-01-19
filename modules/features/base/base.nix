@@ -89,5 +89,12 @@
       then "/Users/${config.vars.username}"
       else "/home/${config.vars.username}"
     );
+
+    # SSH
+    programs.ssh = {
+      matchBlocks."*" = {
+        addKeysToAgent = "yes";
+      };
+    };
   };
 }

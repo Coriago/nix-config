@@ -22,6 +22,11 @@
     };
 
     boot.loader.raspberryPi.bootloader = "kernel";
+    boot.kernelParams = [
+      "cgroup_enable=cpuset"
+      "cgroup_memory=1"
+      "cgroup_enable=memory"
+    ];
 
     system.nixos.tags = [
       "raspberry-pi-${config.boot.loader.raspberryPi.variant}"

@@ -6,6 +6,8 @@
       discord
       kitty
       rpi-imager
+      kubectl
+      k9s
     ];
 
     programs.vscode = {
