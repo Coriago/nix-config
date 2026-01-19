@@ -1,7 +1,7 @@
 # Home manager for nixos
 {inputs, ...}: {
   # NixOS
-  flake.modules.nixos.base = {...}: {
+  flake.modules.nixos.base-homemanager = {...}: {
     imports = [inputs.home-manager.nixosModules.home-manager];
     home-manager = {
       useGlobalPkgs = true;

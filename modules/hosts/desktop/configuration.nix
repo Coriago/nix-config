@@ -44,6 +44,7 @@ in {
     imports = with config.flake.modules; [
       generic.${hostname}
       nixos.base
+      nixos.base-homemanager
       nixos.desktop
       nixos.gaming
       nixos.development
