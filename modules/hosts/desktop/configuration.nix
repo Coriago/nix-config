@@ -47,7 +47,6 @@ in {
       nixos.base-homemanager
       nixos.desktop
       nixos.gaming
-      nixos.development
       nixos.self-hosting
       nixos.self-hosting-agent
 
@@ -65,7 +64,6 @@ in {
       imports = with config.flake.modules; [
         generic.${hostname}
         homeManager.base
-        homeManager.development
         homeManager.desktop
       ];
     };

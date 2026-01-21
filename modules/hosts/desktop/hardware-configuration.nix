@@ -28,6 +28,11 @@
       options = ["fmask=0077" "dmask=0077"];
     };
 
+    fileSystems."/run/media/helios/samsung_ssd" = {
+      device = "/dev/disk/by-uuid/2e0f7d12-7c1e-405d-bb58-e0c04acdcded";
+      fsType = "ext4";
+    };
+
     swapDevices = [];
 
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
