@@ -111,6 +111,63 @@ All modules use the flake-parts module system with clear namespacing:
 }
 ```
 
+### Feature Module Patterns
+
+**CRITICAL:** Understand these patterns when adding new feature modules:
+
+#### Pattern 1: Combined Feature Modules (base/, desktop/, gaming/, self-hosting/)
+
+Files in these directories export **both** NixOS and Home Manager config under a **single shared namespace**:
+
+```nix
+# modules/features/desktop/apps.nix
+{
+  # NixOS config goes here
+  flake.modules.nixos.desktop = { pkgs, config, ... }: {
+    programs.usbtop.enable = true;
+    virtualisation.docker.enable = true;
+  };
+
+  # Home Manager config goes here (same "desktop" namespace)
+  flake.modules.homeManager.desktop = { pkgs, ... }: {
+    home.packages = with pkgs; [ vlc discord ];
+    programs.vscode.enable = true;
+  };
+}
+```
+
+**Key Points:**
+- Multiple files can contribute to the same namespace (e.g., `desktop.nix` and `apps.nix` both use `desktop`)
+- Both NixOS and Home Manager sections are optional - include what's needed
+- This allows grouping related functionality while keeping files organized
+
+#### Pattern 2: Individual Driver Modules (drivers/)
+
+Each driver file exports its **own unique namespace**:
+
+```nix
+# modules/features/drivers/audio.nix
+{
+  flake.modules.nixos.audio = {
+    services.pipewire.enable = true;
+    # ... audio config
+  };
+}
+
+# modules/features/drivers/bluetooth.nix
+{
+  flake.modules.nixos.bluetooth = { pkgs, ... }: {
+    hardware.bluetooth.enable = true;
+    # ... bluetooth config
+  };
+}
+```
+
+**Key Points:**
+- Each driver = separate module namespace
+- Import individually: `nixos.audio`, `nixos.bluetooth`, `nixos.gpu`
+- Drivers typically only need NixOS config (no Home Manager section)
+
 ### Host Configuration Pattern
 
 Each host configuration follows this structure:
@@ -132,9 +189,24 @@ in {
 
   # 2. NixOS configuration
   flake.modules.nixos.${hostname} = { ... }: {
-    imports = with config.flake.modules; [ ... ];
+    imports = with config.flake.modules; [
+      generic.${hostname}
+      nixos.base
+      nixos.desktop
+      nixos.gaming
+      
+      # Drivers (individual imports)
+      nixos.bluetooth
+      nixos.gpu
+      nixos.audio
+    ];
+    
     home-manager.users.${username} = {
-      imports = with config.flake.modules; [ ... ];
+      imports = with config.flake.modules; [
+        generic.${hostname}
+        homeManager.base
+        homeManager.desktop
+      ];
     };
     # Host-specific overrides here
   };
@@ -216,10 +288,27 @@ config.age.secrets.secretName.path
 
 ### Adding a New Feature Module
 
-1. Determine appropriate directory (`base/`, `desktop/`, `drivers/`, etc.)
-2. Create module file with both NixOS and Home Manager sections if needed
-3. Use `flake.modules.nixos.moduleName` and/or `flake.modules.homeManager.moduleName`
-4. Import in relevant host configurations
+**For base/, desktop/, gaming/, self-hosting/ directories:**
+
+1. Create file in appropriate directory (e.g., `modules/features/desktop/newfeature.nix`)
+2. Export NixOS config under the parent namespace:
+   ```nix
+   flake.modules.nixos.desktop = { ... }: { /* config */ };
+   ```
+3. Optionally export Home Manager config under same namespace:
+   ```nix
+   flake.modules.homeManager.desktop = { ... }: { /* config */ };
+   ```
+4. Import in host using existing namespace: `nixos.desktop`, `homeManager.desktop`
+
+**For drivers/ directory:**
+
+1. Create file: `modules/features/drivers/newdriver.nix`
+2. Export with unique namespace:
+   ```nix
+   flake.modules.nixos.newdriver = { ... }: { /* config */ };
+   ```
+3. Import in host individually: `nixos.newdriver`
 
 ### Testing Changes
 
@@ -243,6 +332,7 @@ config.age.secrets.secretName.path
 
 - **Simplicity over DRY:** Prefer simple, clear code even if slightly repetitive
 - **File consolidation:** Don't over-modularize - group related functionality
+- **Namespace awareness:** Understand the difference between combined feature modules and individual driver modules
 - **No automatic deploys:** Never run `nixos apply` or deployment commands automatically
 - **Evolution in progress:** Current patterns may change - don't treat them as immutable
 - **User approval:** Always get confirmation before significant structural changes
