@@ -11,8 +11,9 @@
     hardware.nvidia = {
       open = false; # Use proprietary driver - open driver has DRM atomic commit issues
       modesetting.enable = true;
-      nvidiaPersistenced = true;
-      powerManagement.enable = true;
+      # nvidiaPersistenced = false;
+      powerManagement.enable = false;
+      powerManagement.finegrained = false;
       package = nvidiaPackage;
     };
     hardware.nvidia-container-toolkit.enable = true;

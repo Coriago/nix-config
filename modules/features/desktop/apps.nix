@@ -41,6 +41,7 @@
       k9s
       realvnc-vnc-viewer
       opencode
+      devenv
 
       # Node.js for VS Code extension development
       # TODO: Move out into direnv flake
