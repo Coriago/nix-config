@@ -15,10 +15,7 @@
     "aarch64-linux"
   ];
 
-  perSystem = {
-    pkgs,
-    ...
-  }: {
+  perSystem = {pkgs, ...}: {
     # Devshells
     devShells.default = pkgs.mkShell {
       nativeBuildInputs = [

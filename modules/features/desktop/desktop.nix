@@ -10,11 +10,6 @@
     services.displayManager.sddm.wayland.enable = true;
     home-manager.sharedModules = [inputs.plasma-manager.homeModules.plasma-manager];
 
-    environment.sessionVariables = {
-      # Set default Qt platform to Wayland with XCB fallback
-      QT_QPA_PLATFORM = "wayland;xcb";
-    };
-
     # Enable x11
     services.xserver = {
       xkb.layout = config.vars.keyLayout;
