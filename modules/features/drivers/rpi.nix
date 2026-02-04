@@ -1,10 +1,18 @@
 # Raspberry Pi 5 hardware configuration
 {inputs, ...}: {
-  flake.modules.nixos.rpi5 = {config, ...}: {
+  flake.modules.nixos.rpi5 = {
+    config,
+    pkgs,
+    ...
+  }: {
     imports = with inputs.nixos-raspberrypi.nixosModules; [
       raspberry-pi-5.base
       raspberry-pi-5.page-size-16k
       raspberry-pi-5.display-vc4
+    ];
+
+    environment.systemPackages = with pkgs; [
+      raspberrypi-eeprom
     ];
 
     hardware.raspberry-pi.config.all = {
@@ -21,7 +29,7 @@
       };
     };
 
-    boot.loader.raspberryPi.bootloader = "kernel";
+    boot.loader.raspberry-pi.bootloader = "kernel";
     boot.kernelParams = [
       "cgroup_enable=cpuset"
       "cgroup_memory=1"
@@ -29,8 +37,8 @@
     ];
 
     system.nixos.tags = [
-      "raspberry-pi-${config.boot.loader.raspberryPi.variant}"
-      config.boot.loader.raspberryPi.bootloader
+      "raspberry-pi-${config.boot.loader.raspberry-pi.variant}"
+      config.boot.loader.raspberry-pi.bootloader
       config.boot.kernelPackages.kernel.version
     ];
   };
