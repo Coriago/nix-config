@@ -12,6 +12,8 @@
       python311
       gcc
       devenv
+      qemu
+      disko
     ];
 
     # Docker

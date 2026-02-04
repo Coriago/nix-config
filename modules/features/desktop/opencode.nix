@@ -14,10 +14,10 @@
 
       # Disable built-in agents - we're using custom ones
       agent = {
-        build = {disable = true;};
-        plan = {disable = true;};
-        general = {disable = true;};
-        explore = {disable = true;};
+        build = {disable = false;};
+        plan = {disable = false;};
+        general = {disable = false;};
+        explore = {disable = false;};
       };
 
       # Disable GitHub MCP - using gh CLI instead via Shivers agent

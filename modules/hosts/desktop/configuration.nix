@@ -19,17 +19,6 @@ in {
       theme = "equilibrium-dark";
       wallpaper = "https://getwallpapers.com/wallpaper/full/2/e/a/524916.jpg";
       wallpaperHash = "sha256-YqFWMRjdM8dGbSJQomvoNtwmq2ppfwq6r0UYYpx6sVA=";
-      monitors = {
-        "left" = {
-          serial = "1APR9UA001811";
-        };
-        "center" = {
-          serial = "2OMR6UA000303";
-        };
-        "right" = {
-          serial = "1APR9UA001815";
-        };
-      };
     };
   };
 
@@ -71,11 +60,6 @@ in {
     # Host Overrides
     #----------------------------------#
     networking.hostName = hostname;
-    boot.loader = {
-      systemd-boot.enable = true;
-      efi.canTouchEfiVariables = true;
-      grub.enable = lib.mkForce false;
-    };
 
     # Disable integrated AMD iGPU
     boot.blacklistedKernelModules = ["amdgpu"];
@@ -84,11 +68,9 @@ in {
     # Allow cross platform building
     boot.binfmt.emulatedSystems = ["aarch64-linux"];
 
-    # TEMPORARY REMOVE
+    # TEMPORARY REMOVE - For Resume Matcher
     networking.firewall.allowedTCPPorts = [3000 8000];
     networking.firewall.allowedUDPPorts = [3000 8000];
-
-    environment.systemPackages = [pkgs.qemu pkgs.disko];
   };
 
   # Final Configuration
