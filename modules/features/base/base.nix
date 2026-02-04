@@ -91,10 +91,13 @@
       else "/home/${config.vars.username}"
     );
 
-    # SSH
     programs.ssh = {
-      matchBlocks."*" = {
-        addKeysToAgent = "yes";
+      enable = true;
+      enableDefaultConfig = false;
+      matchBlocks = {
+        "*" = {
+          addKeysToAgent = "yes";
+        };
       };
     };
   };
