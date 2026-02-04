@@ -12,7 +12,6 @@
       python311
       gcc
       devenv
-      uv
     ];
 
     # Docker
