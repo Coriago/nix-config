@@ -4,6 +4,7 @@
   flake.modules.nixos.base = {
     imports = [
       inputs.agenix.nixosModules.default
+      inputs.sops-nix.nixosModules.sops
     ];
 
     # Default age identity location for decryption on host

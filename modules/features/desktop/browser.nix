@@ -9,7 +9,7 @@
   };
 
   # HomeManager
-  flake.modules.homeManager.desktop = {...}: {
+  flake.modules.homeManager.desktop = {pkgs, ...}: {
     programs.brave = {
       enable = true;
       extensions = [
@@ -17,5 +17,9 @@
         {id = "nngceckbapebfimnlniiiahkandclblb";} # bitwarden
       ];
     };
+
+    home.packages = with pkgs; [
+      chromium # For Playwright browser automation and testing
+    ];
   };
 }

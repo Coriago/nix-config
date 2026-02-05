@@ -7,6 +7,7 @@
 This is a flake-based NixOS configuration using `flake-parts` for modular organization. The config manages multiple hosts (desktop, Raspberry Pi servers) with shared feature modules.
 
 **Key Directories:**
+
 - `modules/hosts/` - Per-host configurations (heliosdesk, rpiserver1)
 - `modules/features/` - Reusable feature modules (base, desktop, drivers, gaming, self-hosting)
 - `modules/variables/` - Centralized variable definitions and monitor configs
@@ -18,6 +19,7 @@ This is a flake-based NixOS configuration using `flake-parts` for modular organi
 ## Build/Deploy/Test Commands
 
 ### Primary Workflow
+
 ```bash
 # Apply configuration changes (user always does this manually for final approval)
 nixos apply
@@ -33,6 +35,7 @@ nixos build
 ```
 
 ### Raspberry Pi Management
+
 ```bash
 # Build RPI SD card image
 make build-rpi-image
@@ -54,6 +57,7 @@ make swap-boot
 ```
 
 ### Code Quality Tools
+
 ```bash
 # Format all Nix files (alejandra)
 alejandra .
@@ -75,6 +79,7 @@ nix flake show
 ```
 
 ### Development Environment
+
 ```bash
 # Enter devshell (via direnv - automatic with .envrc)
 direnv allow
@@ -102,10 +107,10 @@ All modules use the flake-parts module system with clear namespacing:
 {
   # For generic/variable modules
   flake.modules.generic.moduleName = { ... };
-  
+
   # For NixOS system modules
   flake.modules.nixos.moduleName = { pkgs, config, ... }: { ... };
-  
+
   # For Home Manager modules
   flake.modules.homeManager.moduleName = { pkgs, config, ... }: { ... };
 }
@@ -137,6 +142,7 @@ Files in these directories export **both** NixOS and Home Manager config under a
 ```
 
 **Key Points:**
+
 - Multiple files can contribute to the same namespace (e.g., `desktop.nix` and `apps.nix` both use `desktop`)
 - Both NixOS and Home Manager sections are optional - include what's needed
 - This allows grouping related functionality while keeping files organized
@@ -164,6 +170,7 @@ Each driver file exports its **own unique namespace**:
 ```
 
 **Key Points:**
+
 - Each driver = separate module namespace
 - Import individually: `nixos.audio`, `nixos.bluetooth`, `nixos.gpu`
 - Drivers typically only need NixOS config (no Home Manager section)
@@ -194,13 +201,13 @@ in {
       nixos.base
       nixos.desktop
       nixos.gaming
-      
+
       # Drivers (individual imports)
       nixos.bluetooth
       nixos.gpu
       nixos.audio
     ];
-    
+
     home-manager.users.${username} = {
       imports = with config.flake.modules; [
         generic.${hostname}
@@ -320,13 +327,12 @@ config.age.secrets.secretName.path
 
 ## Development Workflow
 
-**Critical:** The user always runs `nixos apply` manually to activate changes. This provides final approval before system changes take effect. Never automatically apply or switch generations without explicit user instruction.
-
 1. Modify configuration files
 2. Format and lint code
 3. Test build
 4. Inform user changes are ready
-5. User runs `nixos apply` when ready
+5. Runs `nixos apply --dry` to see plan
+6. Run `nixos apply -y` to execute the plan
 
 ## Notes for AI Agents
 

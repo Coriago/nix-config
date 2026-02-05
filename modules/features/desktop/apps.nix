@@ -30,6 +30,7 @@
       enable = true;
       enableZshIntegration = true;
       nix-direnv.enable = true;
+      silent = true;
     };
   };
 
@@ -40,10 +41,7 @@
       discord
       kitty
       rpi-imager
-      kubectl
-      k9s
       realvnc-vnc-viewer
-      opencode
       (pkgs.symlinkJoin {
         name = "orca-slicer-wrapped";
         paths = [pkgs.orca-slicer];
@@ -74,6 +72,13 @@
       })
       # bambu-studio
 
+      # Dev stuff
+      kubectl
+      k9s
+      opencode
+      just
+      just-lsp
+
       # Node.js for VS Code extension development
       # TODO: Move out into direnv flake
       nodejs_22
@@ -84,15 +89,6 @@
 
     programs.vscode = {
       enable = true;
-      mutableExtensionsDir = true;
-      profiles.default.extensions = with pkgs.vscode-extensions; [
-        jnoortheen.nix-ide
-        christian-kohler.path-intellisense
-
-        # TypeScript / Node.js development
-        dbaeumer.vscode-eslint
-        esbenp.prettier-vscode
-      ];
     };
   };
 }

@@ -21,6 +21,7 @@
       nativeBuildInputs = [
         pkgs.age
         pkgs.disko
+        pkgs.sops
         inputs.agenix.packages.${pkgs.system}.default
       ];
     };
