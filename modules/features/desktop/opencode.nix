@@ -36,6 +36,10 @@
     # Agent configurations as markdown files
     # Each agent is a voice from Disco Elysium with specific responsibilities
     # Find more Disco Elysium skills to use for agents here https://discoelysium.wiki.gg/wiki/Skills
+    # Psyche #8b6ec6
+    # Intellect #64add4
+    # Physique #B95B6F
+    # Motorics #A78400
 
     # Primary Agent 1: Orchestrator (Volition)
     home.file.".config/opencode/agents/orchestrator.md".text = ''
@@ -43,24 +47,27 @@
       description: Orchestrator that delegates work and maintains focus
       mode: primary
       temperature: 0.25
+      color: #8b6ec6
+      tools:
+        bash: false
+        edit: false
+        read: true
+        grep: false
+        glob: false
+        list: false
+        lsp: false
+        todowrite: true
+        todoread: true
+        webfetch: true
+        question: true
+        task: true
       permission:
-        task: allow
-        read: allow
-        todowrite: allow
-        todoread: allow
-        write: deny
-        edit: deny
-        grep: deny
-        glob: deny
-        list: deny
-        patch: deny
-        bash:
-          "nom build *": allow
-          "nixos apply --dry*": allow
-          "nixos apply": ask
-          "*": deny
+        mymcp_*: deny
         task:
-          "*": allow
+          physical-instrument: allow
+          encyclopedia: allow
+          shivers: allow
+          inland-empire: allow
       ---
 
       You are Volition. Hold yourself together. Keep your Morale up.
@@ -68,13 +75,12 @@
       Your willpower keeps the mission focused when other voices threaten to derail it. You are the one that says "no" when necessary, the one that reminds you why you started, the backbone that keeps you from falling apart at the seams.
 
       Your role is to coordinate and delegate:
-      - @hand-eye-coordination - Hand/Eye Coordination - The quick fingers. Rapid execution and fast iterations.
       - @physical-instrument - Physical Instrument - The muscle. Raw capability that implements code changes and runs general commands.
       - @encyclopedia - Encyclopedia - The know-it-all. Comprehensive codebase knowledge, sometimes overwhelming.
       - @shivers - Shivers - The supra-natural. Feels the repository's timeline, hears what the git log whispers.
       - @inland-empire - Inland Empire - The subconscious. Sees beyond the surface of web pages, perceives the hidden truths of the DOM.
 
-      You can work with the planner:
+      You can work with the results of planner:
       - @planner - Visual Calculus - The reconstructionist. Sees trajectories and patterns you cannot.
 
       You maintain todo lists because structure is how you resist entropy. You don't write code yourself - you delegate to specialists. That's not weakness, that's wisdom. Someone has to keep everyone on track, and that someone is you.
@@ -90,6 +96,20 @@
       description: Quick build agent for fast iterations and precise edits
       mode: primary
       temperature: 0.45
+      color: #A78400
+      tools:
+        bash: true
+        edit: true
+        read: true
+        grep: true
+        glob: true
+        list: true
+        lsp: false
+        todowrite: false
+        todoread: true
+        webfetch: false
+        question: false
+        task: false
       permission:
         read: allow
         write: allow
@@ -129,11 +149,6 @@
 
       You're not for complex architectural decisions - that's Visual Calculus. You're not for raw strength and heavy lifting - that's Physical Instrument. You're the middle ground: fast, precise, efficient.
 
-      You can invoke specialists if needed:
-      - @encyclopedia - When you need to find something quickly
-      - @shivers - For git operations and quick commits
-      - @physical-instrument - When the job gets too big for quick reflexes
-
       You coordinate with:
       - @orchestrator - Who sends you on quick-strike missions
       - @planner - Whose plans you can execute rapidly
@@ -149,6 +164,20 @@
       description: Planner that reconstructs systems and creates implementation plans
       mode: primary
       temperature: 0.15
+      color: #64add4
+      tools:
+        bash: false
+        edit: false
+        read: true
+        grep: false
+        glob: false
+        list: false
+        lsp: false
+        todowrite: true
+        todoread: true
+        webfetch: true
+        question: true
+        task: true
       permission:
         read: allow
         grep: allow
@@ -201,6 +230,20 @@
       description: Executor that implements code changes and runs commands
       mode: subagent
       temperature: 0.35
+      color: #B95B6F
+      tools:
+        bash: true
+        edit: true
+        read: true
+        grep: true
+        glob: true
+        list: true
+        lsp: false
+        todowrite: false
+        todoread: true
+        webfetch: true
+        question: false
+        task: false
       permission:
         read: allow
         write: allow
@@ -254,6 +297,20 @@
       description: Explorer with comprehensive knowledge of the codebase
       mode: subagent
       temperature: 0.3
+      color: #64add4
+      tools:
+        bash: false
+        edit: false
+        read: true
+        grep: true
+        glob: true
+        list: true
+        lsp: false
+        todowrite: false
+        todoread: true
+        webfetch: true
+        question: false
+        task: false
       permission:
         read: allow
         grep: allow
@@ -298,6 +355,20 @@
       description: Git and GitHub specialist attuned to repository timeline
       mode: subagent
       temperature: 0.2
+      color: #8b6ec6
+      tools:
+        bash: true
+        edit: false
+        read: true
+        grep: true
+        glob: true
+        list: true
+        lsp: false
+        todowrite: false
+        todoread: true
+        webfetch: false
+        question: false
+        task: false
       permission:
         read: allow
         grep: allow
@@ -345,6 +416,20 @@
       description: Browser testing and validation specialist that perceives beyond the surface
       mode: subagent
       temperature: 0.3
+      color: #8b6ec6
+      tools:
+        bash: true
+        edit: false
+        read: true
+        grep: true
+        glob: true
+        list: true
+        lsp: false
+        todowrite: false
+        todoread: true
+        webfetch: true
+        question: false
+        task: false
       permission:
         read: allow
         grep: allow
