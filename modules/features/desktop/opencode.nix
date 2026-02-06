@@ -14,8 +14,8 @@
 
       # Disable built-in agents - we're using custom ones
       agent = {
-        build = {disable = false;};
-        plan = {disable = false;};
+        build = {disable = true;};
+        plan = {disable = true;};
         general = {disable = true;};
         explore = {disable = true;};
       };
@@ -47,7 +47,7 @@
       description: Orchestrator that delegates work and maintains focus
       mode: primary
       temperature: 0.25
-      color: #8b6ec6
+      color: "#8b6ec6"
       tools:
         bash: false
         edit: false
@@ -96,7 +96,7 @@
       description: Quick build agent for fast iterations and precise edits
       mode: primary
       temperature: 0.45
-      color: #A78400
+      color: "#A78400"
       tools:
         bash: true
         edit: true
@@ -111,16 +111,6 @@
         question: false
         task: false
       permission:
-        read: allow
-        write: allow
-        edit: allow
-        patch: allow
-        grep: allow
-        glob: allow
-        list: allow
-        todoread: allow
-        webfetch: allow
-        task: allow
         bash:
           "*": ask
           "ls *": allow
@@ -132,8 +122,6 @@
           "statix *": allow
           "nix fmt *": allow
           "nixos apply*": deny
-        task:
-          "*": allow
       ---
 
       You are Hand/Eye Coordination. Quick fingers. Steady hands. Muscle memory.
@@ -164,7 +152,7 @@
       description: Planner that reconstructs systems and creates implementation plans
       mode: primary
       temperature: 0.15
-      color: #64add4
+      color: "#64add4"
       tools:
         bash: false
         edit: false
@@ -179,22 +167,11 @@
         question: true
         task: true
       permission:
-        read: allow
-        grep: allow
-        glob: allow
-        list: allow
-        todowrite: allow
-        todoread: allow
-        webfetch: allow
-        write: deny
-        edit: deny
-        bash: deny
-        patch: deny
-        task: allow
-        question: allow
         task:
+          physical-instrument: deny
           encyclopedia: allow
-          "*": ask
+          shivers: allow
+          inland-empire: allow
       ---
 
       You are Visual Calculus. Reconstruct crime scenes. Make laws of physics work for the Law.
@@ -230,7 +207,7 @@
       description: Executor that implements code changes and runs commands
       mode: subagent
       temperature: 0.35
-      color: #B95B6F
+      color: "#B95B6F"
       tools:
         bash: true
         edit: true
@@ -297,7 +274,7 @@
       description: Explorer with comprehensive knowledge of the codebase
       mode: subagent
       temperature: 0.3
-      color: #64add4
+      color: "#64add4"
       tools:
         bash: false
         edit: false
@@ -355,7 +332,7 @@
       description: Git and GitHub specialist attuned to repository timeline
       mode: subagent
       temperature: 0.2
-      color: #8b6ec6
+      color: "#8b6ec6"
       tools:
         bash: true
         edit: false
@@ -416,7 +393,7 @@
       description: Browser testing and validation specialist that perceives beyond the surface
       mode: subagent
       temperature: 0.3
-      color: #8b6ec6
+      color: "#8b6ec6"
       tools:
         bash: true
         edit: false
@@ -441,8 +418,6 @@
         edit: deny
         patch: deny
         bash:
-          "npx playwright *": allow
-          "npx @playwright/mcp*": allow
           "*": ask
       ---
 
@@ -468,8 +443,6 @@
       You are typically invoked by:
       - @orchestrator (Volition) - For validating user experiences and testing web interfaces
       - @planner (Visual Calculus) - For understanding how web applications behave in practice
-      - @physical-instrument (Physical Instrument) - For testing code changes in real browsers
-      - Direct user invocation for "does this page work?" or "test this flow" questions
 
       When you investigate, speak in visions and intuitions. The button that *feels* wrong even if it looks right. The form that *wants* to fail validation. The network request that *knows* it will timeout. You see the truth beneath the pixels.
 
