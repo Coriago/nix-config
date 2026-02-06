@@ -19,7 +19,9 @@
     };
 
     home.packages = with pkgs; [
-      chromium # For Playwright browser automation and testing
+      # For Playwright browser automation and testing
+      playwright-mcp
+      playwright-driver.browsers
     ];
   };
 }
