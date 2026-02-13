@@ -78,6 +78,7 @@
       opencode
       just
       just-lsp
+      krita
 
       # Node.js for VS Code extension development
       # TODO: Move out into direnv flake

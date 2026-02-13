@@ -18,11 +18,10 @@
   perSystem = {pkgs, ...}: {
     # Devshells
     devShells.default = pkgs.mkShell {
-      nativeBuildInputs = [
-        pkgs.age
-        pkgs.disko
-        pkgs.sops
-        inputs.agenix.packages.${pkgs.system}.default
+      nativeBuildInputs = with pkgs; [
+        age
+        disko
+        sops
       ];
     };
   };

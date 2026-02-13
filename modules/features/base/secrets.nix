@@ -1,19 +1,17 @@
 # Agenix module for secret management
 {inputs, ...}: {
-  # Expose agenix as a NixOS module
-  flake.modules.nixos.base = {
+  flake.modules.nixos.base = {config, ...}: {
     imports = [
-      inputs.agenix.nixosModules.default
       inputs.sops-nix.nixosModules.sops
     ];
 
-    # Default age identity location for decryption on host
-    age.identityPaths = [
-      "/etc/ssh/ssh_host_ed25519_key"
-    ];
+    sops.defaultSopsFile = ../../../secrets/secrets.yaml;
+    sops.age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+    sops.age.keyFile = "/home/${config.vars.username}/.config/sops/age/keys.txt";
+    sops.age.generateKey = true;
 
-    age.secrets = {
-      k3s.file = ../../../secrets/k3s.age;
+    sops.secrets = {
+      k3s_token = {};
     };
   };
 }

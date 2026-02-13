@@ -3,7 +3,7 @@ local: {
     # Add K3s
     services.k3s = {
       enable = false;
-      tokenFile = config.age.secrets.k3s.path;
+      tokenFile = config.sops.secrets.k3s_token.path;
     };
 
     # K3s required firewall rules

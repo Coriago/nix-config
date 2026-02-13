@@ -41,7 +41,9 @@ write-sd:
 	echo "Done! SD card is ready."
 
 deploy-fresh:
-	nix run github:nix-community/nixos-anywhere -- --flake .#rpiserver1 --target-host root@192.168.8.104 --build-on-remote
+	nix run github:nix-community/nixos-anywhere -- --flake .#rpiserver1 --target-host root@192.168.8.104 --build-on-remote --copy-host-keys
+
+# --build-host root@192.168.8.104
 
 deploy-rebuild:
 	nixos apply .#rpiserver1 --target-host root@192.168.8.104 --build-host root@192.168.8.104
@@ -51,3 +53,13 @@ deploy-rebuild-switch:
 
 swap-boot:
 	./scripts/rpi-boot-priority.sh root@192.168.8.104
+
+create-primary-key:
+	mkdir -p ~/.config/sops/age
+	nix run nixpkgs#ssh-to-age -- -private-key -i ~/.ssh/id_rsa > ~/.config/sops/age/keys.txt
+
+get-primary-pub-key:
+	nix shell nixpkgs#age -c age-keygen -y ~/.config/sops/age/keys.txt
+
+get-host-pub-key:
+	nix-shell -p ssh-to-age --run 'ssh-keyscan -t ed25519 192.168.8.104 | ssh-to-age'

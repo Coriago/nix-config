@@ -1,7 +1,11 @@
 keys:
   - &primary age1mej4wn6585wyrgh7rdu3zne0lq2yr0uwcaudq6yd2yjdhnga0acqwyrejn
+  - &rpiserver1 age18yvw2lwg4v4av37ynag3uu2eryxgkvazk7ardl5yrtuqvkc3jyes5gsuwt
+  - &trusted-hosts age1tycymwys7j644us9qstc39cxhguxmr95k2vf2vhnkrg2kwkw3fjssy8ljk
 creation_rules:
   - path_regex: secrets/secrets.yaml
     key_groups:
       - age:
         - *primary
+        - *rpiserver1
+        - *trusted-hosts
