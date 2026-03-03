@@ -159,7 +159,7 @@
       temperature: 0.15
       color: "#64add4"
       tools:
-        bash: false
+        bash: true
         edit: false
         read: true
         grep: false

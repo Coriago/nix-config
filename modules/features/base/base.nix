@@ -44,7 +44,7 @@
     users.users.${config.vars.username} = {
       isNormalUser = true;
       description = "${config.vars.username} account";
-      extraGroups = ["wheel" "networkmanager" "video" "dialout"];
+      extraGroups = ["wheel" "networkmanager" "video" "dialout" "qbittorrent"];
       openssh.authorizedKeys.keys = [
         config.vars.sshPublicKey
       ];
