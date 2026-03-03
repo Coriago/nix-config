@@ -21,15 +21,15 @@
     };
 
     # AppImage Support
-    programs.fuse.enable = true;
+    # programs.fuse.enable = true;
     programs.appimage = {
       enable = true;
-      binfmt = true;
-      package = pkgs.appimage-run.override {
-        extraPkgs = pkgs: [
-          pkgs.zstd
-        ];
-      };
+      binfmt = false;
+      # package = pkgs.appimage-run.override {
+      #   extraPkgs = pkgs: [
+      #     pkgs.zstd
+      #   ];
+      # };
     };
   };
 

@@ -3,7 +3,7 @@
     environment.systemPackages = with pkgs; [
       retroarch-full
       # Citron Nintendo Switch emulator
-      (pkgs.callPackage ../../../packages/citron.nix {})
+      # (pkgs.callPackage ../../../packages/citron.nix {})
     ];
   };
 }

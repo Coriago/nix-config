@@ -63,6 +63,7 @@
       just
       just-lsp
       krita
+      element-desktop
 
       # Node.js for VS Code extension development
       # TODO: Move out into direnv flake
