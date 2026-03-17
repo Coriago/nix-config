@@ -54,6 +54,7 @@ in {
         generic.${hostname}
         homeManager.base
         homeManager.desktop
+        homeManager.gaming
       ];
     };
 

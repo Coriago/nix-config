@@ -16,6 +16,19 @@
     # Set nix path for lsp
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
 
+    nix.distributedBuilds = true;
+    nix.buildMachines = [
+      {
+        system = "aarch64-linux";
+        hostName = "192.168.8.104";
+        sshUser = "root";
+        sshKey = "/${config.vars.username}/.ssh/id_rsa";
+      }
+    ];
+    nix.extraOptions = ''
+      builders-use-substitutes = true
+    '';
+
     nix.settings = {
       auto-optimise-store = true;
 
@@ -59,7 +72,7 @@
     ];
 
     # Allow for dynamic libraries in nix
-    programs.nix-ld.enable = false;
+    programs.nix-ld.enable = true;
     programs.nix-ld.libraries = with pkgs; [
       stdenv.cc.cc
       zlib

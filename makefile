@@ -46,7 +46,7 @@ deploy-fresh:
 # --build-host root@192.168.8.104
 
 deploy-rebuild:
-	nixos apply .#rpiserver1 --target-host root@192.168.8.104 --build-host root@192.168.8.104
+	nixos apply .#rpiserver1 --target-host root@192.168.8.104
 
 deploy-rebuild-switch:
 	nixos-rebuild switch --flake .#rpiserver1 --target-host root@192.168.8.104 --build-host root@192.168.8.104
