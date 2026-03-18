@@ -26,11 +26,6 @@
     import-tree.url = "github:vic/import-tree"; # Recursive import of nix files in a directory
     nix-flatpak.url = "github:gmodena/nix-flatpak"; # Flatpak app management
     stylix.url = "github:nix-community/stylix"; # Styling for desktop
-    plasma-manager = {
-      url = "github:nix-community/plasma-manager"; # More options for managing plasma desktop
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
 
     # RPI
     ################################

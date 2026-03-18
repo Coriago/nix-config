@@ -3,7 +3,6 @@ local: {
     environment.systemPackages = with pkgs; [
       retroarch-full
       lutris
-      lib
     ];
 
     services.joycond.enable = true;
