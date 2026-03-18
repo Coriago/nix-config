@@ -1,6 +1,6 @@
-# Features
+# Modules
 
-Reusable feature modules. I divided these up based on how likely I would personally enable/disable them on each of my machines.
+Reusable modules. I divided these up based on how likely I would personally enable/disable them on each of my machines.
 This is entirely subjective and just based on 'feel'.
 
 ## Description
