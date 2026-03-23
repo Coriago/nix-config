@@ -40,11 +40,16 @@ write-sd:
 	sudo sync; \
 	echo "Done! SD card is ready."
 
-DEVICE_CONFIG = rpiserver1
+DEVICE_CONFIG = rpiserver2
 DEVICE_IP = $(shell nix eval .#nixosConfigurations.$(DEVICE_CONFIG).config.vars.local_ip --raw)
 
+.PHONY: deploy-fresh
 deploy-fresh:
 	nix run github:nix-community/nixos-anywhere -- --flake .#$(DEVICE_CONFIG) --target-host root@$(DEVICE_IP) --copy-host-keys
+	sleep 5
+	$(MAKE) swap-boot
+	ssh-keygen -R $(DEVICE_IP)
+	
 
 deploy-rebuild:
 	nixos apply .#$(DEVICE_CONFIG) --target-host root@$(DEVICE_IP)
