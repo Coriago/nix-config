@@ -40,19 +40,20 @@ write-sd:
 	sudo sync; \
 	echo "Done! SD card is ready."
 
-deploy-fresh:
-	nix run github:nix-community/nixos-anywhere -- --flake .#rpiserver1 --target-host root@192.168.8.104 --copy-host-keys
+DEVICE_CONFIG = rpiserver1
+DEVICE_IP = $(shell nix eval .#nixosConfigurations.$(DEVICE_CONFIG).config.vars.local_ip --raw)
 
-# --build-host root@192.168.8.104
+deploy-fresh:
+	nix run github:nix-community/nixos-anywhere -- --flake .#$(DEVICE_CONFIG) --target-host root@$(DEVICE_IP) --copy-host-keys
 
 deploy-rebuild:
-	nixos apply .#rpiserver1 --target-host root@192.168.8.104
+	nixos apply .#$(DEVICE_CONFIG) --target-host root@$(DEVICE_IP)
 
 deploy-rebuild-switch:
-	nixos-rebuild switch --flake .#rpiserver1 --target-host root@192.168.8.104
+	nixos-rebuild switch --flake .#$(DEVICE_CONFIG) --target-host root@$(DEVICE_IP)
 
 swap-boot:
-	./scripts/rpi-boot-priority.sh root@192.168.8.104
+	./scripts/rpi-boot-priority.sh root@$(DEVICE_IP)
 
 create-primary-key:
 	mkdir -p ~/.config/sops/age
@@ -62,4 +63,4 @@ get-primary-pub-key:
 	nix shell nixpkgs#age -c age-keygen -y ~/.config/sops/age/keys.txt
 
 get-host-pub-key:
-	nix-shell -p ssh-to-age --run 'ssh-keyscan -t ed25519 192.168.8.104 | ssh-to-age'
+	nix-shell -p ssh-to-age --run 'ssh-keyscan -t ed25519 $(DEVICE_IP) | ssh-to-age'
