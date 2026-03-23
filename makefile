@@ -40,7 +40,7 @@ write-sd:
 	sudo sync; \
 	echo "Done! SD card is ready."
 
-DEVICE_CONFIG = rpiserver3
+DEVICE_CONFIG = rpiserver2
 DEVICE_IP = $(shell nix eval .#nixosConfigurations.$(DEVICE_CONFIG).config.vars.local_ip --raw)
 
 .PHONY: deploy-fresh

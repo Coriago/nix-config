@@ -45,6 +45,7 @@ in {
     # Host Overrides
     #----------------------------------#
     networking.hostName = hostname;
+    services.k3s.role = "server";
   };
 
   # Final Configuration
