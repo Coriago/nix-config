@@ -19,14 +19,16 @@
     nix.distributedBuilds = true;
     nix.buildMachines = [
       {
-        system = "aarch64-linux";
         hostName = "192.168.8.104";
+        systems = ["aarch64-linux"];
         sshUser = "root";
-        sshKey = "/${config.vars.username}/.ssh/id_rsa";
+        maxJobs = 4;
+        supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
       }
     ];
     nix.extraOptions = ''
       builders-use-substitutes = true
+      secret-key-files = ${config.sops.secrets.nix_sigining_key.path}
     '';
 
     nix.settings = {
@@ -36,7 +38,7 @@
       experimental-features = ["nix-command" "flakes"];
 
       # Additional nix caches to fetch from
-      trusted-users = ["root" "${config.vars.username}" "@wheel"]; # Required to allow for more caches
+      trusted-users = ["${config.vars.username}" "@wheel"]; # Required to allow for more caches
       substituters = [
         "https://cache.nixos.org?priority=10"
         "https://nix-community.cachix.org"
@@ -51,6 +53,7 @@
         "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
         "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
         "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
+        "myhomelab.net:xtVVBYntb5zLFB4eUUkLIe8OpDNwvDI20i8sDehE9ck=%"
       ];
     };
 

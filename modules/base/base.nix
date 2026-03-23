@@ -24,11 +24,6 @@
       LC_TIME = config.vars.locale;
     };
 
-    # Basic Networking
-    networking.networkmanager.enable = true;
-    services.avahi.enable = true;
-    services.avahi.nssmdns4 = true;
-
     # Basic Packages
     environment.systemPackages = with pkgs; [
       xdg-utils

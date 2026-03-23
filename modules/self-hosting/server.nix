@@ -2,7 +2,7 @@ local: {
   flake.modules.nixos.self-hosting = {config, ...}: {
     # Add K3s
     services.k3s = {
-      enable = false;
+      enable = true;
       tokenFile = config.sops.secrets.k3s_token.path;
     };
 
@@ -15,25 +15,7 @@ local: {
       }
     ];
     networking.firewall.allowedTCPPorts = [6443 10250 5001 6443];
-    networking.firewall.allowedUDPPorts = [8472 51820 51821 5353];
-
-    # Other networking settings
-    systemd.network.networks = {
-      "99-ethernet-default-dhcp".networkConfig.MulticastDNS = "yes";
-      "99-wireless-client-dhcp".networkConfig.MulticastDNS = "yes";
-    };
-    # Try this in the future
-    # networking.useNetworkd = true;
-    # systemd.services = {
-    #   systemd-networkd.stopIfChanged = false;
-    #   # Services that are only restarted might be not able to resolve when resolved is stopped before
-    #   systemd-resolved.stopIfChanged = false;
-    # };
-
-    # TODO: Automate kubeconfig setup
-    # environment.variables = {
-    #   KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
-    # };
+    networking.firewall.allowedUDPPorts = [8472 51820 51821];
   };
 
   flake.modules.nixos.self-hosting-agent = {lib, ...}: {

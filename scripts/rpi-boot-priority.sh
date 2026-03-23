@@ -37,6 +37,11 @@ esac
 echo "Setting boot order to $NEW_ORDER..."
 ssh "$PI_HOST" "sudo rpi-eeprom-config --out /tmp/boot.conf && \
     sudo sed -i 's/^BOOT_ORDER=.*/BOOT_ORDER=$NEW_ORDER/' /tmp/boot.conf && \
+    if grep -q '^PCIE_PROBE=' /tmp/boot.conf; then \
+        sudo sed -i 's/^PCIE_PROBE=.*/PCIE_PROBE=1/' /tmp/boot.conf; \
+    else \
+        echo 'PCIE_PROBE=1' | sudo tee -a /tmp/boot.conf > /dev/null; \
+    fi && \
     sudo rpi-eeprom-config --apply /tmp/boot.conf && \
     sudo rm /tmp/boot.conf"
 

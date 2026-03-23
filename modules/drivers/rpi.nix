@@ -16,6 +16,12 @@
     ];
 
     hardware.raspberry-pi.config.all = {
+      options = {
+        enable_uart = {
+          enable = true;
+          value = true;
+        };
+      };
       base-dt-params = {
         # Enables PCIe for SSD
         pciex1 = {
@@ -31,9 +37,14 @@
 
     boot.loader.raspberry-pi.bootloader = "kernel";
     boot.kernelParams = [
+      # Needed for k3s
       "cgroup_enable=cpuset"
       "cgroup_memory=1"
       "cgroup_enable=memory"
+      # Fixes for nvme drive ssd
+      "nvme_core.default_ps_max_latency_us=0"
+      "pcie_aspm=off"
+      "pcie_port_pm=off"
     ];
 
     system.nixos.tags = [
@@ -41,6 +52,38 @@
       config.boot.loader.raspberry-pi.bootloader
       config.boot.kernelPackages.kernel.version
     ];
+
+    # Disable power management to prevent issues
+    powerManagement.enable = false;
+
+    # Networking for headless
+    networking.useNetworkd = true;
+    # mDNS
+    networking.firewall.allowedUDPPorts = [5353];
+    systemd.network.networks = {
+      "99-ethernet-default-dhcp".networkConfig.MulticastDNS = "yes";
+      "99-wireless-client-dhcp".networkConfig.MulticastDNS = "yes";
+    };
+    # Remove wait online
+    systemd.services.NetworkManager-wait-online.enable = false;
+    systemd.network.wait-online.enable = false;
+    # Prevent total shutdown to prevent outages
+    systemd.services = {
+      systemd-networkd.stopIfChanged = false;
+      # Services that are only restarted might be not able to resolve when resolved is stopped before
+      systemd-resolved.stopIfChanged = false;
+    };
+    networking.wireless.enable = false;
+    networking.wireless.iwd = {
+      enable = true;
+      settings = {
+        Network = {
+          EnableIPv6 = true;
+          RoutePriorityOffset = 300;
+        };
+        Settings.AutoConnect = true;
+      };
+    };
   };
 
   flake.modules.nixos.rpi5-disks = {...}: {

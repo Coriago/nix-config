@@ -21,5 +21,8 @@
       xkb.layout = config.vars.keyLayout;
       xkb.variant = "";
     };
+
+    # Networking for non-headless
+    networking.networkmanager.enable = true;
   };
 }
