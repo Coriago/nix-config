@@ -32,6 +32,9 @@
       nix-direnv.enable = true;
       silent = true;
     };
+
+    # VS Code
+    #programs.vscode.enable = true;
   };
 
   # Home Manager
@@ -39,7 +42,6 @@
     home.packages = with pkgs; [
       vlc
       discord
-      kitty
       rpi-imager
       realvnc-vnc-viewer
       (pkgs.symlinkJoin {

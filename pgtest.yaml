@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: longhorn-test
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: longhorn-test
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn # This assumes you have the default 'longhorn' SC
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: longhorn-test
+spec:
+  serviceName: "postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      tolerations:
+      - key: "node.kubernetes.io/unreachable"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 30  # Evict after 30 seconds instead of 300
+      - key: "node.kubernetes.io/not-ready"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 30
+      containers:
+      - name: postgres
+        image: postgres:15 
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "longhorntest"
+        # THIS IS THE FIX: Tell postgres to look one level deeper
+        - name: PGDATA
+          value: /data/pgdata
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: data
+          mountPath: /data
+          # This ensures we don't collide with lost+found at the root
+          subPath: postgres 
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: postgres-pvc

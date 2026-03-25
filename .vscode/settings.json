@@ -37,5 +37,9 @@
                 }
             }
         }
-    }
+    },
+    "yaml.schemas": {
+        "kubernetes://schema/apps/v1@statefulset": "file:///home/helios/.config/nixos/pgtest.yaml"
+    },
+    "makefile.configureOnOpen": false
 }

@@ -1,62 +1,52 @@
 {
-  flake.modules.nixos.self-hosting = {config, ...}: let
+  flake.modules.nixos.self-hosting = {
+    pkgs,
+    config,
+    ...
+  }: let
     image = pkgs.dockerTools.pullImage {
-      imageName = "nginx";
-      imageDigest = "sha256:b3c656d55d7ad751196f21b7fd2e8d4da9cb430e32f646adcf92441b72f82b14";
-      hash = "sha256-qrQIBp2EbKw3Aicu424rbu26v2T1LZgHVQ+hJKKZQxE=";
-      finalImageTag = "1.29.3-alpine";
-      arch = "amd64";
+      imageName = "postgres";
+      imageDigest = "sha256:c635fa3e3b7421a659d34abdfd6d492f679cbe8149e261a501237b55c5a94212";
+      hash = "sha256-xVc6v9GDce3LbyRVDBc03pBJoNyXLo/eGcJQ3OODvGE=";
+      finalImageTag = "15";
+      arch = "arm64";
     };
+
+    fromYAML = path:
+      builtins.fromJSON (
+        builtins.readFile (
+          pkgs.runCommand "from-yaml.json" {
+            nativeBuildInputs = [pkgs.yq-go];
+          } "yq ea '[.]' ${path} -o=json > $out"
+        )
+      );
   in {
+    # Required for Longhorn
+    environment.systemPackages = [pkgs.nfs-utils];
+    services.openiscsi = {
+      enable = true;
+      name = "${config.networking.hostName}-initiatorhost";
+    };
+
+    # services.k3s.autoDeployCharts.hello-world.enable = false;
+    # services.k3s.autoDeployCharts.longhorn.enable = false;
+
+    networking.extraHosts = "127.0.0.1 longhorn.local";
+
     # Add K3s
     services.k3s = {
       images = [image];
-      autoDeployCharts.hello-world = {
-        name = "hello-world";
-        repo = "https://helm.github.io/examples";
-        version = "0.1.0";
-        hash = "sha256-U2XjNEWE82/Q3KbBvZLckXbtjsXugUbK6KdqT5kCccM=";
+      autoDeployCharts.longhorn = {
+        name = "longhorn";
+        repo = "https://charts.longhorn.io";
+        version = "1.8.1";
+        hash = "sha256-cc3U1SSSb8LxWHAzSAz5d97rTfL7cDfxc+qOjm8c3CA=";
+        createNamespace = true;
+        targetNamespace = "longhorn-system";
         # configure the chart values like you would do in values.yaml
         values = {
-          image = {
-            repository = image.imageName;
-            tag = image.imageTag;
-          };
-          serviceAccount.create = false;
         };
-        extraDeploy = [
-          {
-            apiVersion = "networking.k8s.io/v1";
-            kind = "Ingress";
-            metadata = {
-              name = "hello-world";
-              annotations."traefik.ingress.kubernetes.io/router.middlewares" = "default-hello-world-strip-prefix@kubernetescrd";
-            };
-            spec = {
-              ingressClassName = "traefik";
-              rules = [
-                {
-                  http.paths = [
-                    {
-                      path = "/hello";
-                      pathType = "Exact";
-                      backend.service = {
-                        name = "hello-world";
-                        port.number = 80;
-                      };
-                    }
-                  ];
-                }
-              ];
-            };
-          }
-          {
-            apiVersion = "traefik.io/v1alpha1";
-            kind = "Middleware";
-            metadata.name = "hello-world-strip-prefix";
-            spec.stripPrefix.prefixes = ["/hello"];
-          }
-        ];
+        extraDeploy = fromYAML ./longhorn.yaml;
       };
     };
   };

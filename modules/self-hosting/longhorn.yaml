@@ -2,29 +2,33 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: longhorn
+  namespace: longhorn-system
   annotations:
-    "traefik.ingress.kubernetes.io/router.middlewares": "default-longhorn-strip-prefix@kubernetescrd"
+    traefik.ingress.kubernetes.io/router.middlewares:
+      longhorn-system-longhorn-buffering@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
-    - http:
+    - host: longhorn.local
+      http:
         paths:
-          - path: /longhorn
-            pathType: Exact
+          - path: /
+            pathType: Prefix
             backend:
               service:
-                name: longhorn-ui
+                name: longhorn-frontend
                 port:
                   number: 80
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: longhorn-strip-prefix
+  name: longhorn-buffering
+  namespace: longhorn-system
 spec:
-  stripPrefix:
-    prefixes:
-      - /longhorn
+  buffering:
+    # Allows backing image uploads up to 10,000MB
+    maxRequestBodyBytes: 10485760000 
 ---
 apiVersion: v1
 kind: ConfigMap
