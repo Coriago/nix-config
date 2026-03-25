@@ -36,6 +36,7 @@
     # Add K3s
     services.k3s = {
       images = [image];
+      autoDeployCharts.hello-world.enable = false;
       autoDeployCharts.longhorn = {
         name = "longhorn";
         repo = "https://charts.longhorn.io";

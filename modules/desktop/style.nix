@@ -21,6 +21,5 @@
     # Theme
     # Comment this out and theme will be set by wallpaper colors
     stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/${config.vars.theme}.yaml";
-    # stylix.targets.vscode.enable = false;
   };
 }

@@ -20,7 +20,6 @@
     virtualisation.docker = {
       enable = true;
       autoPrune.enable = true;
-      enableNvidia = true;
     };
 
     users.users.${config.vars.username}.extraGroups = ["docker"];
@@ -78,5 +77,6 @@
     programs.vscode = {
       enable = true;
     };
+    stylix.targets.vscode.enable = false;
   };
 }
