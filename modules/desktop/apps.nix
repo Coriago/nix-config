@@ -14,6 +14,7 @@
       devenv
       qemu
       disko
+      rpi-imager
     ];
 
     # Docker
@@ -31,17 +32,12 @@
       nix-direnv.enable = true;
       silent = true;
     };
-
-    # VS Code
-    #programs.vscode.enable = true;
   };
 
   # Home Manager
   flake.modules.homeManager.desktop = {pkgs, ...}: {
     home.packages = with pkgs; [
       vlc
-      discord
-      rpi-imager
       realvnc-vnc-viewer
       (pkgs.symlinkJoin {
         name = "orca-slicer-wrapped";
@@ -59,23 +55,22 @@
 
       # Dev stuff
       kubectl
-      k9s
-      opencode
       just
       just-lsp
       krita
       element-desktop
-
-      # Node.js for VS Code extension development
-      # TODO: Move out into direnv flake
-      nodejs_22
-      nodePackages.typescript
-      nodePackages.typescript-language-server
-      vsce # VS Code Extension Manager
     ];
 
-    programs.vscode = {
-      enable = true;
+    programs = {
+      kubecolor.enable = true;
+      k9s.enable = true;
+      opencode = {
+        enable = true;
+        enableMcpIntegration = true;
+      };
+      vscode.enable = true;
+      discord.enable = true;
+      nushell.enable = true;
     };
     stylix.targets.vscode.enable = false;
   };
