@@ -1,5 +1,5 @@
 # Desktop UI Apps
-{
+{inputs, ...}: {
   # NixOS
   flake.modules.nixos.desktop = {
     pkgs,
@@ -9,9 +9,7 @@
     programs.usbtop.enable = true;
     environment.systemPackages = with pkgs; [
       usbutils
-      python311
       gcc
-      devenv
       qemu
       disko
       rpi-imager
@@ -31,6 +29,20 @@
       enableZshIntegration = true;
       nix-direnv.enable = true;
       silent = true;
+    };
+
+    # Nixos cli
+    imports = [
+      inputs.nixos-cli.nixosModules.nixos-cli
+    ];
+    programs.nixos-cli = {
+      enable = true;
+      settings = {
+        use_nvd = true;
+        apply.use_nom = true;
+        config_location = "/home/${config.vars.username}/.config/nixos";
+        apply.reexec_as_root = true;
+      };
     };
   };
 
@@ -71,7 +83,11 @@
       vscode.enable = true;
       discord.enable = true;
       nushell.enable = true;
+      btop.enable = true;
     };
     stylix.targets.vscode.enable = false;
+    # Get rid of warning
+    stylix.targets.qt.enable = false;
+    gtk.gtk4.theme = null;
   };
 }

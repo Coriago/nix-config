@@ -3,7 +3,7 @@
   inputs = {
     # Primary
     ################################
-    nixpkgs.url = "github:nixos/nixpkgs/d96e0ef24ca99ed535f54a5d4a31e94419bdfc82"; # nixos-unstable as of 2026-02-05
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable"; # nixos-unstable as of 2026-02-05
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";

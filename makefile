@@ -69,3 +69,7 @@ get-primary-pub-key:
 
 get-host-pub-key:
 	nix-shell -p ssh-to-age --run 'ssh-keyscan -t ed25519 $(DEVICE_IP) | ssh-to-age'
+
+
+update-flake:
+	nix flake update --override-input nixpkgs github:NixOS/nixpkgs/$(shell curl -s https://status.nixos.org | jq -r '.data.result[] | select(.metric.channel=="nixos-unstable") | .metric.revision'

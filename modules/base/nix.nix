@@ -6,16 +6,10 @@
     config,
     ...
   }: {
-    imports = [
-      inputs.nixos-cli.nixosModules.nixos-cli
-    ];
-
     # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
-
     # Set nix path for lsp
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
-
     nix.distributedBuilds = true;
     nix.buildMachines = [
       {
@@ -98,15 +92,5 @@
       nix-inspect
       nix-output-monitor
     ];
-
-    # Nixos cli
-    services.nixos-cli = {
-      enable = true;
-      config = {
-        use_nvd = true;
-        apply.use_nom = true;
-        config_location = "/home/${config.vars.username}/.config/nixos";
-      };
-    };
   };
 }
