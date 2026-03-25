@@ -26,18 +26,14 @@
     import-tree.url = "github:vic/import-tree"; # Recursive import of nix files in a directory
     nix-flatpak.url = "github:gmodena/nix-flatpak"; # Flatpak app management
     stylix.url = "github:nix-community/stylix"; # Styling for desktop
+    disko = {
+      url = "github:nix-community/disko"; # Disk management tool
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # RPI
     ################################
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main"; # RPI Support
-    disko = {
-      url = "github:nix-community/disko"; # Disk management tool
-      inputs.nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
-    };
-    home-manager-rpi = {
-      url = "github:nix-community/home-manager/release-25.11";
-      inputs.nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
-    };
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} (inputs.import-tree [./modules ./hosts]);

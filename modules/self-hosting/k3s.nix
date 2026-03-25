@@ -4,6 +4,9 @@ local: {
     services.k3s = {
       enable = true;
       tokenFile = config.sops.secrets.k3s_token.path;
+      gracefulNodeShutdown = {
+        enable = true;
+      };
     };
 
     # K3s required firewall rules

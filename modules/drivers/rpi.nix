@@ -3,9 +3,10 @@
   flake.modules.nixos.rpi5 = {
     config,
     pkgs,
+    nixos-raspberrypi,
     ...
   }: {
-    imports = with inputs.nixos-raspberrypi.nixosModules; [
+    imports = with nixos-raspberrypi.nixosModules; [
       raspberry-pi-5.base
       raspberry-pi-5.page-size-16k
       raspberry-pi-5.display-vc4
@@ -13,6 +14,15 @@
 
     environment.systemPackages = with pkgs; [
       raspberrypi-eeprom
+    ];
+
+    # Use the nixos-raspberrypi version to avoid the long build times of these pacakges.
+    # Yes they are older but not enough to cause issues.
+    nixpkgs.overlays = [
+      (final: prev: {
+        jemalloc = nixos-raspberrypi.inputs.nixpkgs.legacyPackages.${prev.system}.jemalloc;
+        bind = nixos-raspberrypi.inputs.nixpkgs.legacyPackages.${prev.system}.bind;
+      })
     ];
 
     hardware.raspberry-pi.config.all = {

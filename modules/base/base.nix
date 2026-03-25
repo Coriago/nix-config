@@ -35,6 +35,7 @@
       yq
       gnumake
       bash
+      dnsutils
     ];
 
     # User
@@ -73,12 +74,6 @@
   }: {
     # Version
     home.stateVersion = config.vars.stateVersion;
-
-    # Basic Packages for User
-    home.packages = with pkgs; [
-      btop
-      dnsutils
-    ];
 
     # User
     home.username = config.vars.username;

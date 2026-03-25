@@ -87,7 +87,6 @@
     "disko": {
       "inputs": {
         "nixpkgs": [
-          "nixos-raspberrypi",
           "nixpkgs"
         ]
       },
@@ -262,28 +261,6 @@
       },
       "original": {
         "owner": "nix-community",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
-    "home-manager-rpi": {
-      "inputs": {
-        "nixpkgs": [
-          "nixos-raspberrypi",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1774274588,
-        "narHash": "sha256-dnHvv5EMUgTzGZmA+3diYjQU2O6BEpGLEOgJ1Qe9LaY=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "cf9686ba26f5ef788226843bc31fda4cf72e373b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "ref": "release-25.11",
         "repo": "home-manager",
         "type": "github"
       }
@@ -521,7 +498,6 @@
         "disko": "disko",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
-        "home-manager-rpi": "home-manager-rpi",
         "import-tree": "import-tree",
         "nix-flatpak": "nix-flatpak",
         "nixos-cli": "nixos-cli",

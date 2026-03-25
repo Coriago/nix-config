@@ -25,7 +25,7 @@ in {
     imports = with config.flake.modules; [
       generic.${hostname}
       nixos.base
-      nixos.base-homemanager-rpi
+      nixos.base-homemanager
       nixos.self-hosting
       nixos.self-hosting-agent
 
@@ -51,9 +51,12 @@ in {
   # Final Configuration
   ######################
   flake.nixosConfigurations.${hostname} = inputs.nixos-raspberrypi.lib.nixosSystem {
+    nixpkgs = inputs.nixpkgs;
     specialArgs = inputs;
     modules = [
       config.flake.modules.nixos.${hostname} # The module defined above
+      # inputs.nixos-raspberrypi.nixosModules.nixos-raspberrypi.lib.inject-overlays
+      # inputs.nixos-raspberrypi.nixosModules.nixpkgs-rpi
     ];
   };
 }
