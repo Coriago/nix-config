@@ -11,6 +11,14 @@
       finalImageTag = "15";
       arch = "arm64";
     };
+    fromYaml = path:
+      builtins.fromJSON (
+        builtins.readFile (
+          pkgs.runCommand "${path}-converted.json" {nativeBuildInputs = [pkgs.yq-go];} ''
+            yq --no-colors --output-format json ${path} > $out
+          ''
+        )
+      );
   in {
     # Required for Longhorn
     environment.systemPackages = [pkgs.nfs-utils];
@@ -35,7 +43,7 @@
         # configure the chart values like you would do in values.yaml
         values = {
         };
-        extraDeploy = self.mylib.fromYAML ./longhorn.yaml;
+        extraDeploy = fromYaml ./longhorn.yaml;
       };
     };
   };

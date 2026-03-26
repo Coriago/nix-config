@@ -36,23 +36,5 @@
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main"; # RPI Support
   };
 
-  outputs = inputs @ {
-    self,
-    flake-parts,
-    ...
-  }: let
-    lib =
-      inputs.nixpkgs.lib.extend
-      (final: prev: {
-        my = import ./lib/lib.nix {
-          inherit inputs;
-          lib = final;
-        };
-      });
-  in
-    flake-parts.lib.mkFlake {
-      inherit inputs;
-      specialArgs.lib = lib;
-    }
-    (inputs.import-tree [./modules ./hosts]);
+  outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} (inputs.import-tree [./modules ./hosts]);
 }
