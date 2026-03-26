@@ -1,8 +1,8 @@
-{
-  flake.modules.nixos.self-hosting = {lib, ...}: {
+{self, ...}: {
+  flake.modules.nixos.self-hosting = {...}: {
     # Add K3s
     services.k3s = {
-      manifests = lib.fromYAML ./nvidia.yaml;
+      manifests = self.mylib.fromYAML ./nvidia.yaml;
     };
   };
 }

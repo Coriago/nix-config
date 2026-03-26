@@ -1,8 +1,7 @@
-{
+{self, ...}: {
   flake.modules.nixos.self-hosting = {
     pkgs,
     config,
-    lib,
     ...
   }: let
     image = pkgs.dockerTools.pullImage {
@@ -36,7 +35,7 @@
         # configure the chart values like you would do in values.yaml
         values = {
         };
-        extraDeploy = lib.fromYAML ./longhorn.yaml;
+        extraDeploy = self.mylib.fromYAML ./longhorn.yaml;
       };
     };
   };

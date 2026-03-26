@@ -21,14 +21,6 @@
     system,
     ...
   }: {
-    _module.args.pkgs = import inputs.nixpkgs {
-      inherit system;
-      overlays = [
-        (self: super: {
-          lib = lib;
-        })
-      ];
-    };
     # Devshells
     devShells.default = pkgs.mkShell {
       nativeBuildInputs = with pkgs; [
