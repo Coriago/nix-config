@@ -1,6 +1,5 @@
-# Agenix module for secret management
 {inputs, ...}: {
-  flake.modules.nixos.base = {config, ...}: {
+  flake.modules.nixos.base = {...}: {
     imports = [
       inputs.sops-nix.nixosModules.sops
     ];

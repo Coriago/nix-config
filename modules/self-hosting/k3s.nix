@@ -4,9 +4,10 @@ local: {
     services.k3s = {
       enable = true;
       tokenFile = config.sops.secrets.k3s_token.path;
-      gracefulNodeShutdown = {
-        enable = true;
-      };
+      gracefulNodeShutdown.enable = true;
+      images = [
+        config.services.k3s.package.airgap-images
+      ];
     };
 
     # K3s required firewall rules
@@ -20,6 +21,8 @@ local: {
     networking.firewall.allowedTCPPorts = [6443 10250 5001 6443];
     networking.firewall.allowedUDPPorts = [8472 51820 51821];
   };
+
+  flake.modules.nixos.self-hosting-server = {};
 
   flake.modules.nixos.self-hosting-agent = {lib, ...}: {
     services.k3s = {

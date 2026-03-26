@@ -1,4 +1,3 @@
-# Nix settings and tooling
 {inputs, ...}: {
   # NixOS
   flake.modules.nixos.base = {

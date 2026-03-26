@@ -1,4 +1,3 @@
-# Git configuration
 {
   # NixOS
   flake.modules.nixos.base = {...}: {

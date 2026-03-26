@@ -2,6 +2,7 @@
   flake.modules.nixos.self-hosting = {
     pkgs,
     config,
+    lib,
     ...
   }: let
     image = pkgs.dockerTools.pullImage {
@@ -11,15 +12,6 @@
       finalImageTag = "15";
       arch = "arm64";
     };
-
-    fromYAML = path:
-      builtins.fromJSON (
-        builtins.readFile (
-          pkgs.runCommand "from-yaml.json" {
-            nativeBuildInputs = [pkgs.yq-go];
-          } "yq ea '[.]' ${path} -o=json > $out"
-        )
-      );
   in {
     # Required for Longhorn
     environment.systemPackages = [pkgs.nfs-utils];
@@ -27,9 +19,6 @@
       enable = true;
       name = "${config.networking.hostName}-initiatorhost";
     };
-
-    # services.k3s.autoDeployCharts.hello-world.enable = false;
-    # services.k3s.autoDeployCharts.longhorn.enable = false;
 
     networking.extraHosts = "127.0.0.1 longhorn.local";
 
@@ -47,7 +36,7 @@
         # configure the chart values like you would do in values.yaml
         values = {
         };
-        extraDeploy = fromYAML ./longhorn.yaml;
+        extraDeploy = lib.fromYAML ./longhorn.yaml;
       };
     };
   };

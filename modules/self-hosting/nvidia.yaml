@@ -1,0 +1,83 @@
+apiVersion: node.k8s.io/v1
+handler: nvidia
+kind: RuntimeClass
+metadata:
+  labels:
+    app.kubernetes.io/component: gpu-operator
+  name: nvidia
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: generic-cdi-plugin
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: generic-cdi-plugin-daemonset
+  namespace: generic-cdi-plugin
+spec:
+  selector:
+    matchLabels:
+      name: generic-cdi-plugin
+  template:
+    metadata:
+      labels:
+        name: generic-cdi-plugin
+        app.kubernetes.io/component: generic-cdi-plugin
+        app.kubernetes.io/name: generic-cdi-plugin
+    spec:
+      containers:
+      - image: ghcr.io/olfillasodikno/generic-cdi-plugin:main
+        name: generic-cdi-plugin
+        command:
+          - /generic-cdi-plugin
+          - /var/run/cdi/nvidia-container-toolkit.json
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+        tty: true
+        volumeMounts:
+        - name: kubelet
+          mountPath: /var/lib/kubelet
+        - name: nvidia-container-toolkit
+          mountPath: /var/run/cdi/nvidia-container-toolkit.json
+      volumes:
+      - name: kubelet
+        hostPath:
+          path: /var/lib/kubelet
+      - name: nvidia-container-toolkit
+        hostPath:
+          path: /var/run/cdi/nvidia-container-toolkit.json
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "nixos-nvidia-cdi"
+                operator: In
+                values:
+                - "enabled"
+# EXAMPLE
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: gpu-test
+#   namespace: default
+# spec:
+#   runtimeClassName: nvidia # <- THIS FOR GPU
+#   containers:
+#   - name: gpu-test
+#     image: nvidia/cuda:12.6.3-base-ubuntu22.04
+#     command: [ "/bin/bash", "-c", "--" ]
+#     args: [ "while true; do sleep 30; done;" ]
+#     env:
+#       - name: NVIDIA_VISIBLE_DEVICES
+#         value: all
+#       - name: NVIDIA_DRIVER_CAPABILITIES
+#         value: all
+#     resources: # <- THIS FOR GPU
+#       requests:
+#         nvidia.com/gpu-all: "1"
+#       limits:
+#         nvidia.com/gpu-all: "1"

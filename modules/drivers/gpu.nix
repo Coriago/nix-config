@@ -19,7 +19,10 @@
       powerManagement.finegrained = false;
       package = nvidiaPackage;
     };
+
+    # Containers
     hardware.nvidia-container-toolkit.enable = true;
+    hardware.nvidia-container-toolkit.mount-nvidia-executables = true;
 
     # Early KMS loading - critical for preventing atomic commit failures
     boot.initrd.kernelModules = ["nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
@@ -36,10 +39,6 @@
       # wayland/gpu env var fixes
       QT_QPA_PLATFORM = "wayland;xcb";
       KWIN_DRM_DEVICES = "/dev/dri/card1"; # KWin DRM device
-      # LIBVA_DRIVER_NAME = "nvidia"; # Hardware video acceleration
-      # GBM_BACKEND = "nvidia-drm"; # Graphics backend for Wayland
-      # __GLX_VENDOR_LIBRARY_NAME = "nvidia"; # Use Nvidia driver for GLX
-      # NIXOS_OZONE_WL = "1"; # Wayland support for Electron apps
     };
 
     # Nix cache for CUDA (optional)
@@ -53,6 +52,22 @@
       vulkan-tools
       mesa-demos
       libva-utils # VA-API debugging tools
+    ];
+
+    # Enable GPU access in K3s
+    systemd.tmpfiles.rules = [
+      "L /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl - - - - ${pkgs.writeText "config.toml.tmpl" ''
+        {{ template "base" . }}
+
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
+          privileged_without_host_devices = false
+          runtime_engine = ""
+          runtime_root = ""
+          runtime_type = "io.containerd.runc.v2"
+      ''}"
+    ];
+    services.k3s.nodeLabel = [
+      "nixos-nvidia-cdi=enabled"
     ];
   };
 }

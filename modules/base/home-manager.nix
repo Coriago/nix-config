@@ -1,4 +1,3 @@
-# Home manager for nixos
 {inputs, ...}: {
   # NixOS
   flake.modules.nixos.base-homemanager = {...}: {

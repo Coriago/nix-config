@@ -1,4 +1,3 @@
-# Shell
 {
   # NixOS
   flake.modules.nixos.base = {pkgs, ...}: {
