@@ -15,7 +15,7 @@
       builtins.fromJSON (
         builtins.readFile (
           pkgs.runCommand "${path}-converted.json" {nativeBuildInputs = [pkgs.yq-go];} ''
-            yq --no-colors --output-format json ${path} > $out
+            yq ea '[.]' ${path} -o=json > $out
           ''
         )
       );
