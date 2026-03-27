@@ -14,7 +14,9 @@
       rpi-imager
       xhost
     ];
-
+    programs = {
+      usbtop.enable = true;
+    };
     services.flatpak.packages = [
       "com.stremio.Stremio" # Stremio
     ];

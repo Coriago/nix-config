@@ -27,6 +27,7 @@
   flake.modules.homeManager.desktop = {...}: {
     # Disable stylix on vscode otherwise settings.json can't be changed
     stylix.targets.vscode.enable = false;
+    stylix.targets.firefox.enable = false;
 
     # Get rid of warnings
     stylix.targets.qt.enable = false;

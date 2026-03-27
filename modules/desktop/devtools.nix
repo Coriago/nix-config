@@ -23,7 +23,8 @@
     programs.nixos-cli = {
       enable = true;
       settings = {
-        use_nvd = true;
+        differ.tool = "command";
+        differ.command = ["nvd" "diff"];
         apply.use_nom = true;
         config_location = "/home/${config.vars.username}/.config/nixos";
         apply.reexec_as_root = true;
@@ -33,5 +34,6 @@
 
   # Home Manager
   flake.modules.homeManager.desktop = {...}: {
+    programs.uv.enable = true;
   };
 }
