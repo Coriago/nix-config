@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.gaming = {pkgs, ...}: {
+  flake.modules.nixos.desktop = {pkgs, ...}: {
     programs.steam = {
       enable = true;
       remotePlay.openFirewall = true;
@@ -16,5 +16,11 @@
       enable = true;
       capSysNice = true;
     };
+
+    environment.systemPackages = with pkgs; [
+      lutris
+    ];
+    services.joycond.enable = true;
+    boot.kernelModules = ["hid_nintendo"];
   };
 }

@@ -35,7 +35,6 @@ in {
       nixos.base
       nixos.base-homemanager
       nixos.desktop
-      nixos.gaming
       nixos.self-hosting
       nixos.self-hosting-agent
 
