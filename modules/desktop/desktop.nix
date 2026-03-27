@@ -12,9 +12,6 @@
     services.desktopManager.plasma6.enable = true;
     services.displayManager.sddm.enable = true;
     services.displayManager.sddm.wayland.enable = true;
-    environment.systemPackages = with pkgs; [
-      xhost
-    ];
 
     # Enable x11
     services.xserver = {
@@ -36,8 +33,22 @@
       };
     };
 
-    # Network mDNS
-    # services.avahi.enable = true;
-    # services.resolved.enable = true;
+    # Common Dynamic Libraries for Desktop Programs
+    programs.nix-ld.libraries = with pkgs; [
+      stdenv.cc.cc
+      zlib
+      fuse3
+      icu
+      nss
+      openssl
+      curl
+      expat
+    ];
+
+    # AppImage Support
+    programs.appimage = {
+      enable = true;
+      binfmt = false;
+    };
   };
 }

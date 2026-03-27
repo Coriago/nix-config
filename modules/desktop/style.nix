@@ -22,4 +22,14 @@
     # Comment this out and theme will be set by wallpaper colors
     stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/${config.vars.theme}.yaml";
   };
+
+  # Home Manager
+  flake.modules.homeManager.desktop = {...}: {
+    # Disable stylix on vscode otherwise settings.json can't be changed
+    stylix.targets.vscode.enable = false;
+
+    # Get rid of warnings
+    stylix.targets.qt.enable = false;
+    gtk.gtk4.theme = null;
+  };
 }

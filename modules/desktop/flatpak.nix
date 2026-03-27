@@ -15,21 +15,6 @@
           location = "https://flathub.org/repo/flathub.flatpakrepo";
         }
       ];
-      packages = [
-        "com.stremio.Stremio" # Stremio
-      ];
-    };
-
-    # AppImage Support
-    # programs.fuse.enable = true;
-    programs.appimage = {
-      enable = true;
-      binfmt = false;
-      # package = pkgs.appimage-run.override {
-      #   extraPkgs = pkgs: [
-      #     pkgs.zstd
-      #   ];
-      # };
     };
   };
 
