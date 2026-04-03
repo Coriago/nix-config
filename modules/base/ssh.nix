@@ -28,15 +28,15 @@
     systemd.user.services.ssh-add = {
       Unit = {
         Description = "Add SSH keys to agent on login";
-        After = ["ssh-agent.service"];
+        After = ["graphical-session.target"];
       };
       Service = {
-        Type = "oneshot";
+        Type = "simple";
         ExecStart = "${pkgs.openssh}/bin/ssh-add";
-        RemainAfterExit = true;
+        # RemainAfterExit = true;
       };
       Install = {
-        WantedBy = ["default.target"];
+        WantedBy = ["graphical-session.target"];
       };
     };
   };
