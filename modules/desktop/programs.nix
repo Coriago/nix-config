@@ -6,6 +6,10 @@
     config,
     ...
   }: {
+    # LLM Tools
+    nixpkgs.overlays = [
+      inputs.llm-agents.overlays.default
+    ];
     environment.systemPackages = with pkgs; [
       usbutils
       gcc
@@ -13,6 +17,8 @@
       disko
       rpi-imager
       xhost
+      llm-agents.oh-my-opencode
+      llm-agents.opencode
     ];
     programs = {
       usbtop.enable = true;
@@ -27,10 +33,6 @@
     programs = {
       kubecolor.enable = true;
       k9s.enable = true;
-      opencode = {
-        enable = true;
-        enableMcpIntegration = true;
-      };
       vscode.enable = true;
       discord.enable = true;
       nushell.enable = true;
@@ -44,6 +46,7 @@
       };
       firefox.enable = true;
     };
+
     home.sessionVariables = {
       BROWSER = "brave";
       EDITOR = "code -w";
@@ -65,13 +68,11 @@
             --set WEBKIT_DISABLE_DMABUF_RENDERER 1
         '';
       })
+      krita
+      element-desktop
 
       # Dev stuff
       kubectl
-      just
-      just-lsp
-      krita
-      element-desktop
     ];
   };
 }

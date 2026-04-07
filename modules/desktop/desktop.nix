@@ -43,6 +43,8 @@
       openssl
       curl
       expat
+      binutils
+      lld
     ];
 
     # AppImage Support

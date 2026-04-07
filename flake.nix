@@ -30,6 +30,7 @@
       url = "github:nix-community/disko"; # Disk management tool
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    llm-agents.url = "github:numtide/llm-agents.nix"; # LLM Agents
 
     # RPI
     ################################
