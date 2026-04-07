@@ -3,6 +3,7 @@
   # Flake parts addon modules
   imports = [
     inputs.flake-parts.flakeModules.modules
+    inputs.flake-parts.flakeModules.easyOverlay
     inputs.home-manager.flakeModules.home-manager
   ];
 

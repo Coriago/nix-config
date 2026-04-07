@@ -19,6 +19,8 @@
       xhost
       llm-agents.oh-my-opencode
       llm-agents.opencode
+      comment-checker
+      gh
     ];
     programs = {
       usbtop.enable = true;
