@@ -1,6 +1,14 @@
-{inputs, ...}: {
+{
+  inputs,
+  self,
+  ...
+}: {
   # NixOS
-  flake.modules.nixos.desktop = {config, ...}: {
+  flake.modules.nixos.desktop-extras = {
+    config,
+    pkgs,
+    ...
+  }: {
     # Docker
     virtualisation.docker = {
       enable = true;
@@ -15,6 +23,9 @@
       nix-direnv.enable = true;
       silent = true;
     };
+    environment.systemPackages = with self.packages.${pkgs.stdenv.hostPlatform.system}; [
+      comment-checker
+    ];
 
     # Nixos cli
     imports = [
@@ -33,7 +44,7 @@
   };
 
   # Home Manager
-  flake.modules.homeManager.desktop = {...}: {
+  flake.modules.homeManager.desktop-extras = {...}: {
     programs.uv.enable = true;
   };
 }

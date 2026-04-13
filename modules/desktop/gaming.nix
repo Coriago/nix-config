@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.desktop = {pkgs, ...}: {
+  flake.modules.nixos.desktop-extras = {pkgs, ...}: {
     programs.steam = {
       enable = true;
       remotePlay.openFirewall = true;
@@ -9,7 +9,6 @@
       protontricks.enable = true;
     };
 
-    hardware.steam-hardware.enable = true;
     hardware.xone.enable = true;
 
     programs.gamescope = {

@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.desktop = {...}: {
+  flake.modules.nixos.desktop-extras = {...}: {
     services.audiobookshelf = {
       enable = true;
       openFirewall = true;

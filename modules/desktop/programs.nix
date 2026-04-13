@@ -1,7 +1,7 @@
 # Main file for enabling programs and applications in the desktop environment
 {inputs, ...}: {
   # NixOS
-  flake.modules.nixos.desktop = {
+  flake.modules.nixos.desktop-extras = {
     pkgs,
     config,
     ...
@@ -19,7 +19,6 @@
       xhost
       llm-agents.oh-my-opencode
       llm-agents.opencode
-      comment-checker
       gh
     ];
     programs = {
@@ -31,7 +30,7 @@
   };
 
   # Home Manager
-  flake.modules.homeManager.desktop = {pkgs, ...}: {
+  flake.modules.homeManager.desktop-extras = {pkgs, ...}: {
     programs = {
       kubecolor.enable = true;
       k9s.enable = true;

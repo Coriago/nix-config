@@ -15,7 +15,7 @@
         hostName = "192.168.8.104";
         systems = ["aarch64-linux"];
         sshUser = "root";
-        maxJobs = 0;
+        maxJobs = 4;
         supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
       }
     ];

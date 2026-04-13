@@ -35,6 +35,7 @@ in {
       nixos.base
       nixos.base-homemanager
       nixos.desktop
+      nixos.desktop-extras
       nixos.self-hosting
       nixos.self-hosting-agent
 
@@ -53,6 +54,7 @@ in {
         generic.${hostname}
         homeManager.base
         homeManager.desktop
+        homeManager.desktop-extras
       ];
     };
 
