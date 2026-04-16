@@ -46,6 +46,7 @@ in {
       nixos.audio
       nixos.monitor
       nixos.openrgb
+      nixos.gaomon
     ];
 
     home-manager.users.${username} = {
