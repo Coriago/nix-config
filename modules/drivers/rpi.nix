@@ -2,6 +2,7 @@
 {inputs, ...}: {
   flake.modules.nixos.rpi5 = {
     config,
+    lib,
     pkgs,
     nixos-raspberrypi,
     ...
@@ -16,9 +17,11 @@
       raspberrypi-eeprom
     ];
 
-    # Use the nixos-raspberrypi version to avoid the long build times of these pacakges.
+    # Use the nixos-raspberrypi version to avoid the long build times of these packages.
     # Yes they are older but not enough to cause issues.
-    nixpkgs.overlays = [
+    # mkOrder 400 ensures this runs before the page-size-16k module's mkBefore (500),
+    # so the 16k jemalloc overlay applies on top of the rpi nixpkgs base.
+    nixpkgs.overlays = lib.mkOrder 400 [
       (final: prev: {
         jemalloc = nixos-raspberrypi.inputs.nixpkgs.legacyPackages.${prev.system}.jemalloc;
         bind = nixos-raspberrypi.inputs.nixpkgs.legacyPackages.${prev.system}.bind;
