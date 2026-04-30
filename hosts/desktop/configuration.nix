@@ -40,13 +40,10 @@ in {
       nixos.self-hosting-agent
 
       # Drivers
-      nixos.bluetooth
       nixos.gpu
       nixos.boot
-      nixos.audio
-      nixos.monitor
-      nixos.openrgb
-      nixos.gaomon
+      # nixos.openrgb
+      # nixos.gaomon
     ];
 
     home-manager.users.${username} = {
@@ -73,6 +70,22 @@ in {
     # TEMPORARY REMOVE - For Resume Matcher
     networking.firewall.allowedTCPPorts = [3000 8000];
     networking.firewall.allowedUDPPorts = [3000 8000];
+
+    # BIOS Util
+    services.fwupd.enable = true;
+
+    # Monitor control
+    hardware.i2c.enable = true;
+    environment.systemPackages = with pkgs; [
+      ddcutil
+      ddcui
+    ];
+
+    # Bluetooth
+    hardware.bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+    };
   };
 
   # Final Configuration

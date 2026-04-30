@@ -27,6 +27,10 @@
     services.flatpak.packages = [
       "com.stremio.Stremio" # Stremio
     ];
+    # Tailscale
+    services.tailscale.enable = true;
+    networking.nameservers = ["100.100.100.100" "192.168.8.1" "1.1.1.1"];
+    networking.search = ["taila777b2.ts.net"];
   };
 
   # Home Manager
@@ -38,13 +42,6 @@
       discord.enable = true;
       nushell.enable = true;
       btop.enable = true;
-      brave = {
-        enable = true;
-        extensions = [
-          {id = "cjpalhdlnbpafiamejdnhcphjbkeiagm";} # ublock origin
-          {id = "nngceckbapebfimnlniiiahkandclblb";} # bitwarden
-        ];
-      };
       firefox.enable = true;
     };
 
@@ -54,21 +51,10 @@
     };
 
     home.packages = with pkgs; [
+      brave
       vlc
       realvnc-vnc-viewer
-      (pkgs.symlinkJoin {
-        name = "orca-slicer-wrapped";
-        paths = [pkgs.orca-slicer];
-        buildInputs = [pkgs.makeWrapper];
-        postBuild = ''
-          wrapProgram $out/bin/orca-slicer \
-            --set __GLX_VENDOR_LIBRARY_NAME mesa \
-            --set __EGL_VENDOR_LIBRARY_FILENAMES "${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json" \
-            --set MESA_LOADER_DRIVER_OVERRIDE zink \
-            --set GALLIUM_DRIVER zink \
-            --set WEBKIT_DISABLE_DMABUF_RENDERER 1
-        '';
-      })
+      orca-slicer
       krita
       element-desktop
 

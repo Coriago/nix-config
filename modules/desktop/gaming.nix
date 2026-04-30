@@ -17,7 +17,7 @@
     };
 
     environment.systemPackages = with pkgs; [
-      lutris
+      # lutris
     ];
     services.joycond.enable = true;
     boot.kernelModules = ["hid_nintendo"];
