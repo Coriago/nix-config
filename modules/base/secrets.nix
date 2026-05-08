@@ -12,6 +12,7 @@
     sops.secrets = {
       k3s_token = {};
       nix_sigining_key = {};
+      email = {};
     };
   };
 }

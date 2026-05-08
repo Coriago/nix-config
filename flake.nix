@@ -31,6 +31,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix"; # LLM Agents
+    # nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
 
     # RPI
     ################################

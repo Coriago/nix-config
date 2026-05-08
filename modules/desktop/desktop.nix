@@ -10,10 +10,15 @@
     # Uses KDE Plasma for Desktop
     services.xserver.enable = true;
     services.desktopManager.plasma6.enable = true;
-    services.displayManager.sddm.enable = true;
-    services.displayManager.sddm.wayland.enable = true;
+    services.displayManager.plasma-login-manager.enable = true;
+    services.displayManager.autoLogin.user = config.vars.username;
+    services.fprintd.enable = true;
     programs.kdeconnect.enable = true;
     programs.partition-manager.enable = true;
+    environment.systemPackages = [pkgs.systemdgenie];
+
+    # Audio
+    security.rtkit.enable = true;
 
     # Enable x11
     services.xserver = {

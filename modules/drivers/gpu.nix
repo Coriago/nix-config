@@ -6,7 +6,7 @@
     ...
   }: let
     # Prefer a stable NVIDIA driver
-    nvidiaPackage = config.boot.kernelPackages.nvidiaPackages.stable;
+    nvidiaPackage = config.boot.kernelPackages.nvidiaPackages.legacy_580;
   in {
     # Video drivers configuration for Xorg and Wayland
     services.xserver.videoDrivers = ["nvidia"];
@@ -15,13 +15,13 @@
     hardware.nvidia = {
       open = false; # Use proprietary driver - open driver has DRM atomic commit issues
       modesetting.enable = true;
-      powerManagement.enable = true;
+      powerManagement.enable = false;
       powerManagement.finegrained = false;
       package = nvidiaPackage;
     };
 
     # Containers
-    hardware.nvidia-container-toolkit.enable = true;
+    hardware.nvidia-container-toolkit.enable = false;
     hardware.nvidia-container-toolkit.mount-nvidia-executables = true;
 
     # Early KMS loading - critical for preventing atomic commit failures
@@ -55,19 +55,19 @@
     ];
 
     # Enable GPU access in K3s
-    systemd.tmpfiles.rules = [
-      "L /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl - - - - ${pkgs.writeText "config.toml.tmpl" ''
-        {{ template "base" . }}
+    # systemd.tmpfiles.rules = [
+    #   "L /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl - - - - ${pkgs.writeText "config.toml.tmpl" ''
+    #     {{ template "base" . }}
 
-        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
-          privileged_without_host_devices = false
-          runtime_engine = ""
-          runtime_root = ""
-          runtime_type = "io.containerd.runc.v2"
-      ''}"
-    ];
-    services.k3s.nodeLabel = [
-      "nixos-nvidia-cdi=enabled"
-    ];
+    #     [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
+    #       privileged_without_host_devices = false
+    #       runtime_engine = ""
+    #       runtime_root = ""
+    #       runtime_type = "io.containerd.runc.v2"
+    #   ''}"
+    # ];
+    # services.k3s.nodeLabel = [
+    #   "nixos-nvidia-cdi=enabled"
+    # ];
   };
 }

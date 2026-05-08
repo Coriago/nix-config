@@ -43,7 +43,9 @@ in {
       nixos.gpu
       nixos.boot
       # nixos.openrgb
+      # nixos.vmtest
       # nixos.gaomon
+      # nixos.cachyos
     ];
 
     home-manager.users.${username} = {
