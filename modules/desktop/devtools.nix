@@ -23,6 +23,8 @@
       nix-direnv.enable = true;
       silent = true;
     };
+
+    # Local Pkgs
     environment.systemPackages = with self.packages.${pkgs.stdenv.hostPlatform.system}; [
       comment-checker
     ];

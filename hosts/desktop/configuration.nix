@@ -36,8 +36,8 @@ in {
       nixos.base-homemanager
       nixos.desktop
       nixos.desktop-extras
-      nixos.self-hosting
-      nixos.self-hosting-agent
+      # nixos.self-hosting
+      # nixos.self-hosting-agent
 
       # Drivers
       nixos.gpu

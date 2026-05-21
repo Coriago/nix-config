@@ -12,6 +12,11 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+    # clan-core = {
+    #   url = "https://git.clan.lol/clan/clan-core/archive/main.tar.gz";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    #   inputs.flake-parts.follows = "flake-parts";
+    # };
 
     # Secrets Management
     ################################
@@ -23,14 +28,18 @@
     # Secondary
     ################################
     nixos-cli.url = "github:nix-community/nixos-cli"; # Better cli for nixos
+    nixos-cli.inputs.nixpkgs.follows = "nixpkgs";
+    nixos-cli.inputs.flake-parts.follows = "flake-parts";
     import-tree.url = "github:vic/import-tree"; # Recursive import of nix files in a directory
     nix-flatpak.url = "github:gmodena/nix-flatpak"; # Flatpak app management
     stylix.url = "github:nix-community/stylix"; # Styling for desktop
-    disko = {
-      url = "github:nix-community/disko"; # Disk management tool
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    stylix.inputs.nixpkgs.follows = "nixpkgs";
+    stylix.inputs.flake-parts.follows = "flake-parts";
+    disko.url = "github:nix-community/disko"; # Disk management tool
+    disko.inputs.nixpkgs.follows = "nixpkgs";
     llm-agents.url = "github:numtide/llm-agents.nix"; # LLM Agents
+    llm-agents.inputs.nixpkgs.follows = "nixpkgs";
+    llm-agents.inputs.flake-parts.follows = "flake-parts";
     # nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
 
     # RPI

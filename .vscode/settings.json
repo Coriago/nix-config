@@ -2,38 +2,24 @@
     "editor.formatOnSave": true,
     "nix.enableLanguageServer": true,
     "nix.serverPath": "nixd",
-    "nix.hiddenLanguageServerErrors": [
-        "textDocument/definition",
-    ],
     "nix.serverSettings": {
-        "nil": {
-            "formatting": {
-                "command": [
-                    "alejandra"
-                ],
-            },
-        },
         "nixd": {
-            "formatting": {
-                "command": [
-                    "alejandra"
-                ],
-            },
             "nixpkgs": {
-                "expr": "import <nixpkgs> {}"
+                "expr": "import (builtins.getFlake (toString ./.)).inputs.nixpkgs { }"
+            },
+            "formatting": {
+                "command": [ "alejandra" ]
             },
             "options": {
                 "nixos": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}\").nixosConfigurations.heliosdesk.options",
+                    "expr": "(builtins.getFlake (toString ./.)).nixosConfigurations.heliosdesk.options"
                 },
-                "home-manager": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}\").nixosConfigurations.heliosdesk.options.home-manager.users.type.getSubOptions []"
+                "home_manager": {
+                    // "expr": "(builtins.getFlake (toString ./.)).homeConfigurations.\"user@hostname\".options"
+                    "expr": "(builtins.getFlake (toString ./.)).nixosConfigurations.heliosdesk.options.home-manager.users.type.getSubOptions []"
                 },
-                "flake-parts": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}\").debug.options"
-                },
-                "flake-parts2": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}\").currentSystem.options"
+                "flake_parts": {
+                    "expr": "let flake = builtins.getFlake (toString ./.); in flake.debug.options // flake.currentSystem.options"
                 }
             }
         }

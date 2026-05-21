@@ -33,6 +33,11 @@
       fsType = "ext4";
     };
 
+    # fileSystems."/run/media/helios/sata_ssd" = {
+    #   device = "/dev/disk/by-uuid/9cc45b54-254b-4345-866e-d19bc2008";
+    #   fsType = "ext4";
+    # };
+
     swapDevices = [];
 
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
