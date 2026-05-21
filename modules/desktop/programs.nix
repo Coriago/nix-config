@@ -60,6 +60,9 @@
 
       # Dev stuff
       kubectl
+      devenv
     ];
+
+    # programs.zsh. = "";
   };
 }

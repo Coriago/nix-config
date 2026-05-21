@@ -6,7 +6,8 @@
     ...
   }: let
     # Prefer a stable NVIDIA driver
-    nvidiaPackage = config.boot.kernelPackages.nvidiaPackages.legacy_580;
+    # nvidiaPackage = config.boot.kernelPackages.nvidiaPackages.legacy_580;
+    nvidiaPackage = config.boot.kernelPackages.nvidiaPackages.stable;
   in {
     # Video drivers configuration for Xorg and Wayland
     services.xserver.videoDrivers = ["nvidia"];
@@ -21,8 +22,9 @@
     };
 
     # Containers
-    hardware.nvidia-container-toolkit.enable = false;
+    hardware.nvidia-container-toolkit.enable = true;
     hardware.nvidia-container-toolkit.mount-nvidia-executables = true;
+    # virtualisation.docker.enableNvidia = true;
 
     # Early KMS loading - critical for preventing atomic commit failures
     boot.initrd.kernelModules = ["nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
@@ -43,9 +45,9 @@
 
     # Nix cache for CUDA (optional)
     nix.settings = {
-      substituters = ["https://cuda-maintainers.cachix.org"];
+      substituters = ["https://cache.nixos-cuda.org"];
       trusted-public-keys = [
-        "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+        "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
       ];
     };
     environment.systemPackages = with pkgs; [
