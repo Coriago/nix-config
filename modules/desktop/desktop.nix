@@ -39,25 +39,5 @@
         workstation = true;
       };
     };
-
-    # Common Dynamic Libraries for Desktop Programs
-    programs.nix-ld.libraries = with pkgs; [
-      stdenv.cc.cc.lib
-      zlib
-      fuse3
-      icu
-      nss
-      openssl
-      curl
-      expat
-      binutils
-      lld
-    ];
-
-    # AppImage Support
-    programs.appimage = {
-      enable = true;
-      binfmt = false;
-    };
   };
 }

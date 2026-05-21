@@ -51,6 +51,8 @@
         "https://nixos-raspberrypi.cachix.org"
         "https://install.determinate.systems"
         "https://watersucks.cachix.org"
+        "https://ros.cachix.org"
+        "https://nixpkgs-python.cachix.org"
       ];
       trusted-public-keys = [
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
@@ -60,6 +62,8 @@
         "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
         "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
         "myhomelab.net:xtVVBYntb5zLFB4eUUkLIe8OpDNwvDI20i8sDehE9ck=%"
+        "ros.cachix.org-1:dSyZxI8geDCJrwgvCOHDoAfOm5sV1wCPjBkKL+38Rvo="
+        "nixpkgs-python.cachix.org-1:hxjI7pFxTyuTHn2NkvWCrAUcNZLNS3ZAvfYNuYifcEU="
       ];
     };
 
@@ -80,13 +84,9 @@
       }
     ];
 
-    # Allow for dynamic libraries in nix
-    programs.nix-ld.enable = true;
-
     # Nix tooling
     environment.systemPackages = with pkgs; [
-      nil
-      nixd
+      # nixd
       statix
       alejandra
       nvd
