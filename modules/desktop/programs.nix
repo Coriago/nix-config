@@ -20,7 +20,35 @@
       llm-agents.oh-my-opencode
       llm-agents.opencode
       gh
+      ghostty
+      tree-sitter
+      vim
+      neovim
+      go
+      ripgrep
+      cargo
+      rustc
+      rustfmt
+      clippy
+      rust-analyzer
+
+      bottles
+      ty
+      pyright
+      nixd
+      alejandra
+      just
+      just-lsp
+      age
+      disko
+      sops
+      bitwarden-cli
+      bws
+      vial
+      qmk
     ];
+    services.udev.packages = [pkgs.vial];
+    hardware.keyboard.qmk.enable = true;
     programs = {
       usbtop.enable = true;
     };
@@ -29,8 +57,8 @@
     ];
     # Tailscale
     services.tailscale.enable = true;
-    # networking.nameservers = ["100.100.100.100" "192.168.8.1" "1.1.1.1"];
-    # networking.search = ["taila777b2.ts.net"];
+    networking.nameservers = ["100.100.100.100" "1.1.1.1"];
+    networking.search = ["li-taipan.ts.net"];
   };
 
   # Home Manager
@@ -61,7 +89,41 @@
       # Dev stuff
       kubectl
       devenv
+
+      python312Packages.python-kasa
     ];
+
+    # imports = [
+    #   inputs.lazyvim.homeManagerModules.default
+    # ];
+
+    # programs.lazyvim = {
+    #   enable = true;
+    #   extras = {
+    #     lang.nix.enable = true;
+    #     lang.python = {
+    #       enable = true;
+    #       installDependencies = true; # Install ruff
+    #       installRuntimeDependencies = true; # Install python3
+    #     };
+    #     lang.go = {
+    #       enable = true;
+    #       installDependencies = true; # Install gopls, gofumpt, etc.
+    #       installRuntimeDependencies = true; # Install go compiler
+    #     };
+    #   };
+
+    #   extraPackages = with pkgs; [
+    #     nixd # Nix LSP
+    #     alejandra # Nix formatter
+    #   ];
+
+    #   # Only needed for languages not covered by LazyVim extras
+    #   treesitterParsers = with pkgs.vimPlugins.nvim-treesitter-parsers; [
+    #     wgsl # WebGPU Shading Language
+    #     templ # Go templ files
+    #   ];
+    # };
 
     # programs.zsh. = "";
   };

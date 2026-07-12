@@ -20,15 +20,15 @@
       #   protocol = "ssh-ng";
       #   supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
       # }
-      {
-        hostName = "192.168.8.104";
-        systems = ["aarch64-linux"];
-        sshUser = "root";
-        maxJobs = 2;
-        speedFactor = 1;
-        protocol = "ssh-ng";
-        supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
-      }
+      # {
+      #   hostName = "192.168.8.104";
+      #   systems = ["aarch64-linux"];
+      #   sshUser = "root";
+      #   maxJobs = 2;
+      #   speedFactor = 1;
+      #   protocol = "ssh-ng";
+      #   supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
+      # }
     ];
     nix.extraOptions = ''
       builders-use-substitutes = true
@@ -37,6 +37,9 @@
 
     nix.settings = {
       auto-optimise-store = true;
+      trusted-substituters = [
+        "ssh-ng://nix-ssh@rpihost1"
+      ];
 
       # Enable flakes
       experimental-features = ["nix-command" "flakes"];
@@ -53,6 +56,7 @@
         "https://watersucks.cachix.org"
         "https://ros.cachix.org"
         "https://nixpkgs-python.cachix.org"
+        "ssh-ng://nix-ssh@rpihost1"
       ];
       trusted-public-keys = [
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="

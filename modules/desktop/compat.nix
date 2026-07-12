@@ -58,6 +58,7 @@
       mesa
       addDriverRunpath
       cacert
+      libxcrypt-legacy
     ];
 
     environment.systemPackages = with pkgs; [

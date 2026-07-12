@@ -5,15 +5,15 @@
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
       localNetworkGameTransfers.openFirewall = true;
-      gamescopeSession.enable = true;
+      gamescopeSession.enable = false;
       protontricks.enable = true;
     };
 
     hardware.xone.enable = true;
 
     programs.gamescope = {
-      enable = true;
-      capSysNice = true;
+      enable = false;
+      capSysNice = false;
     };
 
     environment.systemPackages = with pkgs; [

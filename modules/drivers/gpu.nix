@@ -22,7 +22,7 @@
     };
 
     # Containers
-    hardware.nvidia-container-toolkit.enable = true;
+    hardware.nvidia-container-toolkit.enable = false;
     hardware.nvidia-container-toolkit.mount-nvidia-executables = true;
     # virtualisation.docker.enableNvidia = true;
 

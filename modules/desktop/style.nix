@@ -31,6 +31,6 @@
 
     # Get rid of warnings
     stylix.targets.qt.enable = false;
-    gtk.gtk4.theme = null;
+    # gtk.gtk4.theme = null;
   };
 }

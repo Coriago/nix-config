@@ -8,6 +8,7 @@
     };
 
     services.qbittorrent.enable = true;
+    services.qbittorrent.webuiPort = 8976;
 
     # services.qbittorrent.user = ;
   };

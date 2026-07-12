@@ -17,8 +17,8 @@ in {
       locale = "en_US.UTF-8";
       email = "gagemiller155@gmail.com";
       theme = "equilibrium-dark";
-      wallpaper = "https://getwallpapers.com/wallpaper/full/2/e/a/524916.jpg";
-      wallpaperHash = "sha256-YqFWMRjdM8dGbSJQomvoNtwmq2ppfwq6r0UYYpx6sVA=";
+      wallpaper = "https://cdn.wallpapersafari.com/4/44/JgEZQu.jpg";
+      wallpaperHash = "sha256-htjVJhbzfLtWTLt9G9252pLG1u8m9aHlHUYgoDytDBU=";
     };
   };
 
@@ -70,8 +70,8 @@ in {
     boot.binfmt.emulatedSystems = ["aarch64-linux"];
 
     # TEMPORARY REMOVE - For Resume Matcher
-    networking.firewall.allowedTCPPorts = [3000 8000];
-    networking.firewall.allowedUDPPorts = [3000 8000];
+    networking.firewall.allowedTCPPorts = [3000 8000 8123];
+    networking.firewall.allowedUDPPorts = [3000 8000 8123];
 
     # BIOS Util
     services.fwupd.enable = true;
@@ -87,6 +87,34 @@ in {
     hardware.bluetooth = {
       enable = true;
       powerOnBoot = true;
+    };
+
+    # Quick Home Assistant setup for testing
+
+    virtualisation.oci-containers = {
+      backend = "docker";
+      containers.homeassistant = {
+        volumes = [
+          "home-assistant:/config"
+          "/run/dbus:/run/dbus:ro"
+        ];
+        devices = [
+          "/dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_cca104ee7591f01189e1b77629b3d7e9-if00-port0:/dev/ttyUSB0"
+        ];
+        capabilities = {
+          NET_ADMIN = true;
+          NET_RAW = true;
+        };
+        environment.TZ = "Europe/Berlin";
+        # Note: The image will not be updated on rebuilds, unless the version label changes
+        image = "ghcr.io/home-assistant/home-assistant:stable";
+        extraOptions = [
+          # Use the host network namespace for all sockets
+          "--network=host"
+          # Pass devices into the container, so Home Assistant can discover and make use of them
+          # "--device=/dev/ttyACM0:/dev/ttyACM0"
+        ];
+      };
     };
   };
 

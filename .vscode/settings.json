@@ -4,9 +4,9 @@
     "nix.serverPath": "nixd",
     "nix.serverSettings": {
         "nixd": {
-            "nixpkgs": {
-                "expr": "import (builtins.getFlake (toString ./.)).inputs.nixpkgs { }"
-            },
+            // "nixpkgs": {
+            //     "expr": "import (builtins.getFlake (toString ./.)).inputs.nixpkgs { }"
+            // },
             "formatting": {
                 "command": [ "alejandra" ]
             },
@@ -19,8 +19,12 @@
                     "expr": "(builtins.getFlake (toString ./.)).nixosConfigurations.heliosdesk.options.home-manager.users.type.getSubOptions []"
                 },
                 "flake_parts": {
-                    "expr": "let flake = builtins.getFlake (toString ./.); in flake.debug.options // flake.currentSystem.options"
+                    "expr": "let flake = builtins.getFlake (toString ./.); in flake.debug.options // { perSystem = flake.currentSystem.options; }"
                 }
+
+                // "wrappers": {
+                //     "expr": "(builtins.getFlake (toString ./.)).wrappers"
+                // }
             }
         }
     },

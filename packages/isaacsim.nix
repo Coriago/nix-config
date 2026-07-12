@@ -1,52 +1,59 @@
 {
-  pkgs ? import <nixpkgs> {},
+  pkgs,
   fetchurl,
-  buildPythonPackage,
+  python312Packages,
+  buildFHSEnv,
 }: let
-  # 1. Define the Python Package derivation
-  # Replace values with your actual package details
-  myPythonPackage = buildPythonPackage rec {
+  # Build derivation: Downloads and installs the Isaac Sim Python wheel
+  isaacsim = python312Packages.buildPythonPackage rec {
     pname = "isaacsim";
     version = "6.0.0.0";
-    format = "wheel"; # change to "pyproject" if using pyproject.toml
-
-    # src = pkgs.fetchPypi {
-    #   inherit pname version;
-    #   hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # Provide actual hash
-    # };
+    format = "wheel";
 
     src = fetchurl {
       url = "https://pypi.nvidia.com/${pname}/${pname}-${version}-cp312-none-manylinux_2_35_x86_64.whl";
-      hash = "sha256-YzlFj3Bd8nlPsbvqaspzmlG/bIBLGGSP5BN6mbEWheM=";
+      hash = "sha256-OQUqkLpZKMl0ULZxq3Ty8lGU168f3suNmwAio/rzeHU=";
     };
 
-    # Dependencies required for this python package
-    propagatedBuildInputs = with pkgs.python3.pkgs; [
+    propagatedBuildInputs = with python312Packages; [
       requests
     ];
 
+    # Disable Python runtime dependency checking — Isaac Sim wheels declare
+    # many deps (isaacsim-kernel, etc.) that aren't in nixpkgs
+    dontCheckRuntimeDeps = true;
+
+    # Manylinux wheels contain precompiled binaries that need patching
+    # for Nix store paths. Uncomment when moving past download to runtime:
+    # nativeBuildInputs = with pkgs; [
+    #   autoPatchelfHook
+    # ];
+    # buildInputs = with pkgs; [
+    #   stdenv.cc.cc.lib
+    # ];
+
     meta = {
-      description = "A custom Python package downloaded via Nix";
+      description = "NVIDIA Isaac Sim robotics simulation platform";
+      homepage = "https://developer.nvidia.com/isaac-sim";
+      # license = pkgs.lib.licenses.unfree;
+      license = pkgs.lib.licenses.agpl3Only;
+      platforms = ["x86_64-linux"];
     };
   };
 
-  # Combine our package into a custom Python interpreter environment
-  myPythonEnv = pkgs.python312.withPackages (ps: [
-    myPythonPackage
-  ]);
-in
-  # 2. Wrap the Python environment inside an FHS sandbox
-  pkgs.buildFHSEnv {
-    name = "my-python-fhs-wrapper";
+  # FHS derivation: Wraps Isaac Sim in a filesystem hierarchy standard environment
+  # This is useful for binaries that expect a traditional Linux filesystem layout
+  isaacsim-fhs = buildFHSEnv {
+    name = "isaacsim-fhs";
 
-    # targetPkgs populates /lib, /bin, etc. inside the sandbox
     targetPkgs = pkgs: [
-      myPythonEnv # Drops our python interpretter with our package into /bin
-      pkgs.stdenv.cc.cc.lib # Often useful for packages needing standard C libraries (glibc)
-      pkgs.zlib # Common native dependency
+      (pkgs.python312.withPackages (_: [isaacsim]))
+      pkgs.stdenv.cc.cc.lib
+      pkgs.zlib
     ];
 
-    # The exact script/command that runs when the wrapper is executed
-    # "bash" opens an interactive shell. To execute a script directly, use "python3 script.py"
     runScript = "bash";
-  }
+  };
+in {
+  inherit isaacsim isaacsim-fhs;
+}

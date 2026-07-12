@@ -1,5 +1,5 @@
 # Common bootloader configuration
-{
+{inputs, ...}: {
   flake.modules.nixos.boot = {
     lib,
     pkgs,
@@ -14,6 +14,11 @@
     };
 
     # Use latest kernel
-    boot.kernelPackages = pkgs.linuxPackages_6_18;
+    # boot.kernelPackages = pkgs.linuxPackages_latest;
+    boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
+
+    nix.settings.substituters = ["https://cache.xinux.uz"];
+    nix.settings.trusted-public-keys = ["cache.xinux.uz:BXCrtqejFjWzWEB9YuGB7X2MV4ttBur1N8BkwQRdH+0="];
+    nixpkgs.overlays = [inputs.nix-cachyos-kernel.overlays.default];
   };
 }

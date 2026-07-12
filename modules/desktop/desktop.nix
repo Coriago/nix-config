@@ -15,7 +15,20 @@
     services.fprintd.enable = true;
     programs.kdeconnect.enable = true;
     programs.partition-manager.enable = true;
-    environment.systemPackages = [pkgs.systemdgenie];
+    environment.systemPackages = with pkgs; [
+      systemdgenie
+      kdePackages.print-manager
+      yazi
+      # neovim
+      # ripgrep
+      # fd
+      # fzf
+      k3s
+    ];
+
+    # Printer
+    services.printing.enable = true;
+    services.printing.drivers = with pkgs; [hplip];
 
     # Audio
     security.rtkit.enable = true;
@@ -40,4 +53,24 @@
       };
     };
   };
+
+  # flake.apps.fdsf = {...}: {
+
+  # };
+
+  # flake.wrappers.lazyvim = {wlib, ...}: {
+  #   imports = [wlib.wrapperModules.neovim];
+  # };
+
+  # perSystem = {
+  #   pkgs,
+  #   lib,
+  #   self',
+  #   ...
+  # }: {
+  #   # packages.myneovim = ;
+  #   # wrappers.
+  # };
+
+  # perSystem
 }

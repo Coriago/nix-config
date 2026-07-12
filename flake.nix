@@ -3,7 +3,8 @@
   inputs = {
     # Primary
     ################################
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable"; # nixos-unstable as of 2026-02-05
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -40,7 +41,16 @@
     llm-agents.url = "github:numtide/llm-agents.nix"; # LLM Agents
     llm-agents.inputs.nixpkgs.follows = "nixpkgs";
     llm-agents.inputs.flake-parts.follows = "flake-parts";
-    # nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
+    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
+    nix-cachyos-kernel.inputs.nixpkgs.follows = "nixpkgs";
+    mcp-servers-nix.url = "github:natsukium/mcp-servers-nix";
+    mcp-servers-nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    wrappers.url = "github:BirdeeHub/nix-wrapper-modules";
+    wrappers.inputs.nixpkgs.follows = "nixpkgs";
+
+    lazyvim.url = "github:pfassina/lazyvim-nix";
+    lazyvim.inputs.nixpkgs.follows = "nixpkgs";
 
     # RPI
     ################################

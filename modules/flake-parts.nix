@@ -10,6 +10,7 @@
     inputs.flake-parts.flakeModules.easyOverlay
     inputs.home-manager.flakeModules.home-manager
     # inputs.clan-core.flakeModules.default
+    inputs.wrappers.flakeModules.wrappers
   ];
 
   # Debug for better intellisense
@@ -28,13 +29,12 @@
   }: {
     # Devshells
     devShells.default = pkgs.mkShell {
-      nativeBuildInputs = with pkgs;
-        [
-          age
-          disko
-          sops
-          nixd
-        ];
+      nativeBuildInputs = with pkgs; [
+        age
+        disko
+        sops
+        nixd
+      ];
     };
 
     # ++ [inputs.clan-core.packages.${system}.clan-cli];
