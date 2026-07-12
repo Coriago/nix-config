@@ -44,11 +44,7 @@
       sops
       bitwarden-cli
       bws
-      vial
-      qmk
     ];
-    services.udev.packages = [pkgs.vial];
-    hardware.keyboard.qmk.enable = true;
     programs = {
       usbtop.enable = true;
     };

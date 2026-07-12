@@ -91,31 +91,31 @@ in {
 
     # Quick Home Assistant setup for testing
 
-    virtualisation.oci-containers = {
-      backend = "docker";
-      containers.homeassistant = {
-        volumes = [
-          "home-assistant:/config"
-          "/run/dbus:/run/dbus:ro"
-        ];
-        devices = [
-          "/dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_cca104ee7591f01189e1b77629b3d7e9-if00-port0:/dev/ttyUSB0"
-        ];
-        capabilities = {
-          NET_ADMIN = true;
-          NET_RAW = true;
-        };
-        environment.TZ = "Europe/Berlin";
-        # Note: The image will not be updated on rebuilds, unless the version label changes
-        image = "ghcr.io/home-assistant/home-assistant:stable";
-        extraOptions = [
-          # Use the host network namespace for all sockets
-          "--network=host"
-          # Pass devices into the container, so Home Assistant can discover and make use of them
-          # "--device=/dev/ttyACM0:/dev/ttyACM0"
-        ];
-      };
-    };
+    # virtualisation.oci-containers = {
+    #   backend = "docker";
+    #   containers.homeassistant = {
+    #     volumes = [
+    #       "home-assistant:/config"
+    #       "/run/dbus:/run/dbus:ro"
+    #     ];
+    #     devices = [
+    #       "/dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_cca104ee7591f01189e1b77629b3d7e9-if00-port0:/dev/ttyUSB0"
+    #     ];
+    #     capabilities = {
+    #       NET_ADMIN = true;
+    #       NET_RAW = true;
+    #     };
+    #     environment.TZ = "Europe/Berlin";
+    #     # Note: The image will not be updated on rebuilds, unless the version label changes
+    #     image = "ghcr.io/home-assistant/home-assistant:stable";
+    #     extraOptions = [
+    #       # Use the host network namespace for all sockets
+    #       "--network=host"
+    #       # Pass devices into the container, so Home Assistant can discover and make use of them
+    #       # "--device=/dev/ttyACM0:/dev/ttyACM0"
+    #     ];
+    #   };
+    # };
   };
 
   # Final Configuration
