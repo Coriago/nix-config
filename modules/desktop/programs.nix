@@ -44,6 +44,11 @@
       sops
       bitwarden-cli
       bws
+      unrar
+      hugo
+      nodejs
+      publii
+      xclicker
     ];
     programs = {
       usbtop.enable = true;

@@ -34,12 +34,10 @@
       builders-use-substitutes = true
       secret-key-files = ${config.sops.secrets.nix_sigining_key.path}
     '';
+    documentation.enable = false;
 
     nix.settings = {
       auto-optimise-store = true;
-      trusted-substituters = [
-        "ssh-ng://nix-ssh@rpihost1"
-      ];
 
       # Enable flakes
       experimental-features = ["nix-command" "flakes"];
@@ -56,7 +54,6 @@
         "https://watersucks.cachix.org"
         "https://ros.cachix.org"
         "https://nixpkgs-python.cachix.org"
-        "ssh-ng://nix-ssh@rpihost1"
       ];
       trusted-public-keys = [
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="

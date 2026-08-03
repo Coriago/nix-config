@@ -46,6 +46,9 @@
       gcc
       gnumake
       libva-utils
+      webkitgtk_4_1
+      libsoup_3
+      libwebp
 
       # Python
       python312
@@ -85,6 +88,11 @@
     programs.appimage = {
       enable = true;
       binfmt = false;
+      package =
+        pkgs.appimage-run.override
+        {
+          extraPkgs = pkgs: config.programs.nix-ld.libraries;
+        };
     };
   };
 }

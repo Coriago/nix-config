@@ -41,6 +41,9 @@
 
     # Networking for non-headless
     networking.networkmanager.enable = true;
+    networking.interfaces.enp8s0 = {
+      wakeOnLan.enable = true;
+    };
     services.avahi = {
       nssmdns4 = true;
       enable = true;
