@@ -8,7 +8,7 @@
   }: {
     # LLM Tools
     nixpkgs.overlays = [
-      inputs.llm-agents.overlays.default
+      inputs.llm-agents.overlays.shared-nixpkgs
     ];
     environment.systemPackages = with pkgs; [
       usbutils
@@ -31,6 +31,8 @@
       rustfmt
       clippy
       rust-analyzer
+      mtr
+      lmstudio
 
       bottles
       ty
@@ -45,10 +47,10 @@
       bitwarden-cli
       bws
       unrar
-      hugo
       nodejs
       publii
       xclicker
+      blender
     ];
     programs = {
       usbtop.enable = true;
@@ -82,10 +84,8 @@
     home.packages = with pkgs; [
       brave
       vlc
-      realvnc-vnc-viewer
       orca-slicer
       krita
-      element-desktop
 
       # Dev stuff
       kubectl
