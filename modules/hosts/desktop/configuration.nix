@@ -3,7 +3,7 @@
     username = "helios";
   };
 
-  flake.configurations.nixos.heliosdesk = {
+  configurations.nixos.heliosdesk = {
     imports = with config.flake.modules.nixos; [
       base
       kde

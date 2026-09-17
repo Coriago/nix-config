@@ -1,5 +1,5 @@
 {
-  flake.configurations.nixos.heliosdesk = {
+  configurations.nixos.heliosdesk = {
     config,
     lib,
     modulesPath,

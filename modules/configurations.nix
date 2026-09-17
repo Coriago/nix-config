@@ -4,8 +4,8 @@
   lib,
   ...
 }: {
-  options.flake.configurations.nixos = lib.mkOption {
-    type = lib.types.lazyAttrsOf (lib.types.submodule {options.module = lib.mkOption {type = lib.types.deferredModule;};});
+  options.configurations.nixos = lib.mkOption {
+    type = lib.types.lazyAttrsOf lib.types.deferredModule;
     default = {};
     apply = lib.mapAttrs (
       name: hostModule: {
@@ -33,7 +33,7 @@
       config.flake.nixosConfigurations
     );
 
-    # Output configurations for every flake.configurations.nixos.${name} defined in the flake.
+    # Output configurations for every configurations.nixos.${name} defined in the flake.
     nixosConfigurations =
       lib.mapAttrs (
         _name: module:
@@ -41,6 +41,6 @@
             modules = [module];
           }
       )
-      config.flake.configurations.nixos;
+      config.configurations.nixos;
   };
 }

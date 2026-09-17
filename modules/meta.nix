@@ -33,16 +33,17 @@ in {
   };
 
   config = {
-    # meta.hosts = lib.genAttrs (lib.attrNames config.flake.configurations.nixos) (_name: {});
+    # meta.hosts = lib.genAttrs (lib.attrNames config.configurations.nixos) (_name: {});
 
     # Central metadata used across flake
     meta = {
       sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBYVacUQ/B11m2ycolJnoIKn4TS1alZKDbe1ssRnWZE2";
+      primaryHost = config.meta.hosts.heliosdesk;
     };
 
     # Generic module to be inherited by any submodules to define the metadata for that host
     flake.modules.generic.meta = {lib, ...}: {
-      options.hostmeta = {
+      options.hostmeta = lib.mkOption {
         type = hostMetaType;
       };
     };
