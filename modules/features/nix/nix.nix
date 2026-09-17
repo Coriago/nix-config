@@ -1,40 +1,13 @@
 {inputs, ...}: {
-  # NixOS
   flake.modules.nixos.base = {
     pkgs,
     config,
     ...
   }: {
-    # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
+
     # Set nix path for lsp
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
-    nix.distributedBuilds = true;
-    nix.buildMachines = [
-      # {
-      #   hostName = "localhost";
-      #   systems = ["x86_64-linux" "aarch64-linux"];
-      #   sshUser = "root";
-      #   maxJobs = 8; # Number of local cores
-      #   speedFactor = 50; # Much higher than the remote
-      #   protocol = "ssh-ng";
-      #   supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
-      # }
-      # {
-      #   hostName = "192.168.8.104";
-      #   systems = ["aarch64-linux"];
-      #   sshUser = "root";
-      #   maxJobs = 2;
-      #   speedFactor = 1;
-      #   protocol = "ssh-ng";
-      #   supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
-      # }
-    ];
-    nix.extraOptions = ''
-      builders-use-substitutes = true
-      secret-key-files = ${config.sops.secrets.nix_sigining_key.path}
-    '';
-    documentation.enable = false;
 
     nix.settings = {
       auto-optimise-store = true;
@@ -43,14 +16,13 @@
       experimental-features = ["nix-command" "flakes"];
 
       # Additional nix caches to fetch from
-      trusted-users = ["${config.vars.username}" "@wheel"]; # Required to allow for more caches
+      trusted-users = ["${config.hostmeta.username}" "@wheel"]; # Required to allow for more caches
       substituters = [
         "https://cache.nixos.org?priority=10"
         "https://nix-community.cachix.org"
         "https://numtide.cachix.org"
         "https://cache.numtide.com"
         "https://nixos-raspberrypi.cachix.org"
-        "https://install.determinate.systems"
         "https://watersucks.cachix.org"
         "https://ros.cachix.org"
         "https://nixpkgs-python.cachix.org"
@@ -60,7 +32,6 @@
         "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
         "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
         "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
-        "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
         "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
         "myhomelab.net:xtVVBYntb5zLFB4eUUkLIe8OpDNwvDI20i8sDehE9ck=%"
         "ros.cachix.org-1:dSyZxI8geDCJrwgvCOHDoAfOm5sV1wCPjBkKL+38Rvo="
@@ -71,7 +42,7 @@
     # Allows nixos rebuild without password
     security.sudo.extraRules = [
       {
-        users = [config.vars.username];
+        users = [config.hostmeta.username];
         commands = [
           {
             command = "/run/current-system/sw/bin/nixos-rebuild";
