@@ -1,6 +1,10 @@
 {inputs, ...}: {
   # NixOS
-  flake.modules.nixos.base = {config, ...}: {
+  flake.modules.nixos.development = {
+    pkgs,
+    config,
+    ...
+  }: {
     imports = [
       inputs.nixos-cli.nixosModules.nixos-cli
     ];
@@ -14,5 +18,14 @@
         apply.reexec_as_root = true;
       };
     };
+    environment.systemPackages = with pkgs; [
+      # nixd
+      statix
+      alejandra
+      nvd
+      nix-diff
+      nix-inspect
+      nix-output-monitor
+    ];
   };
 }

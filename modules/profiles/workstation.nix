@@ -1,8 +1,8 @@
 {config, ...}: {
-  flake.modules.nixos.workstation-profile = {hostmeta, ...}: {
+  flake.modules.nixos.workstation = {hostmeta, ...}: {
     imports = with config.flake.modules.nixos; [
       base
-      cachyos-kernel
+      development
       kde
     ];
 

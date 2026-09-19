@@ -4,12 +4,14 @@ in {
   flake.modules.nixos.base = {
     config,
     lib,
+    pkgs,
     ...
   }: {
     # Time and Locale
     time.timeZone = "America/New_York";
     i18n.defaultLocale = "en_US.UTF-8";
 
+    # User setup
     users.users.${config.hostmeta.username} = {
       isNormalUser = true;
       description = "${config.hostmeta.username} account";
@@ -40,19 +42,10 @@ in {
     };
 
     programs.git.enable = true;
-
-
-    imports = [
-      local.inputs.home-manager.nixosModules.home-manager
-    ];
-    home-manager = {
-      useGlobalPkgs = true;
-      useUserPackages = true;
-      backupCommand = ''
-        TIMESTAMP=$(date +%Y%m%d%H%M%S)
-        # Move the conflicting file to a dated backup
-        mv "$1" "$1.$TIMESTAMP.bak"
-      '';
+    programs.zsh = {
+      enable = true;
+      enableCompletion = true;
     };
+    users.defaultUserShell = pkgs.zsh;
   };
 }
