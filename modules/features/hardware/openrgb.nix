@@ -1,4 +1,5 @@
 # OpenRGB configuration for NixOS
+# WIP not ready.
 {
   flake.modules.nixos.openrgb = {
     pkgs,

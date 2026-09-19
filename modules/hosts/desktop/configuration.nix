@@ -8,6 +8,7 @@
       base
       kde
       nvidia
+      cachyos-kernel
     ];
 
     system.stateVersion = "26.05";

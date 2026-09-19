@@ -4,9 +4,6 @@
     "nix.serverPath": "nixd",
     "nix.serverSettings": {
         "nixd": {
-            // "nixpkgs": {
-            //     "expr": "import (builtins.getFlake (toString ./.)).inputs.nixpkgs { }"
-            // },
             "formatting": {
                 "command": [ "alejandra" ]
             },
@@ -14,22 +11,15 @@
                 "nixos": {
                     "expr": "(builtins.getFlake (toString ./.)).nixosConfigurations.heliosdesk.options"
                 },
-                "home_manager": {
-                    // "expr": "(builtins.getFlake (toString ./.)).homeConfigurations.\"user@hostname\".options"
-                    "expr": "(builtins.getFlake (toString ./.)).nixosConfigurations.heliosdesk.options.home-manager.users.type.getSubOptions []"
-                },
+                // "home_manager": {
+                //     // "expr": "(builtins.getFlake (toString ./.)).homeConfigurations.\"user@hostname\".options"
+                //     "expr": "(builtins.getFlake (toString ./.)).nixosConfigurations.heliosdesk.options.home-manager.users.type.getSubOptions []"
+                // },
                 "flake_parts": {
                     "expr": "let flake = builtins.getFlake (toString ./.); in flake.debug.options // { perSystem = flake.currentSystem.options; }"
                 }
-
-                // "wrappers": {
-                //     "expr": "(builtins.getFlake (toString ./.)).wrappers"
-                // }
             }
         }
-    },
-    "yaml.schemas": {
-        "kubernetes://schema/apps/v1@statefulset": "file:///home/helios/.config/nixos/pgtest.yaml"
     },
     "makefile.configureOnOpen": false
 }

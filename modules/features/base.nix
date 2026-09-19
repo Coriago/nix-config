@@ -19,21 +19,6 @@ in {
       ];
     };
 
-    imports = [
-      local.inputs.sops-nix.nixosModules.sops
-    ];
-
-    sops.defaultSopsFile = ../../secrets/secrets.yaml;
-    sops.age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
-    sops.age.keyFile = "/etc/sops/age/keys.txt";
-    sops.age.generateKey = true;
-
-    sops.secrets = {
-      k3s_token = {};
-      nix_sigining_key = {};
-      email = {};
-    };
-
     security.sudo.wheelNeedsPassword = false; # Passwordless sudo for wheel group
     services.getty.autologinUser = config.hostmeta.username; # Autologin
     security.polkit.enable = true; # Don't require sudo for reboot or
@@ -55,5 +40,19 @@ in {
     };
 
     programs.git.enable = true;
+
+
+    imports = [
+      local.inputs.home-manager.nixosModules.home-manager
+    ];
+    home-manager = {
+      useGlobalPkgs = true;
+      useUserPackages = true;
+      backupCommand = ''
+        TIMESTAMP=$(date +%Y%m%d%H%M%S)
+        # Move the conflicting file to a dated backup
+        mv "$1" "$1.$TIMESTAMP.bak"
+      '';
+    };
   };
 }

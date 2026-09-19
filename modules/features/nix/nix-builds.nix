@@ -1,6 +1,7 @@
 {
   # Optimizations for building and caching packages.
   flake.modules.nixos.nix-builds = {config, ...}: {
+    sops.secrets.nix_sigining_key = {};
     nix.extraOptions = ''
       builders-use-substitutes = true
       secret-key-files = ${config.sops.secrets.nix_sigining_key.path}
