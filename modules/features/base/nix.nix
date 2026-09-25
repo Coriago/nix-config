@@ -5,6 +5,11 @@
     ...
   }: {
     nixpkgs.config.allowUnfree = true;
+    sops.secrets.nix_sigining_key = {};
+    nix.extraOptions = ''
+      builders-use-substitutes = true
+      secret-key-files = ${config.sops.secrets.nix_sigining_key.path}
+    '';
 
     # Set nix path for lsp
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];

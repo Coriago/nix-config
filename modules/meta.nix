@@ -17,6 +17,11 @@
         type = types.str;
         default = name;
       };
+
+      stateVersion = mkOption {
+        type = types.str;
+        default = "26.05";
+      };
     };
   });
 in {

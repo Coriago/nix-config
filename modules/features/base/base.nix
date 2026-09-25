@@ -7,6 +7,8 @@ in {
     pkgs,
     ...
   }: {
+    system.stateVersion = config.hostmeta.stateVersion;
+
     # Time and Locale
     time.timeZone = "America/New_York";
     i18n.defaultLocale = "en_US.UTF-8";
@@ -40,12 +42,19 @@ in {
       grub.enable = lib.mkForce false;
       systemd-boot.configurationLimit = 10;
     };
-
     programs.git.enable = true;
     programs.zsh = {
       enable = true;
       enableCompletion = true;
     };
     users.defaultUserShell = pkgs.zsh;
+    environment.systemPackages = with pkgs; [
+      wget
+      curl
+      zip
+      unzip
+      jq
+      yq
+    ];
   };
 }
