@@ -1,3 +1,6 @@
+# TODO:
+# Setup ollama local llm serving
+# Setup mcp tooling
 {inputs, ...}: {
   flake.modules.nixos.development = {
     pkgs,

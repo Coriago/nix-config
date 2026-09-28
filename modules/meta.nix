@@ -44,6 +44,7 @@ in {
     meta = {
       sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBYVacUQ/B11m2ycolJnoIKn4TS1alZKDbe1ssRnWZE2";
       primaryHost = config.meta.hosts.heliosdesk;
+      tailscaleDomain = "li-taipan.ts.net";
     };
 
     # Generic module to be inherited by any submodules to define the metadata for that host

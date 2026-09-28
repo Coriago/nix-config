@@ -19,7 +19,7 @@
       };
     };
     environment.systemPackages = with pkgs; [
-      # nixd
+      nixd
       statix
       alejandra
       nvd

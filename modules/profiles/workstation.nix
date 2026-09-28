@@ -4,6 +4,7 @@ local: {
       base
       development
       kde
+      tailscale
     ];
 
     home-manager.users.${config.hostmeta.username} = {
