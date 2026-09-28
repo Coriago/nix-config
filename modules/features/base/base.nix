@@ -8,6 +8,7 @@ in {
     ...
   }: {
     system.stateVersion = config.hostmeta.stateVersion;
+    networking.hostName = config.hostmeta.hostname;
 
     # Time and Locale
     time.timeZone = "America/New_York";
@@ -35,13 +36,6 @@ in {
       meta.sshPublicKey
     ];
     programs.ssh.startAgent = true;
-    boot.loader = {
-      systemd-boot.enable = true;
-      systemd-boot.consoleMode = "auto";
-      efi.canTouchEfiVariables = true;
-      grub.enable = lib.mkForce false;
-      systemd-boot.configurationLimit = 10;
-    };
     programs.git.enable = true;
     programs.zsh = {
       enable = true;
