@@ -33,8 +33,6 @@
     llm-agents.url = "github:numtide/llm-agents.nix"; # LLM Agents
     llm-agents.inputs.nixpkgs.follows = "nixpkgs";
     llm-agents.inputs.flake-parts.follows = "flake-parts";
-    mcp-servers-nix.url = "github:natsukium/mcp-servers-nix";
-    mcp-servers-nix.inputs.nixpkgs.follows = "nixpkgs";
     wrapper-modules = {
       url = "github:nix-community/nix-wrapper-modules";
       inputs.nixpkgs.follows = "nixpkgs";
