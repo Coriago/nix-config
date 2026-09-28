@@ -33,6 +33,10 @@ in {
         default = {};
         type = types.lazyAttrsOf hostMetaType;
       };
+      options.email = mkOption {
+        type = types.str;
+        description = "Email address used for the primary user's Git identity.";
+      };
     };
     default = {};
   };
@@ -42,6 +46,7 @@ in {
 
     # Central metadata used across flake
     meta = {
+      email = "gagemiller155@gmail.com";
       sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBYVacUQ/B11m2ycolJnoIKn4TS1alZKDbe1ssRnWZE2";
       primaryHost = config.meta.hosts.heliosdesk;
       tailscaleDomain = "li-taipan.ts.net";

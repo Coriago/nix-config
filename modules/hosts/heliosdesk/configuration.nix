@@ -7,6 +7,7 @@
   configurations.nixos.heliosdesk = {
     imports = with config.flake.modules.nixos; [
       workstation
+      boot
       nvidia
       cachyos-kernel
     ];

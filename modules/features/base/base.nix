@@ -36,12 +36,6 @@ in {
       meta.sshPublicKey
     ];
     programs.ssh.startAgent = true;
-    programs.git.enable = true;
-    programs.zsh = {
-      enable = true;
-      enableCompletion = true;
-    };
-    users.defaultUserShell = pkgs.zsh;
     environment.systemPackages = with pkgs; [
       wget
       curl
