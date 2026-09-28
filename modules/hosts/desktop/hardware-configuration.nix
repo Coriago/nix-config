@@ -42,6 +42,10 @@
 
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
     hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+    # Disable integrated AMD iGPU
+    boot.blacklistedKernelModules = ["amdgpu"];
+    boot.kernelParams = ["module_blacklist=amdgpu"];
   };
   ###########################################
 }

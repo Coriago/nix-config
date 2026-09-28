@@ -10,9 +10,5 @@
       nvidia
       cachyos-kernel
     ];
-
-    # Disable integrated AMD iGPU
-    boot.blacklistedKernelModules = ["amdgpu"];
-    boot.kernelParams = ["module_blacklist=amdgpu"];
   };
 }
