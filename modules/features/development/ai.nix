@@ -1,5 +1,5 @@
 {inputs, ...}: {
-  flake.modules.nixos.ai = {
+  flake.modules.nixos.development = {
     pkgs,
     config,
     ...
