@@ -214,7 +214,6 @@ require('minuet').setup {
   virtualtext = {
     auto_trigger_ft = {},
     keymap = {
-      accept = '<A-A>',
       accept_line = '<A-a>',
       next = '<A-]>',
       prev = '<A-[>',
@@ -231,7 +230,21 @@ vim.keymap.set('n', '<leader>ac', '<cmd>Minuet virtualtext toggle<CR>',
 require('luasnip').setup {}
 require('luasnip.loaders.from_vscode').lazy_load()
 require('blink.cmp').setup {
-  keymap = { preset = 'default' }, -- C-space: open; C-n/C-p: select; C-y: accept.
+  keymap = {
+    preset = 'default', -- C-space: open; C-n/C-p: select.
+    ['<C-y>'] = {
+      function(cmp)
+        -- Prefer the completion menu; otherwise accept visible AI ghost text.
+        local ai = require('minuet.virtualtext').action
+        if not cmp.is_visible() and ai.is_visible() then
+          ai.accept_line()
+          return true
+        end
+      end,
+      'accept',
+      'fallback',
+    },
+  },
   completion = { documentation = { auto_show = true, auto_show_delay_ms = 500 } },
   sources = { default = { 'lsp', 'path', 'snippets', 'buffer' } },
   snippets = { preset = 'luasnip' },
