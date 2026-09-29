@@ -1,4 +1,4 @@
-"""Check the wrapped CLI and exercise its memory server over MCP, offline."""
+"""Check the wrapped CLI and exercise its Playwright browser over MCP, offline."""
 
 import json
 from pathlib import Path
@@ -30,15 +30,15 @@ for _ in range(10):
         [binary, "mcp", "list"], text=True, capture_output=True, timeout=60
     )
     assert status.returncode == 0, status.stdout + status.stderr
-    if "memory" in status.stdout and "connected" in status.stdout.lower():
+    if "playwright" in status.stdout and "connected" in status.stdout.lower():
         break
     time.sleep(1)
 else:
     raise AssertionError(status.stdout + status.stderr + sources.stdout + sources.stderr)
-print("OpenCode connected to memory MCP", flush=True)
+print("OpenCode connected to Playwright MCP", flush=True)
 
 server = subprocess.Popen(
-    config["mcp"]["memory"]["command"],
+    config["mcp"]["servers"]["playwright"]["command"],
     stdin=subprocess.PIPE,
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
@@ -99,15 +99,16 @@ try:
     })
     send({"method": "notifications/initialized"})
     tools = request("tools/list", {})["tools"]
-    assert {"create_entities", "read_graph", "delete_entities"} <= {tool["name"] for tool in tools}
+    assert {"browser_navigate", "browser_evaluate", "browser_snapshot"} <= {tool["name"] for tool in tools}
+    request("tools/call", {"name": "browser_navigate", "arguments": {"url": "about:blank"}})
     request("tools/call", {
-        "name": "create_entities",
-        "arguments": {"entities": [{"name": "myopencode-test", "entityType": "test", "observations": ["MCP works"]}]},
+        "name": "browser_evaluate",
+        "arguments": {"function": "() => { document.body.innerHTML = '<h1>myopencode-browser-test</h1>'; return document.body.innerText; }"},
     })
-    graph = request("tools/call", {"name": "read_graph", "arguments": {}})
-    assert "myopencode-test" in json.dumps(graph), graph
-    request("tools/call", {"name": "delete_entities", "arguments": {"entityNames": ["myopencode-test"]}})
-    print("Memory MCP: initialized, entity created, graph read, entity deleted", flush=True)
+    snapshot = request("tools/call", {"name": "browser_snapshot", "arguments": {}})
+    assert "myopencode-browser-test" in json.dumps(snapshot), snapshot
+    request("tools/call", {"name": "browser_close", "arguments": {}})
+    print("Playwright MCP: browser launched, JavaScript executed, snapshot verified", flush=True)
 finally:
     server.terminate()
     try:

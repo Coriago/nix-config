@@ -13,13 +13,7 @@
     system,
     self',
     ...
-  }: let
-    memoryServer = pkgs.writeShellScriptBin "myopencode-memory" ''
-      export MEMORY_FILE_PATH="''${MEMORY_FILE_PATH:-''${XDG_STATE_HOME:-$HOME/.local/state}/myopencode/memory.jsonl}"
-      ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$MEMORY_FILE_PATH")"
-      exec ${lib.getExe pkgs.mcp-server-memory} "$@"
-    '';
-  in {
+  }: {
     packages.myopencode = inputs.wrapper-modules.wrappers.opencode.wrap {
       inherit pkgs;
       package = inputs.llm-agents.packages.${system}.opencode2;
@@ -28,10 +22,9 @@
       settings = {
         "$schema" = "https://opencode.ai/config.json";
         autoupdate = false;
-        mcp.memory = {
+        mcp.servers.playwright = {
           type = "local";
-          command = [(lib.getExe memoryServer)];
-          enabled = true;
+          command = [(lib.getExe pkgs.playwright-mcp) "--headless" "--isolated"];
         };
       };
       # Keep tools from the invoking project environment ahead of fallbacks.
@@ -46,7 +39,7 @@
     apps.myopencode = {
       type = "app";
       program = lib.getExe' self'.packages.myopencode "myopencode";
-      meta.description = "OpenCode v2 with a packaged memory MCP server";
+      meta.description = "OpenCode v2 with packaged Playwright MCP";
     };
 
     checks.myopencode =

@@ -22,17 +22,16 @@ nix run .#myopencode -- mcp list
 ```
 
 `myopencode` wraps `llm-agents.packages.${system}.opencode2` with
-nix-wrapper-modules. It includes a local **memory MCP server**, packaged by Nix,
-for storing and querying a small knowledge graph. No npm installation or API key
+nix-wrapper-modules. It includes **Playwright MCP and its matching browsers**, packaged by Nix,
+for browser automation. No npm installation or API key
 is needed for the MCP server itself. Authenticate your AI provider normally:
 
 ```sh
 nix run .#myopencode -- auth login
 ```
 
-Memory persists at `$XDG_STATE_HOME/myopencode/memory.jsonl`, defaulting to
-`~/.local/state/myopencode/memory.jsonl`. It is shared across projects; set
-`MEMORY_FILE_PATH` before starting the server to choose a different file.
+Playwright runs headlessly with an isolated browser profile, so it works without
+a graphical session and does not persist browser logins between sessions.
 
 The wrapper supplies default configuration through `OPENCODE_CONFIG`. An explicit
 `OPENCODE_CONFIG` overrides that default; ordinary user/project configuration and
@@ -54,7 +53,7 @@ nix run .#myopencode -- --standalone
 
 The NixOS `development` bundle installs the `myopencode` executable. Package and
 MCP settings live in `modules/features/development/ai.nix`. The smoke test checks
-OpenCode's MCP connection and actual memory tool calls:
+OpenCode's MCP connection, browser startup, JavaScript execution, and snapshots:
 
 ```sh
 nix build .#checks.x86_64-linux.myopencode --no-link -L
