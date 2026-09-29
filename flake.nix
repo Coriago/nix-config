@@ -23,6 +23,8 @@
 
     # Secondary
     ################################
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
+    nixos-hardware.inputs.nixpkgs.follows = "nixpkgs";
     nixos-cli.url = "github:nix-community/nixos-cli"; # Better cli for nixos
     nixos-cli.inputs.nixpkgs.follows = "nixpkgs";
     nixos-cli.inputs.flake-parts.follows = "flake-parts";

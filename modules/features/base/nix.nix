@@ -5,16 +5,13 @@
     ...
   }: {
     nixpkgs.config.allowUnfree = true;
-    sops.secrets.nix_sigining_key = {};
+    sops.secrets.nix_signing_key = {};
     nix.extraOptions = ''
       builders-use-substitutes = true
-      secret-key-files = ${config.sops.secrets.nix_sigining_key.path}
+      secret-key-files = ${config.sops.secrets.nix_signing_key.path}
     '';
-
-    # Set nix path for lsp
-    nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
-
     nix.settings = {
+      nix-path = ["nixpkgs=${inputs.nixpkgs}"];
       auto-optimise-store = true;
 
       # Enable flakes

@@ -14,7 +14,7 @@
         differ.tool = "command";
         differ.command = ["nvd" "diff"];
         apply.use_nom = true;
-        config_location = "/home/${config.hostmeta.username}/.config/nixos";
+        config_location = "/home/${config.hostmeta.username}/.config/nix-config";
         apply.reexec_as_root = true;
       };
     };
