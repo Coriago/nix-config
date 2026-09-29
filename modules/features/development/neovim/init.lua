@@ -7,7 +7,7 @@
 vim.loader.enable()
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 vim.opt.number = true
 vim.opt.mouse = 'a'
@@ -59,12 +59,16 @@ vim.diagnostic.config {
 }
 
 -- UI and editing -------------------------------------------------------------
+require('mini.icons').setup()
+-- Share mini.icons with plugins that use the nvim-web-devicons API.
+require('mini.icons').mock_nvim_web_devicons()
 require('snacks').setup {
-  input = { enabled = true, icon = '>' },
-  lazygit = { config = { gui = { nerdFontsVersion = '' } } },
+  input = { enabled = true },
+  lazygit = { config = { gui = { nerdFontsVersion = '3' } } },
 }
 require('oil').setup {
-  columns = {}, -- Plain filenames; no icon font needed.
+  columns = { 'icon' },
+  win_options = { signcolumn = 'yes:2' }, -- Git index on the left, working tree on the right.
   view_options = { show_hidden = true },
   keymaps = {
     -- Keep Ctrl-h/l consistent with editor window navigation.
@@ -76,6 +80,17 @@ require('oil').setup {
     ['gR'] = 'actions.refresh',
   },
 }
+require('oil-git-status').setup {}
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'OilEnter',
+  group = vim.api.nvim_create_augroup('oil-auto-preview', { clear = true }),
+  callback = function(event)
+    -- OilEnter fires after the directory entries are ready.
+    if vim.api.nvim_get_current_buf() == event.data.buf then
+      require('oil').open_preview()
+    end
+  end,
+})
 vim.keymap.set('n', '-', '<cmd>Oil<CR>', { desc = 'Explore current file directory' })
 vim.keymap.set('n', '<leader>e', function() require('oil').open(vim.fn.getcwd()) end,
   { desc = '[E]xplore working directory' })
@@ -105,7 +120,7 @@ require('gitsigns').setup {
 }
 require('which-key').setup {
   delay = 0,
-  icons = { mappings = false },
+  icons = { mappings = true },
   spec = {
     { '<leader>s', group = '[S]earch' },
     { '<leader>t', group = '[T]oggle' },
@@ -122,7 +137,7 @@ require('todo-comments').setup { signs = false }
 require('mini.ai').setup { n_lines = 500, mappings = { around_next = 'aa', inside_next = 'ii' } }
 require('mini.surround').setup()
 local statusline = require 'mini.statusline'
-statusline.setup { use_icons = false }
+statusline.setup { use_icons = true }
 statusline.section_location = function() return '%2l:%-2v' end
 
 -- Git UI: Snacks embeds the real Lazygit executable and returns edits here.

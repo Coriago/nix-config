@@ -95,6 +95,7 @@ in {
         todo-comments-nvim
         mini-nvim
         oil-nvim
+        oil-git-status-nvim
         snacks-nvim
         opencode-nvim-v2
         minuet-ai-nvim

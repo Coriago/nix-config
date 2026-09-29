@@ -8,11 +8,14 @@
 
     home.sessionVariables.BROWSER = "brave";
 
+    fonts.fontconfig.enable = true;
+
     home.packages = with pkgs; [
       orca-slicer
       krita
       vlc
       ghostty
+      nerd-fonts.jetbrains-mono
     ];
   };
 }
