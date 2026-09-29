@@ -52,12 +52,115 @@ nix run .#myopencode -- --standalone
 ```
 
 The NixOS `development` bundle installs the `myopencode` executable. Package and
-MCP settings live in `modules/features/development/ai.nix`. The smoke test checks
+MCP settings live in `modules/features/development/opencode.nix`. The smoke test checks
 OpenCode's MCP connection, browser startup, JavaScript execution, and snapshots:
 
 ```sh
 nix build .#checks.x86_64-linux.myopencode --no-link -L
 ```
+
+## Local LLM over Tailscale
+
+The `local-llm` feature on `heliosdesk` serves **Qwen3 8B Q4_K_M** using
+`ollama-cuda`. It is sized for the RTX 3080 Ti's 12 GiB VRAM: ~5.2 GB weights,
+32K context, Flash Attention, Q8 KV cache, and one concurrent request/model.
+Requests from multiple hosts queue; idle models unload after five minutes.
+GPU residency and speed still depend on other desktop/GPU workloads.
+
+`meta.localLLM` in `modules/meta.nix` is the shared source for the serving host,
+model, port, context/output limits, and OpenCode endpoint. Only the desktop
+imports the server feature; every `myopencode` wrapper includes its provider.
+
+Apply on `heliosdesk` with `nixos apply`. The model loader downloads the model
+on service startup (allow ~5.2 GB disk space plus runtime storage):
+
+```sh
+journalctl -u ollama-model-loader -f
+ollama list
+```
+
+Both hosts must be signed into the tailnet, with MagicDNS enabled and Tailscale
+policy allowing TCP 11434 to `heliosdesk`. The NixOS firewall opens this port
+only on the Tailscale interface. The API has no separate authentication;
+tailnet peers allowed by that policy can also manage Ollama models.
+
+From any connected host:
+
+```sh
+curl http://heliosdesk.li-taipan.ts.net:11434/api/tags
+nix run .#myopencode -- run --model ollama/qwen3:8b-q4_K_M "Say hello"
+```
+
+Or select the model with `/models`. Restart an existing OpenCode background
+service after updating the wrapper. For an independently installed OpenCode v2,
+add this to `~/.config/opencode/opencode.jsonc`:
+
+```jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "providers": {
+    "ollama": {
+      "settings": {
+        "baseURL": "http://heliosdesk.li-taipan.ts.net:11434/v1"
+      },
+      "models": {
+        "qwen3:8b-q4_K_M": {
+          "capabilities": { "tools": true, "input": ["text"], "output": ["text"] },
+          "limit": { "context": 32768, "output": 8192 }
+        }
+      }
+    }
+  }
+}
+```
+
+During inference, use `ollama ps` on the desktop to verify `100% GPU` and
+`nvidia-smi` to inspect VRAM usage. Service logs are available with
+`journalctl -u ollama`. If gaming or other GPU workloads force CPU offload,
+reduce `meta.localLLM.contextLength` and rebuild. Model tags are fetched at
+deployment time by Ollama, independently of `flake.lock`.
+
+### Hybrid agent workflow
+
+The wrapper adds an optional, experimental **`local-summary`** subagent backed
+by `meta.localLLM.model` over Tailscale. It replaces `local-scout`: local testing
+found citation errors and repeated search failures, so general repository
+discovery is no longer its role. Its `fast` variant disables Qwen3 thinking.
+It has only the read tool and a four-step budget, for low-consequence extraction
+or summaries of explicitly named files when requested.
+
+Keep a capable cloud model selected for the primary Build/Plan agent. Use it
+for architecture, implementation, debugging, and final verification. Prefer its
+direct, targeted search/read tools for ordinary lookups.
+The built-in `explore` and `general` agents retain their normal model inheritance
+for harder research. The primary model is still your choice through `/models`.
+
+Example delegation:
+
+> Use local-summary to read modules/meta.nix, lines 66–74, and extract the
+> configured model, port, and context length with short verbatim excerpts.
+> Verify the findings before using them.
+
+Recommended session guidance:
+
+> Use direct tools for routine lookups. Reserve local-summary for explicitly
+> requested summaries of known files. Use stronger agents for independent
+> investigations or reviews only when the extra work is justified.
+
+The opt-in guidance is in the agent description; it is model-driven routing,
+not an enforced approval mechanism. Child sessions start fresh, so supply exact
+paths and a concrete question. Local inference avoids API charges for the child,
+but delegation, verification, and retries still consume primary-model tokens.
+Net cost savings and end-to-end speed improvements have not been demonstrated.
+Compare correctness, cloud token usage, total latency, and retries on real tasks
+before expanding its role. The local server serializes inference: parallel local agents add
+queueing, and first use after idle includes model-loading time. If the desktop
+is offline, use the regular agents; there is no automatic cloud fallback.
+
+Try the updated wrapper with `nix run .#myopencode`; after installing it through
+`nixos apply`, restart its background service with `myopencode service restart`.
+The fast model variant is also selectable explicitly as
+`ollama/qwen3:8b-q4_K_M#fast`.
 
 ## Portable Neovim
 
