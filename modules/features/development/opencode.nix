@@ -21,10 +21,22 @@ in {
       inherit pkgs;
       package = inputs.llm-agents.packages.${system}.opencode2;
       exePath = "bin/opencode2";
-      binName = "myopencode";
+      binName = "opencode";
       settings = {
         "$schema" = "https://opencode.ai/config.json";
         autoupdate = false;
+        permissions = [
+          {
+            action = "external_directory";
+            resource = "/nix/store/*";
+            effect = "allow";
+          }
+          {
+            action = "read";
+            resource = "/nix/store/*";
+            effect = "allow";
+          }
+        ];
         providers.ollama = {
           settings.baseURL = localLLM.baseURL;
           models.${localLLM.model} = {
@@ -97,7 +109,7 @@ in {
 
     apps.myopencode = {
       type = "app";
-      program = lib.getExe' self'.packages.myopencode "myopencode";
+      program = lib.getExe' self'.packages.myopencode "opencode";
       meta.description = "OpenCode v2 with packaged Playwright MCP";
     };
 

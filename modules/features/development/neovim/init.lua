@@ -37,6 +37,15 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 for key, direction in pairs { h = 'left', j = 'lower', k = 'upper', l = 'right' } do
   vim.keymap.set('n', '<C-' .. key .. '>', '<C-w><C-' .. key .. '>', { desc = 'Move focus to the ' .. direction .. ' window' })
 end
+vim.keymap.set('n', '<leader>wv', '<cmd>vsplit<CR>', { desc = 'Split window [V]ertically' })
+vim.keymap.set('n', '<leader>ws', '<cmd>split<CR>', { desc = '[S]plit window horizontally' })
+vim.keymap.set('n', '<leader>wc', '<cmd>close<CR>', { desc = '[C]lose window' })
+vim.keymap.set('n', '<leader>w=', '<C-w>=', { desc = 'Equalize window sizes' })
+vim.keymap.set('n', '<leader>wt', function()
+  vim.cmd 'botright 12new'
+  vim.cmd 'terminal'
+  vim.cmd 'startinsert'
+end, { desc = 'New [T]erminal below' })
 vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function() vim.hl.on_yank() end,
@@ -50,6 +59,26 @@ vim.diagnostic.config {
 }
 
 -- UI and editing -------------------------------------------------------------
+require('snacks').setup {
+  input = { enabled = true, icon = '>' },
+  lazygit = { config = { gui = { nerdFontsVersion = '' } } },
+}
+require('oil').setup {
+  columns = {}, -- Plain filenames; no icon font needed.
+  view_options = { show_hidden = true },
+  keymaps = {
+    -- Keep Ctrl-h/l consistent with editor window navigation.
+    ['<C-h>'] = false,
+    ['<C-l>'] = false,
+    ['<C-s>'] = false,
+    ['gs'] = { 'actions.select', opts = { horizontal = true } },
+    ['gv'] = { 'actions.select', opts = { vertical = true } },
+    ['gR'] = 'actions.refresh',
+  },
+}
+vim.keymap.set('n', '-', '<cmd>Oil<CR>', { desc = 'Explore current file directory' })
+vim.keymap.set('n', '<leader>e', function() require('oil').open(vim.fn.getcwd()) end,
+  { desc = '[E]xplore working directory' })
 require('guess-indent').setup {}
 require('gitsigns').setup {
   signs = {
@@ -70,6 +99,8 @@ require('gitsigns').setup {
     map('<leader>hr', gs.reset_hunk, 'Git [R]eset hunk')
     map('<leader>hp', gs.preview_hunk, 'Git [P]review hunk')
     map('<leader>hb', gs.blame_line, 'Git [B]lame line')
+    map('<leader>hd', gs.diffthis, 'Git [D]iff current file')
+    map('<leader>tb', gs.toggle_current_line_blame, '[T]oggle Git [B]lame')
   end,
 }
 require('which-key').setup {
@@ -79,6 +110,9 @@ require('which-key').setup {
     { '<leader>s', group = '[S]earch' },
     { '<leader>t', group = '[T]oggle' },
     { '<leader>h', group = 'Git [H]unk' },
+    { '<leader>w', group = '[W]indows and terminal' },
+    { '<leader>g', group = '[G]it' },
+    { '<leader>a', group = '[A]I / OpenCode' },
     { 'gr', group = 'LSP actions' },
   },
 }
@@ -91,6 +125,37 @@ local statusline = require 'mini.statusline'
 statusline.setup { use_icons = false }
 statusline.section_location = function() return '%2l:%-2v' end
 
+-- Git UI: Snacks embeds the real Lazygit executable and returns edits here.
+vim.keymap.set('n', '<leader>gg', function()
+  require('snacks').lazygit { cwd = vim.fn.getcwd() }
+end, { desc = 'Open Lazy[G]it (working directory)' })
+vim.keymap.set('n', '<leader>gf', function() require('snacks').lazygit.log_file() end,
+  { desc = 'Git history of current [F]ile' })
+
+-- OpenCode v2: use the same packaged CLI, providers, and service as the shell.
+local editor_info = require('nix-info').info
+local opencode_cmd = { editor_info.opencode_command }
+local function opencode_terminal_opts()
+  return { cwd = vim.fn.getcwd(), win = { position = 'right', width = 0.45 }, auto_insert = false }
+end
+vim.g.opencode_opts = {
+  server = {
+    start = function() require('snacks').terminal.get(opencode_cmd, opencode_terminal_opts()) end,
+  },
+  ask = { snacks = { icon = 'AI' } },
+}
+vim.keymap.set('n', '<leader>at', function()
+  require('snacks').terminal.toggle(opencode_cmd, opencode_terminal_opts())
+end, { desc = 'OpenCode [T]oggle panel' })
+vim.keymap.set({ 'n', 'x' }, '<leader>aa', function() require('opencode').ask('@this: ') end,
+  { desc = '[A]sk OpenCode about cursor/selection' })
+vim.keymap.set({ 'n', 'x' }, '<leader>as', function() require('opencode').select() end,
+  { desc = 'OpenCode [S]elect action' })
+vim.keymap.set('n', '<leader>ab', function() require('opencode').ask('@buffer: ') end,
+  { desc = 'Ask OpenCode about [B]uffer' })
+vim.keymap.set('n', '<leader>ad', function() require('opencode').ask('Explain @diagnostics: ') end,
+  { desc = 'Ask OpenCode about [D]iagnostics' })
+
 -- Search ---------------------------------------------------------------------
 require('telescope').setup {
   defaults = { preview = { treesitter = false } },
@@ -102,7 +167,7 @@ local builtin = require 'telescope.builtin'
 for key, item in pairs {
   sh = { builtin.help_tags, '[S]earch [H]elp' },
   sk = { builtin.keymaps, '[S]earch [K]eymaps' },
-  sf = { builtin.find_files, '[S]earch [F]iles' },
+  sf = { function() builtin.find_files { hidden = true } end, '[S]earch [F]iles' },
   ss = { builtin.builtin, '[S]earch [S]elect Telescope' },
   sw = { builtin.grep_string, '[S]earch current [W]ord' },
   sg = { builtin.live_grep, '[S]earch by [G]rep' },
@@ -118,6 +183,51 @@ vim.keymap.set('n', '<leader>/', function()
 end, { desc = '[/] Fuzzily search current buffer' })
 
 -- Completion and snippets ----------------------------------------------------
+-- Chat-based local suggestions, separate from Blink's fast LSP completions.
+-- Start manually: this Ollama server serializes requests with other clients.
+require('minuet').setup {
+  provider = 'openai_compatible',
+  n_completions = 1,
+  context_window = 2048, -- Characters around the cursor, not tokens.
+  request_timeout = 10,
+  throttle = 1500,
+  debounce = 600,
+  provider_options = {
+    openai_compatible = {
+      name = 'Local Qwen',
+      end_point = editor_info.ai_completion_endpoint,
+      model = editor_info.ai_completion_model,
+      api_key = function() return 'ollama' end, -- Required by client; ignored by Ollama.
+      -- Minuet's default few-shot prompt demonstrates multiple alternatives;
+      -- Qwen3 8B repeated that pattern even with n_completions = 1.
+      few_shots = function() return {} end,
+      system = {
+        template = 'You are an inline code completion engine. Fill the gap at <cursorPosition> between '
+          .. '<contextBeforeCursor> and <contextAfterCursor>. Return exactly one short continuation, '
+          .. 'only the missing code. Do not repeat surrounding code. Do not list alternatives, explain, '
+          .. 'or use markdown fences. Preserve indentation. Stop as soon as the immediate statement '
+          .. 'or small block is complete.',
+      },
+      optional = { max_tokens = 128, temperature = 0.2, reasoning_effort = 'none' },
+    },
+  },
+  virtualtext = {
+    auto_trigger_ft = {},
+    keymap = {
+      accept = '<A-A>',
+      accept_line = '<A-a>',
+      next = '<A-]>',
+      prev = '<A-[>',
+      dismiss = '<A-e>',
+    },
+  },
+}
+vim.keymap.set('i', '<A-y>', function()
+  require('blink.cmp').hide()
+  require('minuet.virtualtext').action.next()
+end, { desc = 'Request local AI suggestion' })
+vim.keymap.set('n', '<leader>ac', '<cmd>Minuet virtualtext toggle<CR>',
+  { desc = 'Toggle automatic AI [C]ompletion (buffer)' })
 require('luasnip').setup {}
 require('luasnip.loaders.from_vscode').lazy_load()
 require('blink.cmp').setup {

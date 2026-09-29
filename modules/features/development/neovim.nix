@@ -1,8 +1,11 @@
 {
+  config,
   inputs,
   self,
   ...
-}: {
+}: let
+  inherit (config.meta) localLLM;
+in {
   flake.modules.nixos.development = {pkgs, ...}: {
     environment.systemPackages = [self.packages.${pkgs.stdenv.hostPlatform.system}.myneovim];
   };
@@ -12,7 +15,20 @@
     lib,
     self',
     ...
-  }: {
+  }: let
+    # nixpkgs currently ships the v1-only release. Pin upstream's v2 branch
+    # separately until a v2-compatible release reaches our nixpkgs revision.
+    opencode-nvim-v2 = pkgs.vimUtils.buildVimPlugin {
+      pname = "opencode.nvim";
+      version = "unstable-2026-09-24";
+      src = pkgs.fetchFromGitHub {
+        owner = "nickjvandyke";
+        repo = "opencode.nvim";
+        rev = "06770e2e3618b82703e3e7af1f2d5dc67bde0002";
+        hash = "sha256-cY56YBPNQsutfTBtOsMkJaLRvxjQM4mO61A5w9Q8HWs=";
+      };
+    };
+  in {
     packages.myneovim = inputs.wrapper-modules.wrappers.neovim.wrap {
       inherit pkgs;
       settings.config_directory = ./neovim;
@@ -21,6 +37,9 @@
       info = {
         fallback_rustc = "${pkgs.rustc}/bin/rustc";
         fallback_rust_src = "${pkgs.rustPlatform.rustLibSrc}";
+        opencode_command = lib.getExe' self'.packages.myopencode "opencode";
+        ai_completion_endpoint = "${localLLM.baseURL}/chat/completions";
+        ai_completion_model = localLLM.model;
       };
 
       hosts.python3.nvim-host.enable = false;
@@ -36,6 +55,9 @@
             ":"
             (lib.makeBinPath (with pkgs; [
               git
+              lazygit
+              curl
+              self'.packages.myopencode
               ripgrep
               fd
               wl-clipboard
@@ -72,6 +94,10 @@
         tokyonight-nvim
         todo-comments-nvim
         mini-nvim
+        oil-nvim
+        snacks-nvim
+        opencode-nvim-v2
+        minuet-ai-nvim
         plenary-nvim
         telescope-nvim
         telescope-fzf-native-nvim

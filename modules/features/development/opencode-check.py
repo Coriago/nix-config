@@ -10,8 +10,8 @@ import time
 
 
 package = Path(sys.argv[1])
-binary = package / "bin/myopencode"
-config_path = package / "myopencode-config.json"
+binary = package / "bin/opencode"
+config_path = package / "opencode-config.json"
 config = json.loads(config_path.read_text())
 
 version = subprocess.check_output([binary, "--version"], text=True, timeout=30)
