@@ -5,8 +5,14 @@ local: {
       desktop
       development
       kde
+      # niri
       tailscale
     ];
+
+    # services.displayManager = {
+    #   plasma-login-manager.enable = true;
+    #   defaultSession = "niri";
+    # };
 
     home-manager.users.${config.hostmeta.username} = {
       imports = with local.config.flake.modules.homeManager; [
