@@ -14,6 +14,7 @@ in {
     pkgs,
     lib,
     self',
+    liveConfig,
     ...
   }: let
     # nixpkgs currently ships the v1-only release. Pin upstream's v2 branch
@@ -31,7 +32,7 @@ in {
   in {
     packages.myneovim = inputs.wrapper-modules.wrappers.neovim.wrap {
       inherit pkgs;
-      settings.config_directory = ./neovim;
+      settings.config_directory = liveConfig.link ./neovim;
       # Keep state/cache separate from any Neovim already on the host.
       env.NVIM_APPNAME = "myneovim";
       info = {

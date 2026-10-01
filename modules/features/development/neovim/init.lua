@@ -1,4 +1,4 @@
--- Adapted from https://github.com/nvim-lua/kickstart.nvim (MIT; see LICENSE).
+-- Adapted from https://github.com/nvim-lua/kickstart.nvim (MIT; see LICENSE).init
 -- Keep Kickstart's readable configuration, but let Nix supply all plugins,
 -- language servers, formatters, and compiled Treesitter parsers.
 -- Edit this file and rerun `nix run .#myneovim` to use the updated configuration.
@@ -8,7 +8,6 @@ vim.loader.enable()
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
-
 vim.opt.number = true
 vim.opt.mouse = 'a'
 vim.opt.showmode = false
