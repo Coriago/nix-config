@@ -4,6 +4,7 @@ local: {
       base
       desktop
       development
+      pi-agent
       kde
       # niri
       tailscale
