@@ -14,6 +14,27 @@ TODO
 
 # Overview
 
+## Niri desktop
+
+The workstation profile provides a **Niri** login session with a wrapped
+`niri` binary, Ghostty, Fuzzel, Waybar, and Mako. Apply with `nixos apply`,
+then select Niri at login. **Super+Shift+N** opens this checkout in the packaged
+Neovim; **Super+Return** opens a terminal and **Super+?** shows shortcut help.
+
+Try nested with `nix run .#myniri` (uses **Alt** instead of Super), or validate
+with `nix run .#myniri -- validate`. See [the Niri guide](docs/niri-workflow.md)
+for all bindings and configuration paths.
+
+## Portable Pi agent
+
+`nix run .#mypi` runs Pi from `llm-agents`, with packaged web access and
+`@juicesharp/rpiv-ask-user-question` plugins. The workstation profile
+installs it as `pi`. The nix-wrapper-modules package also bundles Chrome DevTools
+MCP and Chromium, registered through Pi's built-in MCP support. Browser config
+uses the `liveConfig` toggle.
+See [the Pi feature guide](modules/features/pi-agent/README.md) for configuration,
+credentials, plugin updates, and checks.
+
 ## Portable OpenCode v2
 
 ```sh
@@ -21,7 +42,8 @@ nix run .#myopencode
 nix run .#myopencode -- mcp list
 ```
 
-`myopencode` wraps `llm-agents.packages.${system}.opencode2` with
+The `myopencode` flake package provides the `opencode` binary, wrapping
+`llm-agents.packages.${system}.opencode2` with
 nix-wrapper-modules. It includes **Playwright MCP and its matching browsers**, packaged by Nix,
 for browser automation. No npm installation or API key
 is needed for the MCP server itself. Authenticate your AI provider normally:
@@ -51,7 +73,7 @@ For a private server tied to the current editor session instead:
 nix run .#myopencode -- --standalone
 ```
 
-The NixOS `development` bundle installs the `myopencode` executable. Package and
+The NixOS `development` bundle installs the `opencode` executable. Package and
 MCP settings live in `modules/features/development/opencode.nix`. The smoke test checks
 OpenCode's MCP connection, browser startup, JavaScript execution, and snapshots:
 
@@ -158,11 +180,19 @@ queueing, and first use after idle includes model-loading time. If the desktop
 is offline, use the regular agents; there is no automatic cloud fallback.
 
 Try the updated wrapper with `nix run .#myopencode`; after installing it through
-`nixos apply`, restart its background service with `myopencode service restart`.
+`nixos apply`, restart its background service with `opencode service restart`.
 The fast model variant is also selectable explicitly as
 `ollama/qwen3:8b-q4_K_M#fast`.
 
 ## Portable Neovim
+
+Start with the [VS Code → Neovim workflow guide](docs/neovim-workflow.md):
+file exploration, splits, terminals, Git, and a staged path to tmux, debugging,
+and a keyboard-driven desktop.
+
+The [AI and Git workflow](docs/neovim-workflow.md#ai-in-the-editor--opencode-and-inline-suggestions)
+includes an OpenCode v2 panel/context sharing, embedded Lazygit, and local Qwen
+inline suggestions through Minuet. Snacks supplies the input/terminal/Lazygit UI.
 
 ```sh
 nix run .#myneovim
@@ -306,12 +336,61 @@ nix build .#checks.x86_64-linux.myneovim .#checks.x86_64-linux.myneovim-projects
 
 The leader key is **Space**:
 
+- `<leader>e`: explore working directory; `-`: explore current file's directory (Oil).
+- `<leader>wv` / `<leader>ws`: splits; `<leader>wt`: new terminal below;
+  `Esc Esc` leaves terminal input mode; `Ctrl-h/j/k/l` switches editor windows.
+- `<leader>gg`: Lazygit; `<leader>gf`: file history; `<leader>hd`: file diff;
+  `<leader>tb`: toggle inline Git blame.
+- `<leader>at`: OpenCode panel; `<leader>aa`: ask about cursor/selection;
+  `<leader>ab`: ask about file; `<leader>ad`: diagnostics; `<leader>as`: actions.
+- Insert mode `Alt-y`: local AI suggestion; `Ctrl-a`: accept line;
+  `Ctrl-y`: accept LSP menu selection or visible AI suggestion; `Alt-e`: dismiss. `<leader>ac` toggles automatic
+  suggestions in the current buffer (manual initially).
 - `<leader>sf`: find files; `<leader>sg`: search text; `<leader>sh`: search help.
 - `gd`: definition; `grr`: references; `grn`: rename; `gra`: code action; `K`: hover.
 - `<leader>f`: format the buffer or selection (no automatic format-on-save).
 - `Ctrl-Space`: completion menu; `Ctrl-n`/`Ctrl-p`: select; `Ctrl-y`: accept.
 - `:checkhealth vim.lsp`: inspect language-server health.
 
+### Live checkout configuration
+
+Toggle live config in `modules/liveconfig.nix`:
+
+```nix
+config.liveConfig = {
+  enable = true; # false bundles config in the Nix store
+  root = "/home/helios/.config/nix-config";
+};
+```
+
+Neovim's entire `modules/features/development/neovim` directory is wired up.
+Build once after changing the toggle or checkout path:
+
+```sh
+nix build .#myneovim --out-link result-neovim-live
+./result-neovim-live/bin/nvim
+```
+
+Run the build from this checkout once, then launch the resulting binary directly.
+Edit Lua files in the checkout and restart Neovim to load them **without another
+Nix build**. This does not automatically reconfigure an already-running editor.
+Plugin/tool changes in Nix still require a build. Keep the checkout at the same
+absolute path while using this package.
+
+No environment variables or `--impure` are needed. The same toggle applies to
+the wrapper installed through NixOS. Set `enable = false` and rebuild to return
+to bundled config. Run flake checks with live config disabled because sandboxed
+tests cannot read the checkout.
+
+For additional wrappers, take the `liveConfig` argument in `perSystem` and pass
+`liveConfig.link ./config-directory` wherever the application receives a runtime
+config path.
+The helper lives in `modules/liveconfig.nix` and works for files or directories.
+Consumers must read the link at runtime: `builtins.readFile`, copying, or
+build-time substitution cannot turn a live link into reloadable configuration.
+Niri's substituted KDL and OpenCode's Nix-generated JSON still require builds.
+
 Edit `modules/features/development/neovim/init.lua` for editor behavior and
 `modules/features/development/neovim.nix` for plugins/tools. Rerun the command to
-rebuild with your changes. Plugins and tools are pinned through `flake.lock`.
+rebuild with your changes. Plugins and tools are pinned through `flake.lock`,
+except opencode.nvim's v2-compatible revision, explicitly pinned in `neovim.nix`.
