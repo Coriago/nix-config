@@ -119,7 +119,7 @@ in {
     ];
   };
 
-  flake.modules.nixos.development = {
+  flake.modules.nixos.neovim = {
     config,
     lib,
     liveConfig,
@@ -128,6 +128,7 @@ in {
   }: {
     imports = [local.flake.wrappers.myneovim.install];
 
+    environment.sessionVariables.EDITOR = "nvim";
     wrappers.myneovim = {pkgs, ...}: {
       enable = true;
       package = pkgs.neovim-unwrapped;

@@ -6,7 +6,7 @@
 }: let
   inherit (config.meta) localLLM;
 in {
-  flake.modules.nixos.development = {pkgs, ...}: {
+  flake.modules.nixos.opencode = {pkgs, ...}: {
     environment.systemPackages = [self.packages.${pkgs.stdenv.hostPlatform.system}.myopencode];
   };
 
