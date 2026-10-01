@@ -1,22 +1,11 @@
 {
+  config,
   inputs,
-  self,
   ...
-}: {
-  flake.modules.nixos.pi-agent = {pkgs, ...}: {
-    environment.systemPackages = [self.packages.${pkgs.stdenv.hostPlatform.system}.mypi];
-  };
-
-  perSystem = {
-    pkgs,
-    lib,
-    system,
-    self',
-    liveConfig,
-    ...
-  }: let
-    pi = inputs.llm-agents.packages.${system}.pi;
-    plugins = pkgs.buildNpmPackage {
+}: let
+  local = config;
+  mkPlugins = pkgs:
+    pkgs.buildNpmPackage {
       pname = "mypi-plugins";
       version = "1.0.0";
       src = ./plugins;
@@ -33,52 +22,113 @@
         runHook postInstall
       '';
     };
-    mkBrowserServer = configDir:
-      inputs.wrapper-modules.lib.wrapPackage {
-        inherit pkgs;
-        package = plugins;
-        exePath = "share/pi-plugins/node_modules/chrome-devtools-mcp/build/src/bin/chrome-devtools-mcp.js";
-        binName = "chrome-devtools-mcp";
-        flags = {
-          "--executablePath" = lib.getExe pkgs.chromium;
-          "--config" = "${configDir}/chrome-devtools.json";
+  mkBrowserServer = {
+    configDir,
+    lib,
+    pkgs,
+    plugins,
+  }:
+    inputs.wrapper-modules.lib.wrapPackage {
+      inherit pkgs;
+      package = plugins;
+      exePath = "share/pi-plugins/node_modules/chrome-devtools-mcp/build/src/bin/chrome-devtools-mcp.js";
+      binName = "chrome-devtools-mcp";
+      flags = {
+        "--executablePath" = lib.getExe pkgs.chromium;
+        "--config" = "${configDir}/chrome-devtools.json";
+      };
+      env.CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS = "1";
+      meta.description = "Chrome DevTools MCP with packaged Chromium";
+    };
+in {
+  flake.wrappers.mypi = {
+    config,
+    lib,
+    pkgs,
+    wlib,
+    ...
+  }: let
+    system = pkgs.stdenv.hostPlatform.system;
+    plugins = mkPlugins pkgs;
+  in {
+    imports = [wlib.modules.default];
+
+    options = {
+      configDir = lib.mkOption {
+        type = lib.types.oneOf [lib.types.path lib.types.package lib.types.str];
+        default = ./config;
+        description = "Pi extension and Chrome DevTools MCP config directory.";
+      };
+      browserServer = lib.mkOption {
+        type = lib.types.package;
+        default = mkBrowserServer {
+          inherit lib pkgs plugins;
+          inherit (config) configDir;
         };
-        env.CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS = "1";
-        meta.description = "Chrome DevTools MCP with packaged Chromium";
+        description = "Wrapped Chrome DevTools MCP server used by Pi.";
       };
-    mkPi = configDir: browserServer:
-      inputs.wrapper-modules.lib.wrapPackage {
-        inherit pkgs;
-        package = pi;
-        env.PI_CHROME_DEVTOOLS_MCP = lib.getExe' browserServer "chrome-devtools-mcp";
-        suffixVar = [
-          {
-            name = "cli-tools";
-            data = ["PATH" ":" (lib.makeBinPath [pkgs.git pkgs.nodejs pkgs.ripgrep])];
-          }
-        ];
-        runShell = [
-          ''
-            # Keep subcommands first; only sessions load the bundled extensions.
-            case "''${1:-}" in
-              install|remove|uninstall|update|list|config|auth|mcp) ;;
-              *) set -- --extension ${plugins}/share/pi-plugins \
-                   --extension ${configDir}/chrome-devtools.ts "$@" ;;
-            esac
-          ''
-        ];
-        meta.description = "Pi with Chrome DevTools MCP, web access, and user questions";
-      };
-    configDir = liveConfig.link ./config;
-    wrapper = mkPi configDir (mkBrowserServer configDir);
+    };
+
+    config = {
+      package = inputs.llm-agents.packages.${system}.pi;
+      env.PI_CHROME_DEVTOOLS_MCP = lib.getExe' config.browserServer "chrome-devtools-mcp";
+      suffixVar = [
+        {
+          name = "cli-tools";
+          data = ["PATH" ":" (lib.makeBinPath [pkgs.git pkgs.nodejs pkgs.ripgrep])];
+        }
+      ];
+      runShell = [
+        ''
+          # Keep subcommands first; only sessions load the bundled extensions.
+          case "''${1:-}" in
+            install|remove|uninstall|update|list|config|auth|mcp) ;;
+            *) set -- --extension ${plugins}/share/pi-plugins \
+                 --extension ${config.configDir}/chrome-devtools.ts "$@" ;;
+          esac
+        ''
+      ];
+      meta.description = "Pi with Chrome DevTools MCP, web access, and user questions";
+    };
+  };
+
+  flake.modules.nixos.pi-agent = {
+    config,
+    lib,
+    liveConfig,
+    pkgs,
+    ...
+  }: {
+    imports = [local.flake.wrappers.mypi.install];
+
+    wrappers.mypi = {pkgs, ...}: {
+      enable = true;
+      configDir = lib.mkIf config.liveConfig.enable (lib.mkForce (liveConfig.link ./config));
+    };
+  };
+
+  perSystem = {
+    pkgs,
+    lib,
+    self',
+    ...
+  }: let
+    plugins = mkPlugins pkgs;
     # Nix's build sandbox cannot host Chromium's nested user-namespace sandbox.
     # Only this test variant disables it; the installed browser keeps it enabled.
-    testBrowserServer = (mkBrowserServer ./config).wrap {
-      appendFlag = ["--chrome-arg=--no-sandbox"];
+    testBrowserServer =
+      (mkBrowserServer {
+        inherit lib pkgs plugins;
+        configDir = ./config;
+      }).wrap {
+        appendFlag = ["--chrome-arg=--no-sandbox"];
+      };
+    testWrapper = local.flake.wrappers.mypi.wrap {
+      inherit pkgs;
+      configDir = ./config;
+      browserServer = testBrowserServer;
     };
-    testWrapper = mkPi ./config testBrowserServer;
   in {
-    packages.mypi = wrapper;
     apps.mypi = {
       type = "app";
       program = lib.getExe self'.packages.mypi;

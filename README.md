@@ -190,9 +190,9 @@ Start with the [VS Code → Neovim workflow guide](docs/neovim-workflow.md):
 file exploration, splits, terminals, Git, and a staged path to tmux, debugging,
 and a keyboard-driven desktop.
 
-The [AI and Git workflow](docs/neovim-workflow.md#ai-in-the-editor--opencode-and-inline-suggestions)
-includes an OpenCode v2 panel/context sharing, embedded Lazygit, and local Qwen
-inline suggestions through Minuet. Snacks supplies the input/terminal/Lazygit UI.
+The AI and Git workflow
+includes embedded Lazygit and local Qwen inline suggestions through Minuet.
+Snacks supplies the input/terminal/Lazygit UI.
 
 ```sh
 nix run .#myneovim
@@ -341,8 +341,6 @@ The leader key is **Space**:
   `Esc Esc` leaves terminal input mode; `Ctrl-h/j/k/l` switches editor windows.
 - `<leader>gg`: Lazygit; `<leader>gf`: file history; `<leader>hd`: file diff;
   `<leader>tb`: toggle inline Git blame.
-- `<leader>at`: OpenCode panel; `<leader>aa`: ask about cursor/selection;
-  `<leader>ab`: ask about file; `<leader>ad`: diagnostics; `<leader>as`: actions.
 - Insert mode `Alt-y`: local AI suggestion; `Ctrl-a`: accept line;
   `Ctrl-y`: accept LSP menu selection or visible AI suggestion; `Alt-e`: dismiss. `<leader>ac` toggles automatic
   suggestions in the current buffer (manual initially).
@@ -354,33 +352,28 @@ The leader key is **Space**:
 
 ### Live checkout configuration
 
-Toggle live config in `modules/liveconfig.nix`:
+Flake package outputs such as `.#myneovim` bundle their config into the Nix
+store for deterministic builds and checks. NixOS configurations can opt into
+checkout-backed config for wrappers that use `liveConfig.link`:
 
 ```nix
-config.liveConfig = {
-  enable = true; # false bundles config in the Nix store
-  root = "/home/helios/.config/nix-config";
-};
+{
+  liveConfig = {
+    enable = true;
+    root = "/home/helios/.config/nix-config";
+  };
+}
 ```
 
-Neovim's entire `modules/features/development/neovim` directory is wired up.
-Build once after changing the toggle or checkout path:
+With that enabled on a host, installed wrappers such as Neovim and Pi read their
+runtime config through symlinks to the checkout. Edit Lua files in the checkout
+and restart Neovim to load them **without another Nix build**. This does not
+automatically reconfigure an already-running editor. Plugin/tool changes in Nix
+still require a build. Keep the checkout at the same absolute path while using
+live config.
 
-```sh
-nix build .#myneovim --out-link result-neovim-live
-./result-neovim-live/bin/nvim
-```
-
-Run the build from this checkout once, then launch the resulting binary directly.
-Edit Lua files in the checkout and restart Neovim to load them **without another
-Nix build**. This does not automatically reconfigure an already-running editor.
-Plugin/tool changes in Nix still require a build. Keep the checkout at the same
-absolute path while using this package.
-
-No environment variables or `--impure` are needed. The same toggle applies to
-the wrapper installed through NixOS. Set `enable = false` and rebuild to return
-to bundled config. Run flake checks with live config disabled because sandboxed
-tests cannot read the checkout.
+No environment variables or `--impure` are needed. Flake checks use deterministic
+package outputs with live config disabled by default.
 
 For additional wrappers, take the `liveConfig` argument in `perSystem` and pass
 `liveConfig.link ./config-directory` wherever the application receives a runtime
@@ -392,5 +385,4 @@ Niri's substituted KDL and OpenCode's Nix-generated JSON still require builds.
 
 Edit `modules/features/development/neovim/init.lua` for editor behavior and
 `modules/features/development/neovim.nix` for plugins/tools. Rerun the command to
-rebuild with your changes. Plugins and tools are pinned through `flake.lock`,
-except opencode.nvim's v2-compatible revision, explicitly pinned in `neovim.nix`.
+rebuild with your changes. Plugins and tools are pinned through `flake.lock`.

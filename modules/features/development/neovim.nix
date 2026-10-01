@@ -1,145 +1,146 @@
 {
   config,
   inputs,
-  self,
   ...
 }: let
-  inherit (config.meta) localLLM;
+  local = config;
+  inherit (local.meta) localLLM;
 in {
-  flake.modules.nixos.development = {pkgs, ...}: {
-    environment.systemPackages = [self.packages.${pkgs.stdenv.hostPlatform.system}.myneovim];
+  flake.wrappers.myneovim = {
+    lib,
+    pkgs,
+    wlib,
+    ...
+  }: {
+    imports = [wlib.wrapperModules.neovim];
+
+    settings.config_directory = ./neovim;
+    # Keep state/cache separate from any Neovim already on the host.
+    env.NVIM_APPNAME = "myneovim";
+    info = {
+      fallback_rustc = "${pkgs.rustc}/bin/rustc";
+      fallback_rust_src = "${pkgs.rustPlatform.rustLibSrc}";
+      ai_completion_endpoint = "${localLLM.baseURL}/chat/completions";
+      ai_completion_model = localLLM.model;
+    };
+
+    hosts.python3.nvim-host.enable = false;
+    hosts.node.nvim-host.enable = false;
+    hosts.ruby.nvim-host.enable = false;
+
+    # Preserve dev-shell tools, activated venvs, and rustup/asdf/mise shims.
+    suffixVar = [
+      {
+        name = "editor-tools";
+        data = [
+          "PATH"
+          ":"
+          (lib.makeBinPath (with pkgs; [
+            git
+            lazygit
+            curl
+            ripgrep
+            fd
+            wl-clipboard
+            xclip
+            nix
+            nixd
+            alejandra
+            lua-language-server
+            stylua
+            python3
+            pyright
+            ruff
+            go
+            gopls
+            rustc
+            cargo
+            rust-analyzer
+            rustfmt
+            gcc
+            nodejs
+            typescript-language-server
+            typescript
+            prettierd
+          ]))
+        ];
+      }
+    ];
+
+    # Nix supplies plugins and compiled parsers; nothing installs at startup.
+    specs.kickstart = with pkgs.vimPlugins; [
+      guess-indent-nvim
+      gitsigns-nvim
+      which-key-nvim
+      tokyonight-nvim
+      todo-comments-nvim
+      mini-nvim
+      oil-nvim
+      oil-git-status-nvim
+      snacks-nvim
+      minuet-ai-nvim
+      plenary-nvim
+      telescope-nvim
+      telescope-fzf-native-nvim
+      telescope-ui-select-nvim
+      nvim-lspconfig
+      fidget-nvim
+      conform-nvim
+      blink-cmp
+      luasnip
+      friendly-snippets
+      (nvim-treesitter.withPlugins (p:
+        with p; [
+          bash
+          c
+          css
+          diff
+          go
+          gomod
+          gosum
+          html
+          javascript
+          json
+          lua
+          luadoc
+          markdown
+          markdown_inline
+          nix
+          python
+          query
+          rust
+          toml
+          tsx
+          typescript
+          vim
+          vimdoc
+          yaml
+        ]))
+    ];
+  };
+
+  flake.modules.nixos.development = {
+    config,
+    lib,
+    liveConfig,
+    pkgs,
+    ...
+  }: {
+    imports = [local.flake.wrappers.myneovim.install];
+
+    wrappers.myneovim = {pkgs, ...}: {
+      enable = true;
+      package = pkgs.neovim-unwrapped;
+      settings.config_directory = lib.mkIf config.liveConfig.enable (lib.mkForce (liveConfig.link ./neovim));
+    };
   };
 
   perSystem = {
     pkgs,
     lib,
     self',
-    liveConfig,
     ...
-  }: let
-    # nixpkgs currently ships the v1-only release. Pin upstream's v2 branch
-    # separately until a v2-compatible release reaches our nixpkgs revision.
-    opencode-nvim-v2 = pkgs.vimUtils.buildVimPlugin {
-      pname = "opencode.nvim";
-      version = "unstable-2026-09-24";
-      src = pkgs.fetchFromGitHub {
-        owner = "nickjvandyke";
-        repo = "opencode.nvim";
-        rev = "06770e2e3618b82703e3e7af1f2d5dc67bde0002";
-        hash = "sha256-cY56YBPNQsutfTBtOsMkJaLRvxjQM4mO61A5w9Q8HWs=";
-      };
-    };
-  in {
-    packages.myneovim = inputs.wrapper-modules.wrappers.neovim.wrap {
-      inherit pkgs;
-      settings.config_directory = liveConfig.link ./neovim;
-      # Keep state/cache separate from any Neovim already on the host.
-      env.NVIM_APPNAME = "myneovim";
-      info = {
-        fallback_rustc = "${pkgs.rustc}/bin/rustc";
-        fallback_rust_src = "${pkgs.rustPlatform.rustLibSrc}";
-        opencode_command = lib.getExe' self'.packages.myopencode "opencode";
-        ai_completion_endpoint = "${localLLM.baseURL}/chat/completions";
-        ai_completion_model = localLLM.model;
-      };
-
-      hosts.python3.nvim-host.enable = false;
-      hosts.node.nvim-host.enable = false;
-      hosts.ruby.nvim-host.enable = false;
-
-      # Preserve dev-shell tools, activated venvs, and rustup/asdf/mise shims.
-      suffixVar = [
-        {
-          name = "editor-tools";
-          data = [
-            "PATH"
-            ":"
-            (lib.makeBinPath (with pkgs; [
-              git
-              lazygit
-              curl
-              self'.packages.myopencode
-              ripgrep
-              fd
-              wl-clipboard
-              xclip
-              nix
-              nixd
-              alejandra
-              lua-language-server
-              stylua
-              python3
-              pyright
-              ruff
-              go
-              gopls
-              rustc
-              cargo
-              rust-analyzer
-              rustfmt
-              gcc
-              nodejs
-              typescript-language-server
-              typescript
-              prettierd
-            ]))
-          ];
-        }
-      ];
-
-      # Nix supplies plugins and compiled parsers; nothing installs at startup.
-      specs.kickstart = with pkgs.vimPlugins; [
-        guess-indent-nvim
-        gitsigns-nvim
-        which-key-nvim
-        tokyonight-nvim
-        todo-comments-nvim
-        mini-nvim
-        oil-nvim
-        oil-git-status-nvim
-        snacks-nvim
-        opencode-nvim-v2
-        minuet-ai-nvim
-        plenary-nvim
-        telescope-nvim
-        telescope-fzf-native-nvim
-        telescope-ui-select-nvim
-        nvim-lspconfig
-        fidget-nvim
-        conform-nvim
-        blink-cmp
-        luasnip
-        friendly-snippets
-        (nvim-treesitter.withPlugins (p:
-          with p; [
-            bash
-            c
-            css
-            diff
-            go
-            gomod
-            gosum
-            html
-            javascript
-            json
-            lua
-            luadoc
-            markdown
-            markdown_inline
-            nix
-            python
-            query
-            rust
-            toml
-            tsx
-            typescript
-            vim
-            vimdoc
-            yaml
-          ]))
-      ];
-    };
-
+  }: {
     apps.myneovim = {
       type = "app";
       program = lib.getExe' self'.packages.myneovim "nvim";

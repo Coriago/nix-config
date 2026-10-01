@@ -12,6 +12,7 @@
         # Automatically add hostmeta to configurations
         imports = [
           config.flake.modules.generic.meta
+          config.flake.modules.nixos.live-config
           hostModule
         ];
 

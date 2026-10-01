@@ -126,7 +126,7 @@ require('which-key').setup {
     { '<leader>h', group = 'Git [H]unk' },
     { '<leader>w', group = '[W]indows and terminal' },
     { '<leader>g', group = '[G]it' },
-    { '<leader>a', group = '[A]I / OpenCode' },
+    { '<leader>a', group = '[A]I' },
     { 'gr', group = 'LSP actions' },
   },
 }
@@ -145,30 +145,6 @@ vim.keymap.set('n', '<leader>gg', function()
 end, { desc = 'Open Lazy[G]it (working directory)' })
 vim.keymap.set('n', '<leader>gf', function() require('snacks').lazygit.log_file() end,
   { desc = 'Git history of current [F]ile' })
-
--- OpenCode v2: use the same packaged CLI, providers, and service as the shell.
-local editor_info = require('nix-info').info
-local opencode_cmd = { editor_info.opencode_command }
-local function opencode_terminal_opts()
-  return { cwd = vim.fn.getcwd(), win = { position = 'right', width = 0.45 }, auto_insert = false }
-end
-vim.g.opencode_opts = {
-  server = {
-    start = function() require('snacks').terminal.get(opencode_cmd, opencode_terminal_opts()) end,
-  },
-  ask = { snacks = { icon = 'AI' } },
-}
-vim.keymap.set('n', '<leader>at', function()
-  require('snacks').terminal.toggle(opencode_cmd, opencode_terminal_opts())
-end, { desc = 'OpenCode [T]oggle panel' })
-vim.keymap.set({ 'n', 'x' }, '<leader>aa', function() require('opencode').ask('@this: ') end,
-  { desc = '[A]sk OpenCode about cursor/selection' })
-vim.keymap.set({ 'n', 'x' }, '<leader>as', function() require('opencode').select() end,
-  { desc = 'OpenCode [S]elect action' })
-vim.keymap.set('n', '<leader>ab', function() require('opencode').ask('@buffer: ') end,
-  { desc = 'Ask OpenCode about [B]uffer' })
-vim.keymap.set('n', '<leader>ad', function() require('opencode').ask('Explain @diagnostics: ') end,
-  { desc = 'Ask OpenCode about [D]iagnostics' })
 
 -- Search ---------------------------------------------------------------------
 require('telescope').setup {
@@ -197,6 +173,7 @@ vim.keymap.set('n', '<leader>/', function()
 end, { desc = '[/] Fuzzily search current buffer' })
 
 -- Completion and snippets ----------------------------------------------------
+local editor_info = require('nix-info').info
 -- Chat-based local suggestions, separate from Blink's fast LSP completions.
 -- Start manually: this Ollama server serializes requests with other clients.
 require('minuet').setup {

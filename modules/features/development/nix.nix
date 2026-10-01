@@ -17,6 +17,7 @@
         config_location = "/home/${config.hostmeta.username}/.config/nix-config";
         apply.reexec_as_root = true;
       };
+      option-cache.exclude = ["wrappers"];
     };
     environment.systemPackages = with pkgs; [
       nixd

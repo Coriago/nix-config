@@ -12,5 +12,7 @@
       local-llm
       cachyos-kernel
     ];
+
+    liveConfig.enable = true;
   };
 }
