@@ -29,7 +29,6 @@
     nixos-cli.inputs.nixpkgs.follows = "nixpkgs";
     nixos-cli.inputs.flake-parts.follows = "flake-parts";
     import-tree.url = "github:vic/import-tree"; # Recursive import of nix files in a directory
-    nix-flatpak.url = "github:gmodena/nix-flatpak"; # Flatpak app management
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
     nix-cachyos-kernel.inputs.nixpkgs.follows = "nixpkgs";
     llm-agents.url = "github:numtide/llm-agents.nix"; # LLM Agents

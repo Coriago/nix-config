@@ -84,11 +84,12 @@ in {
           case "''${1:-}" in
             install|remove|uninstall|update|list|config|auth|mcp) ;;
             *) set -- --extension ${plugins}/share/pi-plugins \
-                 --extension ${config.configDir}/chrome-devtools.ts "$@" ;;
+                 --extension ${config.configDir}/chrome-devtools.ts \
+                 --extension ${config.configDir}/context7.ts "$@" ;;
           esac
         ''
       ];
-      meta.description = "Pi with Chrome DevTools MCP, web access, and user questions";
+      meta.description = "Pi with Chrome DevTools and Context7 MCP, web access, and user questions";
     };
   };
 
@@ -96,14 +97,23 @@ in {
     config,
     lib,
     liveConfig,
-    pkgs,
     ...
-  }: {
+  }: let
+    context7Secret = config.sops.secrets.context7.path;
+  in {
     imports = [local.flake.wrappers.mypi.install];
+    sops.secrets.context7 = {};
 
     wrappers.mypi = {pkgs, ...}: {
       enable = true;
       configDir = lib.mkIf config.liveConfig.enable (lib.mkForce (liveConfig.link ./config));
+      runShell = [
+        ''
+          if [ -r ${lib.escapeShellArg context7Secret} ]; then
+            export CONTEXT7_API_KEY="$(< ${lib.escapeShellArg context7Secret})"
+          fi
+        ''
+      ];
     };
   };
 
@@ -140,6 +150,7 @@ in {
       } ''
         export HOME="$TMPDIR/home"
         mkdir -p "$HOME"
+        ${pkgs.nodejs}/bin/node ${./context7-check.mjs} ${./config/context7.ts}
         python ${./check.py} ${lib.getExe testWrapper} ${./check.ts}
         python ${./browser-check.py} ${lib.getExe' testBrowserServer "chrome-devtools-mcp"}
         touch "$out"

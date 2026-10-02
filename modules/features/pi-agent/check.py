@@ -19,6 +19,13 @@ with tempfile.TemporaryDirectory() as tmp:
         PI_CODING_AGENT_DIR=f"{tmp}/.pi/agent",
         PI_OFFLINE="1",
     )
+    # Disable only the remote connection; extension registration is tested separately.
+    agent_dir = os.path.join(tmp, ".pi", "agent")
+    os.makedirs(agent_dir)
+    with open(os.path.join(agent_dir, "mcp.json"), "w") as f:
+        json.dump({"mcpServers": {"context7": {
+            "url": "https://mcp.context7.com/mcp", "enabled": False,
+        }}}, f)
     subprocess.run([binary, "--version"], env=env, cwd=tmp, check=True, timeout=15)
     # Subcommands must not be mistaken for chat prompts by wrapper flags.
     subprocess.run([binary, "list"], env=env, cwd=tmp, check=True, timeout=15)

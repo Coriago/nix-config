@@ -54,11 +54,25 @@ mode and a temporary isolated profile, with usage statistics and CrUX requests
 disabled. The browser sandbox stays enabled. The MCP wrapper pins the browser
 executable and disables npm update checks.
 
-Both files in `config/` use `liveConfig.link`. With live config enabled, edit
+The files in `config/` use `liveConfig.link`. With live config enabled, edit
 them and restart Pi or use `/reload` without rebuilding. For example, change
 `headless` to `false` to show the browser in a graphical session. With live config
 disabled, they are bundled as a store snapshot. Package/browser updates and
 Nix-generated executable paths still require a build.
+
+## Context7 MCP
+
+`config/context7.ts` registers the official remote server at
+`https://mcp.context7.com/mcp` through Pi's native MCP API. Its documentation
+lookup tools are exposed directly. No local server or npm install is required.
+Anonymous access works at lower rate limits; optionally export
+`CONTEXT7_API_KEY` before launching Pi for authenticated access. The key is read
+at runtime and is never embedded in the Nix store.
+
+Restart Pi or use `/reload`, then inspect `context7` in `/mcp`. As with Chrome
+DevTools, this extension registration is not listed by shell-level `pi mcp list`.
+A user/project `mcp.json` entry named `context7` overrides the bundled registration.
+See [Context7's Pi guide](https://context7.com/docs/clients/pi).
 
 ## Updating and checking
 
@@ -81,7 +95,9 @@ use the reported actual hash). Plugin updates require a rebuild.
 nix build .#checks.x86_64-linux.mypi --no-link -L
 ```
 
-The offline check verifies both plugins, Pi's native MCP connection, browser
+The offline check verifies Context7 registration with and without a runtime key;
+it disables the remote connection via a test-only `mcp.json` override. It also
+verifies both plugins, Pi's native MCP connection, browser
 startup, JavaScript execution, snapshots, and screenshots. It uses a config
 snapshot even when live config is enabled. Only the build-sandbox test variant
 passes `--no-sandbox` to Chromium, because nested browser namespaces are not
