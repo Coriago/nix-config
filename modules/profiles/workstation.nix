@@ -6,20 +6,14 @@ local: {
       development
       pi-agent
       kde
-      # niri
+      neovim
       tailscale
     ];
-
-    # services.displayManager = {
-    #   plasma-login-manager.enable = true;
-    #   defaultSession = "niri";
-    # };
 
     home-manager.users.${config.hostmeta.username} = {
       imports = with local.config.flake.modules.homeManager; [
         base
         desktop
-        development
       ];
     };
   };

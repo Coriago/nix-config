@@ -639,7 +639,7 @@
     },
     "ui": {
         "boxBorderEnabled": false,
-        "fontDefault": "JetBrainsMono Nerd Font",
+        "fontDefault": "Noto Sans",
         "fontDefaultScale": 1,
         "fontFixed": "monospace",
         "fontFixedScale": 1,
