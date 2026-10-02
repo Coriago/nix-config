@@ -1,3 +1,0 @@
-# Runtime copies; declare plugin sources/settings in noctalia.nix instead.
-/plugins/
-/plugins.json

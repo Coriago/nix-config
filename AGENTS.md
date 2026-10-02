@@ -25,7 +25,8 @@
 - Use Context7 for library/API documentation when available: resolve the library ID, then query the relevant version. Fetch full official pages as needed; snippets do not replace complete documentation reads.
 
 - Umbriel: https://docs.noctalia.dev/umbriel/ — compositor configuration, keybinds, and session startup.
-- Noctalia v5: https://docs.noctalia.dev/noctalia/configuration/ — TOML layers, GUI settings versus runtime state, includes, and hot reload.
+- Noctalia v5: https://docs.noctalia.dev/noctalia/configuration/ — TOML layers, GUI settings versus runtime state, includes, and hot reload. Hooks: https://docs.noctalia.dev/noctalia/automation/hooks/
+- Tomli-W: https://github.com/hukkin/tomli-w — TOML serialization for filtered preference exports.
 
 ## Wrapper reference
 

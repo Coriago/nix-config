@@ -1,2 +1,0 @@
-# Curated Noctalia v5 settings. Changes reload live when liveConfig is enabled.
-# Nix settings provide the baseline; GUI settings.toml overrides both layers.
