@@ -2,7 +2,11 @@
 
 `mypi` uses nix-wrapper-modules to wrap
 `inputs.llm-agents.packages.${system}.pi` and provides the `pi` executable.
-Pi is pinned to 0.99.1, which includes native MCP support. The `pi-agent` NixOS
+Pi is pinned to 0.99.1, which includes native MCP support. A local package override
+adds the codemode worker to Bun's compiled entrypoints, matching upstream's
+`build:binary` script; the pinned llm-agents package embeds only the image worker.
+Remove the override once the input package includes both workers.
+The `pi-agent` NixOS
 feature is enabled by the workstation profile.
 
 ```sh
@@ -98,7 +102,10 @@ nix build .#checks.x86_64-linux.mypi --no-link -L
 The offline check verifies Context7 registration with and without a runtime key;
 it disables the remote connection via a test-only `mcp.json` override. It also
 verifies both plugins, Pi's native MCP connection, browser
-startup, JavaScript execution, snapshots, and screenshots. It uses a config
+startup, JavaScript execution, snapshots, and screenshots. A local simulated
+OpenAI-compatible model emits a codemode call; the real Pi sandbox executes
+parallel nested bash and Chrome DevTools calls, catching missing worker assets
+without provider credentials or external model requests. It uses a config
 snapshot even when live config is enabled. Only the build-sandbox test variant
 passes `--no-sandbox` to Chromium, because nested browser namespaces are not
 available there.

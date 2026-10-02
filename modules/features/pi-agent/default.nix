@@ -70,7 +70,21 @@ in {
     };
 
     config = {
-      package = inputs.llm-agents.packages.${system}.pi;
+      # The pinned package omits codemode's worker from the Bun entrypoints.
+      # Match Pi 0.99.1's build:binary layout using the prebuilt npm worker.
+      package = inputs.llm-agents.packages.${system}.pi.overrideAttrs (old: {
+        preInstall =
+          lib.replaceStrings
+          ["bun build --compile ./dist/bun/cli.js ./src/utils/image-resize-worker.ts --outfile dist/pi"]
+          [
+            ''
+              mkdir -p src/extensions/codemode
+              echo 'import "../../../dist/extensions/codemode/worker.js";' > src/extensions/codemode/worker.ts
+              bun build --compile ./dist/bun/cli.js ./src/utils/image-resize-worker.ts ./src/extensions/codemode/worker.ts --outfile dist/pi
+            ''
+          ]
+          old.preInstall;
+      });
       env.PI_CHROME_DEVTOOLS_MCP = lib.getExe' config.browserServer "chrome-devtools-mcp";
       suffixVar = [
         {

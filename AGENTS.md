@@ -8,6 +8,7 @@
 - Prefer supported upstream options over custom scripts or reimplementing existing features. Explain any necessary deviation based on documented limitations and the pinned implementation.
 - If documentation cannot be retrieved, say so rather than guessing. Distinguish documented behavior, implementation details, and assumptions.
 - Validate the intended behavior with focused checks. Clearly distinguish builds, simulated tests, and actual application/GUI tests.
+- When changing NixOS modules or packages used by them, also build the affected NixOS configurations (`nixosConfigurations.<host>.config.system.build.toplevel`), not just standalone output packages or flake checks. Package builds and evaluation alone do not validate system integration. Do not activate/switch the system merely to validate it; report any build failures or checks you could not complete.
 
 ## Repository boundaries
 
@@ -20,9 +21,11 @@
 - nix-wrapper-modules: https://nix-community.github.io/nix-wrapper-modules/ — wrapper options, integration, and examples.
 - Context7: https://context7.com/docs/ — documentation lookup and MCP setup; Pi integration: https://context7.com/docs/clients/pi
 - Pi: https://github.com/earendil-works/pi/tree/main/packages/coding-agent/docs — agent configuration, extensions, and native MCP.
+- Bun: https://bun.sh/docs/bundler/executables — standalone executable builds, worker entrypoints, and embedded assets.
 - Use Context7 for library/API documentation when available: resolve the library ID, then query the relevant version. Fetch full official pages as needed; snippets do not replace complete documentation reads.
 
 - Umbriel: https://docs.noctalia.dev/umbriel/ — compositor configuration, keybinds, and session startup.
+- Noctalia v5: https://docs.noctalia.dev/noctalia/configuration/ — TOML layers, GUI settings versus runtime state, includes, and hot reload.
 
 ## Wrapper reference
 

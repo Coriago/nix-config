@@ -1,0 +1,2 @@
+# Live Umbriel overrides, loaded after the Nix baseline.
+# Save this file to reload; autostart/environment/DRM changes require a restart.
