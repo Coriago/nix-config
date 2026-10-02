@@ -22,6 +22,8 @@
 - Pi: https://github.com/earendil-works/pi/tree/main/packages/coding-agent/docs — agent configuration, extensions, and native MCP.
 - Use Context7 for library/API documentation when available: resolve the library ID, then query the relevant version. Fetch full official pages as needed; snippets do not replace complete documentation reads.
 
+- Umbriel: https://docs.noctalia.dev/umbriel/ — compositor configuration, keybinds, and session startup.
+
 ## Wrapper reference
 
 - Noctalia wrapper: https://nix-community.github.io/nix-wrapper-modules/wrapperModules/noctalia-shell.html

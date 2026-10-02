@@ -1,8 +1,7 @@
 {
-  flake.modules.nixos.noctalia-greeter = {lib, pkgs, ...}: {
-    services.greetd = {
+  flake.modules.nixos.noctalia-greeter = {...}: {
+    services.displayManager.noctalia-greeter = {
       enable = true;
-      settings.default_session.command = lib.getExe pkgs.noctalia-greeter;
     };
   };
 }

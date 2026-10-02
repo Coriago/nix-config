@@ -1,59 +1,91 @@
-"""Test wrapper settings selection and atomic saves without launching a GUI."""
+"""Test wrapper configuration and atomic saves without launching a GUI."""
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
 
+
+def read_config(directory):
+    return {name: json.loads((directory / f"{name}.json").read_text())
+            for name in ("settings", "colors")}
+
+
 if sys.argv[1] == "--app":
-    path = Path(os.environ["NOCTALIA_SETTINGS_FILE"])
-    settings = json.loads(path.read_text())
+    directory = Path(os.environ["NOCTALIA_CONFIG_DIR"])
+    assert not os.environ.get("NOCTALIA_SETTINGS_FILE")
+    configuration = read_config(directory)
     if "--save" in sys.argv[2:]:
-        settings["testGuiEdit"] = True
-        temporary = path.with_suffix(".tmp")
-        temporary.write_text(json.dumps(settings))
-        temporary.replace(path)
-    print(json.dumps({"path": str(path), "settings": settings, "args": sys.argv[2:]}))
+        for name, data in configuration.items():
+            data["testGuiEdit"] = True
+            temporary = directory / f"{name}.tmp"
+            temporary.write_text(json.dumps(data))
+            temporary.replace(directory / f"{name}.json")
+    print(json.dumps({"directory": str(directory), "configuration": configuration,
+                      "args": sys.argv[2:]}))
     sys.exit(0)
 
-portable, live, source, live_path = sys.argv[1:]
-committed = json.loads(Path(source).read_text())
-original_source = Path(source).read_bytes()
+portable, live, frozen, source, live_path = sys.argv[1:]
+committed = read_config(Path(source))
 
 
 def run(exe, *args, env):
     return json.loads(subprocess.check_output([exe, *args], env=env, text=True))
 
 
+def check_edits(exe, directory, env):
+    # Test-only preInstalledPlugins supplies the registry, source and settings.
+    registry_path = directory / "plugins.json"
+    registry = json.loads(registry_path.read_text())
+    assert registry["states"]["test-plugin"]["enabled"]
+    assert (directory / "plugins/test-plugin/main.qml").is_file()
+    plugin_settings = directory / "plugins/test-plugin/settings.json"
+    assert json.loads(plugin_settings.read_text()) == {"fromNix": True}
+    # GUI changes are allowed and upstream copying must not revert them.
+    registry["states"]["test-plugin"]["enabled"] = False
+    registry_path.write_text(json.dumps(registry))
+    plugin_settings.write_text('{"fromGui": true}')
+    for name in ("settings", "colors"):
+        path = directory / f"{name}.json"
+        assert not path.is_symlink() and os.access(path, os.W_OK)
+    run(exe, "--save", env=env)
+    result = run(exe, env=env)
+    assert all(data["testGuiEdit"] for data in result["configuration"].values())
+    assert not json.loads(registry_path.read_text())["states"]["test-plugin"]["enabled"]
+    assert json.loads(plugin_settings.read_text()) == {"fromGui": True}
+
+
 for xdg in (False, True):
     env = os.environ.copy()
+    env["PATH"] = ""  # Copy tools must come from the wrapper, not the host.
     env.pop("XDG_CONFIG_HOME", None)
     root = Path(env["HOME"]) / ".config"
     if xdg:
         root = Path(env["HOME"]) / "custom config"
         env["XDG_CONFIG_HOME"] = str(root)
-    # Inherited settings must not redirect this standalone package.
     env["NOCTALIA_SETTINGS_FILE"] = "/nonexistent/inherited.json"
-    expected = root / "mynoctalia/settings.json"
+    directory = root / "mynoctalia"
     initial = run(portable, "argument with spaces", env=env)
-    assert initial["path"] == str(expected)
-    assert initial["settings"] == committed
+    assert initial["directory"] == str(directory)
+    assert initial["configuration"] == committed
     assert initial["args"] == ["argument with spaces"]
-    assert expected.is_file() and not expected.is_symlink()
-    assert os.access(expected, os.W_OK)
-    assert run(portable, "--save", env=env)["settings"]["testGuiEdit"]
-    assert run(portable, env=env)["settings"]["testGuiEdit"]
+    check_edits(portable, directory, env)
 
-# Explicit live path simulates a checkout, including atomic GUI writes.
-path = Path(live_path)
-path.parent.mkdir(parents=True, exist_ok=True)
-path.write_text(json.dumps({"fromCheckout": True}))
+# A checkout already has settings/colors; never overwrite them with store defaults.
+directory = Path(live_path)
+directory.mkdir(parents=True, exist_ok=True)
+for name in ("settings", "colors"):
+    (directory / f"{name}.json").write_text('{"fromCheckout": true}')
 env = os.environ.copy()
 initial = run(live, env=env)
-assert initial["path"] == live_path
-assert initial["settings"] == {"fromCheckout": True}
-run(live, "--save", env=env)
-assert json.loads(path.read_text())["testGuiEdit"]
-assert run(live, env=env)["settings"]["testGuiEdit"]
-assert Path(source).read_bytes() == original_source
-print("Passed: committed defaults, HOME/XDG paths, atomic saves, persistence, live checkout, arguments.")
+assert initial["directory"] == live_path
+assert all(data == {"fromCheckout": True} for data in initial["configuration"].values())
+check_edits(live, directory, env)
+assert all(data["testGuiEdit"] for data in read_config(directory).values())
+
+# NixOS without liveConfig keeps both files in the store.
+initial = run(frozen, env=env)
+assert initial["directory"].startswith("/nix/store/")
+assert initial["configuration"] == committed
+assert read_config(Path(source)) == committed
+print("Passed: settings/colors, HOME/XDG, atomic saves, persistence, live/store modes, preinstalled plugins and GUI edits.")

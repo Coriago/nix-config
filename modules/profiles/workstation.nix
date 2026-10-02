@@ -5,7 +5,8 @@ local: {
       desktop
       development
       pi-agent
-      kde
+      # kde
+      tiling-desktop
       neovim
       tailscale
     ];
