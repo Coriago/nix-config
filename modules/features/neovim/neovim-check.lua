@@ -7,6 +7,10 @@ local function check()
   assert(require('blink.cmp').get_lsp_capabilities().textDocument.completion)
   assert(require('telescope').extensions.fzf)
   assert(require('telescope').extensions['ui-select'])
+  if vim.fn.has('linux') == 1 then
+    assert(vim.fn.executable('inotifywait') == 1, 'inotifywait: missing executable')
+    assert(require('vim.lsp._watchfiles')._watchfunc == vim._watch.inotify, 'inotify backend not selected')
+  end
   -- UI and unsupported filetypes must not try to start a missing parser.
   for _, filetype in ipairs { 'TelescopePrompt', 'TelescopeResults', 'text', 'myneovim_unknown' } do
     local buf = vim.api.nvim_create_buf(false, true)
@@ -51,6 +55,50 @@ local function check()
       return #clients > 0 and clients[1].initialized
     end, 100), fixture.server .. ': did not attach; see ' .. vim.lsp.log.get_filename())
     assert(vim.fn.maparg('grn', 'n') ~= '', 'LspAttach mappings missing')
+    if vim.fn.has('linux') == 1 then
+      local client = vim.lsp.get_clients { bufnr = buf, name = fixture.server }[1]
+      assert(client.capabilities.workspace.didChangeWatchedFiles.dynamicRegistration,
+        fixture.server .. ': file watching not advertised')
+      if fixture.server == 'pyright' then
+        -- Exercise real filesystem events through Neovim's LSP watcher pipeline.
+        -- Register explicitly so this test doesn't depend on a server's patterns.
+        local watchers = require 'vim.lsp._watchfiles'
+        local path = root .. '/unopened.py'
+        local uri = vim.uri_from_fname(path)
+        local seen = {}
+        local notify = client.notify
+        client.notify = function(self, method, params)
+          if method == 'workspace/didChangeWatchedFiles' then
+            for _, change in ipairs(params.changes) do
+              if change.uri == uri then seen[change.type] = true end
+            end
+          end
+          return notify(self, method, params)
+        end
+        local registration = {
+          id = 'smoke-file-watching',
+          registerOptions = { watchers = { { globPattern = '**/unopened.py' } } },
+        }
+        watchers.register(registration, client.id)
+        -- inotifywait establishes recursive watches asynchronously.
+        vim.wait(500, function() return false end)
+        local function expect(kind)
+          assert(vim.wait(5000, function() return seen[kind] end, 10),
+            'unopened file: missing LSP watch event ' .. kind)
+        end
+        write('unopened.py', 'answer = 1')
+        expect(vim.lsp.protocol.FileChangeType.Created)
+        seen = {}
+        write('unopened.py', 'answer = 2')
+        expect(vim.lsp.protocol.FileChangeType.Changed)
+        seen = {}
+        assert(vim.fn.delete(path) == 0)
+        expect(vim.lsp.protocol.FileChangeType.Deleted)
+        watchers.unregister({ id = registration.id }, client.id)
+        client.notify = notify
+        print('LSP file watching: unopened file create, change, delete passed')
+      end
+    end
     print(fixture.server .. ': attached, parser loaded')
     for _, client in ipairs(vim.lsp.get_clients { bufnr = buf }) do
       client:stop(true)

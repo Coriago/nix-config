@@ -315,6 +315,13 @@ local servers = {
 }
 for name, config in pairs(servers) do
   config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
+  if vim.fn.has('linux') == 1 then
+    -- Off by default on Linux; Nix supplies inotifywait for the built-in backend.
+    -- Lets servers register watches for project files, including unopened ones.
+    config.capabilities = vim.tbl_deep_extend('force', config.capabilities, {
+      workspace = { didChangeWatchedFiles = { dynamicRegistration = true } },
+    })
+  end
   vim.lsp.config(name, config)
   vim.lsp.enable(name)
 end

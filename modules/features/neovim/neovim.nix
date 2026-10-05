@@ -62,6 +62,9 @@ in {
             typescript-language-server
             typescript
             prettierd
+          ] ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+            # Neovim automatically selects its built-in inotify backend.
+            pkgs.inotify-tools
           ]))
         ];
       }
