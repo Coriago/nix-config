@@ -43,7 +43,7 @@ in {
         esc-fn = wlib.escapeShellArgWithEnv;
       };
       settings.hooks =
-        lib.genAttrs ["logging_out" "rebooting" "shutting_down"]
+        lib.genAttrs ["logging_out" "rebooting" "shutting_down" "colors_changed" ]
         (_: lib.mkBefore ["${sync}"]);
       constructFiles.syncPreferences = {
         relPath = "bin/noctalia-sync-preferences";
@@ -52,6 +52,11 @@ in {
           exec ${sync} "$@"
         '';
         builder = ''cp "$1" "$2" && chmod +x "$2"'';
+      };
+
+      settings.wallpaper.default = pkgs.fetchurl {
+        url = "https://github.com/it-is-zane/wallpapers/blob/main/NixOS/NixOS_Black.png?raw=true";
+        hash = "sha256-zO5ggrxgCocLSfAHd8xDa4PVkIN/DElNCN2MLi6qrP8=";
       };
     };
   };

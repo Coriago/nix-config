@@ -17,7 +17,6 @@ LOCAL_KEYS = {
     "device", "devices", "device_id", "device_name", "backlight",
     "account", "accounts", "password", "token", "secret", "credentials",
     "latitude", "longitude", "city", "country", "address",
-    "settings_expand_all_groups",
 }
 CONNECTOR = re.compile(r"(?:^|[@\s])(?:DP|HDMI-A|HDMI|eDP|DVI-D|DVI-I|VGA|DisplayPort)-\d+(?:-\d+)*(?:$|\s)")
 # Check embedded paths too (commands, file URIs, and environment expansion).

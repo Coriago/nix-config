@@ -9,10 +9,18 @@ auto_locate = true
 
 [shell]
 polkit_agent = true
+settings_expand_all_groups = true
 telemetry_enabled = true
+umbriel_overview_type_to_launch_enabled = true
 
 [theme]
-builtin = "Gruvbox"
+builtin = "Tokyo-Night"
+community_palette = "Oxocarbon"
+mode = "dark"
+source = "builtin"
+wallpaper_scheme = "m3-rainbow"
 
-[wallpaper.default]
-path = "/nix/store/1gf3dzgh253w3rzv123cwfda9wgi799j-noctalia-5.2.0/share/noctalia/assets/noctalia-wallpaper.png"
+[theme.templates]
+builtin_ids = [
+    "umbriel",
+]
