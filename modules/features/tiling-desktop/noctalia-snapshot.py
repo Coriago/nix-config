@@ -43,6 +43,8 @@ def prune(value, path=()):
                 continue
             if path == ("wallpaper",) and lower == "last":
                 continue
+            if path == ("accessibility",) and lower == "ui_scale":
+                continue
             if CONNECTOR.search(key) or any(word in lower for word in ("password", "credential", "secret", "token")):
                 continue
             cleaned = prune(child, (*path, key))

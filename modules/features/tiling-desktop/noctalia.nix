@@ -38,9 +38,9 @@
     };
     config = {
       package = lib.mkDefault pkgs.noctalia;
-      # The shipped GTK template hook calls these tools; package runs must not
+      # The shipped GTK/Umbriel template hooks call these tools; package runs must not
       # depend on them being installed in the host profile.
-      runtimePkgs = [pkgs.systemd pkgs.bash pkgs.coreutils pkgs.glib pkgs.dconf];
+      runtimePkgs = [pkgs.systemd pkgs.bash pkgs.coreutils pkgs.gawk pkgs.glib pkgs.dconf];
       suffixVar = [
         {
           name = "gtk-theme-data";
@@ -59,7 +59,7 @@
       # Keep launcher applications alive when the shell service restarts.
       settings.shell.launch_apps_as_systemd_services = lib.mkDefault true;
       settings.hooks =
-        lib.genAttrs ["logging_out" "rebooting" "shutting_down" "colors_changed" ]
+        lib.genAttrs ["logging_out" "rebooting" "shutting_down" "colors_changed"]
         (_: lib.mkBefore ["${saveSnapshot}"]);
       constructFiles.snapshotPreferences = {
         relPath = "bin/noctalia-snapshot-preferences";
@@ -91,29 +91,38 @@
     };
   };
 
-  flake.modules.nixos.noctalia = {lib, pkgs, ...}: let
+  flake.modules.nixos.noctalia = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: let
     package = self.packages.${pkgs.stdenv.hostPlatform.system}.mynoctalia;
   in {
-    programs.noctalia = {
-      enable = true;
-      inherit package;
-      systemd.enable = true;
-      systemd.target = "umbriel-session.target";
-    };
-    systemd.user.services.noctalia = {
-      restartIfChanged = true;
-      serviceConfig = {
-        ExecStartPre = "${package}/bin/noctalia-reset-overrides";
-        # During migration, leave the old compositor-started shell running
-        # until logout. Do not start a duplicate or reset its live settings.
-        ExecCondition = pkgs.writeShellScript "noctalia-service-available" ''
-          if ${lib.getExe package} msg status >/dev/null 2>&1; then
-            echo "Noctalia is already running outside this service; log out and back in once to complete the service migration."
-            exit 1
-          fi
-        '';
+    options.programs.noctalia.resetOverridesOnStart = lib.mkEnableOption "resetting GUI overrides to the packaged baseline before starting the Noctalia service";
+
+    config = {
+      programs.noctalia = {
+        enable = true;
+        inherit package;
+        systemd.enable = true;
+        systemd.target = "umbriel-session.target";
       };
+      systemd.user.services.noctalia = {
+        restartIfChanged = true;
+        serviceConfig = {
+          ExecStartPre = lib.mkIf config.programs.noctalia.resetOverridesOnStart "${package}/bin/noctalia-reset-overrides";
+          # During migration, leave the old compositor-started shell running
+          # until logout. Do not start a duplicate or reset its live settings.
+          ExecCondition = pkgs.writeShellScript "noctalia-service-available" ''
+            if ${lib.getExe package} msg status >/dev/null 2>&1; then
+              echo "Noctalia is already running outside this service; log out and back in once to complete the service migration."
+              exit 1
+            fi
+          '';
+        };
+      };
+      programs.dconf.enable = true;
     };
-    programs.dconf.enable = true;
   };
 }

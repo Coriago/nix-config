@@ -15,6 +15,7 @@ in {
     qtengineConfig = json.generate "qtengine-config.json" config.qtengineSettings;
     defaults = lib.recursiveUpdate (builtins.fromTOML (builtins.readFile ./umbriel/config.toml)) {
       general.autostart = [noctalia];
+      include.optional.files = ["$XDG_CONFIG_HOME/umbriel/noctalia.toml"];
       # Application launchers use the wrapped packages; other bindings live in TOML.
       keybinds = {
         "Mod+G" = "spawn:${lib.getExe pkgs.ghostty}";
@@ -64,6 +65,7 @@ in {
       # Commands such as `msg`/`validate` require the subcommand first.
       runShell = [
         ''
+          export XDG_CONFIG_HOME="''${XDG_CONFIG_HOME:-$HOME/.config}"
           case "''${1-}" in
             ""|-*) set -- -c ${lib.escapeShellArg config.configPath} "$@" ;;
             validate) shift; set -- validate -c ${settings} "$@" ;;

@@ -7,6 +7,7 @@ in {
     ...
   }: let
     python = pkgs.python3.withPackages (p: [p.tomli-w]);
+    umbriel = local.flake.wrappers.myumbriel.wrap {inherit pkgs;};
     wrapper = local.flake.wrappers.mynoctalia.wrap {
       inherit pkgs;
       settings.theme.mode = "light";
@@ -41,7 +42,7 @@ in {
       ${pkgs.dbus}/bin/dbus-run-session --dbus-daemon=${pkgs.dbus}/bin/dbus-daemon --config-file=bus.conf -- \
         ${python}/bin/python ${./gtk-hook-check.py} \
         ${lib.getExe wrapper} ${pkgs.noctalia}/share/noctalia/assets/templates \
-        ${pkgs.dconf}/bin/dconf
+        ${pkgs.dconf}/bin/dconf ${lib.getExe umbriel}
       touch "$out"
     '';
   };

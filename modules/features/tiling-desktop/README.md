@@ -19,7 +19,7 @@ hooks run the same snapshot operation. They do not cover crashes, compositor
 exits, or shutdowns outside Noctalia. `snapshotFile` sets the destination; its
 default is this repo under `$HOME/.config/nix-config`.
 
-GUI overrides are pruned before merging. The filter removes monitor
+GUI overrides are pruned before merging. The filter removes UI scale, monitor
 selectors/layouts, local paths, credentials, hooks, and identified bookkeeping
 such as `config_version`. If a GUI override is rejected, its baseline value is
 retained. After merging, values containing `/nix/store/` paths are removed from either
@@ -56,7 +56,9 @@ not need to match. Fields absent from `config.toml` remain, and the portability
 filter is not involved. Reset only edits `settings.toml`.
 The next snapshot retains the baseline values for fields removed by reset.
 
-The systemd service runs this reset before every start, including login,
+Set `programs.noctalia.resetOverridesOnStart = true` to run this reset before
+every systemd service start. It defaults to false and is enabled on `heliosdesk`.
+When enabled, this includes login,
 manual restarts, crash restarts, and restarts during a rebuild switch. It uses
 the same package as the shell being started, so the new baseline takes effect
 before Noctalia reads its settings. Save GUI preferences to the snapshot before
@@ -118,6 +120,12 @@ Standalone package runs continue to use their generated store file, keeping
 package testing independent of the installed `/etc` config. The wrapper's
 `configPath` option can select a stable file for a separate testing session;
 `umbriel validate` always validates the package's generated settings.
+
+The generated config optionally includes
+`$XDG_CONFIG_HOME/umbriel/noctalia.toml`, where Noctalia's enabled Umbriel template
+writes its colors. The wrapper defaults `XDG_CONFIG_HOME` to `~/.config` when unset.
+Umbriel watches the included file and reloads theme changes natively; a missing
+file is allowed. Explicit Nix settings take precedence over included colors.
 
 ## Application theming
 
@@ -199,6 +207,8 @@ and checks GTK's actual theme loader against both bundled theme variants.
 The GTK hook check renders the upstream GTK templates through the Noctalia CLI
 on a private D-Bus with a fresh home and an empty PATH, checks dconf light/dark
 selection, and verifies existing CSS survives without duplicate imports.
+It also renders the Umbriel template in both modes and validates the compositor's
+theme include with missing, generated, and malformed theme files.
 The reload check compiles the pinned Umbriel file watcher and verifies repeated
 atomic replacements of a stable config file deliver the new content. It does
 not exercise compositor layout changes: the headless compositor requires a

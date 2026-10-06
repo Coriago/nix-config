@@ -15,6 +15,7 @@ fixture = {
     "config_version": 14,
     "theme": {"mode": "dark"},
     "audio": {"enable_overdrive": False},
+    "accessibility": {"ui_scale": 1.5, "high_contrast": True},
     "bar": {"default": {"position": "top"}, "monitor": {"DP-1": {"thickness": 30}}},
     "lockscreen_widgets": {"widget_order": ["login@DP-3"]},
     "shell": {"avatar_path": "/home/me/avatar.png"},
@@ -25,6 +26,7 @@ fixture = {
 }
 filtered = snapshotter.prune(fixture)
 assert filtered == {
+    "accessibility": {"high_contrast": True},
     "theme": {"mode": "dark"}, "audio": {"enable_overdrive": False},
     "bar": {"default": {"position": "top"}},
 }
@@ -47,6 +49,7 @@ assert "shell" not in combined
 assert "wallpaper" not in combined
 assert combined["hooks"] == baseline["hooks"]
 assert combined["audio"] == {"enable_overdrive": False}
+assert combined["accessibility"] == {"high_contrast": True}
 assert "monitor" not in combined["bar"]
 assert "token" not in combined
 
