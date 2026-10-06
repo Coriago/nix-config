@@ -17,7 +17,6 @@
       ghostty
       nerd-fonts.jetbrains-mono
       kdePackages.ark
-      thunar
       herdr
     ];
   };
