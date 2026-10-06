@@ -14,7 +14,6 @@ telemetry_enabled = true
 umbriel_overview_type_to_launch_enabled = true
 
 [theme]
-builtin = "Tokyo-Night"
 community_palette = "Oxocarbon"
 mode = "dark"
 source = "builtin"
@@ -22,5 +21,9 @@ wallpaper_scheme = "m3-rainbow"
 
 [theme.templates]
 builtin_ids = [
+    "gtk3",
+    "gtk4",
+    "ghostty",
+    "kcolorscheme",
     "umbriel",
 ]

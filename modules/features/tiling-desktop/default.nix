@@ -1,7 +1,7 @@
 {config, ...}: let
   local = config;
 in {
-  flake.modules.nixos.tiling-desktop = {...}: {
+  flake.modules.nixos.tiling-desktop = {pkgs, ...}: {
     imports = [
       local.flake.modules.nixos.noctalia
 
@@ -10,5 +10,12 @@ in {
       local.flake.modules.nixos.umbriel
       local.flake.modules.nixos.noctalia-greeter
     ];
+
+    environment.systemPackages = with pkgs; [
+      wdisplays
+    ];
+
+    # Keep profiles writable: wdisplays' "Save to kanshi Config" owns this file.
+    services.kanshi.enable = true;
   };
 }

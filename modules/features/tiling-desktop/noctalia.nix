@@ -1,6 +1,4 @@
-{config, ...}: let
-  local = config;
-in {
+{self, ...}: {
   flake.wrappers.mynoctalia = {
     config,
     lib,
@@ -42,6 +40,10 @@ in {
         data = "\${XDG_STATE_HOME:-$HOME/.local/state}/mynoctalia";
         esc-fn = wlib.escapeShellArgWithEnv;
       };
+      # Preserve exported templates while adding the Qt6/KDE color output.
+      settings.theme.templates.builtin_ids = lib.mkDefault (
+        lib.unique ((synced.theme.templates.builtin_ids or []) ++ ["kcolorscheme"])
+      );
       settings.hooks =
         lib.genAttrs ["logging_out" "rebooting" "shutting_down" "colors_changed" ]
         (_: lib.mkBefore ["${sync}"]);
@@ -61,8 +63,17 @@ in {
     };
   };
 
-  flake.modules.nixos.noctalia = {...}: {
-    imports = [local.flake.wrappers.mynoctalia.install];
-    wrappers.mynoctalia.enable = true;
+  flake.modules.nixos.noctalia = {config, pkgs, ...}: {
+    programs.dconf.enable = true;
+    # Set the initial theme on activation, without locking Noctalia's mode sync.
+    home-manager.users.${config.hostmeta.username}.dconf.settings = {
+      "org/gnome/desktop/interface".gtk-theme = "adw-gtk3";
+    };
+
+    # https://docs.noctalia.dev/noctalia/templates/official/gtk-qt/
+    environment.systemPackages = [
+      self.packages.${pkgs.stdenv.hostPlatform.system}.mynoctalia
+      pkgs.adw-gtk3
+    ];
   };
 }

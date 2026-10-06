@@ -6,11 +6,19 @@
     wlib,
     ...
   }: let
-    noctalia = lib.getExe config.noctaliaPackage;
+    noctalia = lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.mynoctalia;
     toml = pkgs.formats.toml {};
     settings = toml.generate "umbriel-config.toml" config.settings;
+    json = pkgs.formats.json {};
+    qtengineConfig = json.generate "qtengine-config.json" config.qtengineSettings;
     defaults = {
       general.autostart = [noctalia];
+      # Umbriel also publishes these to the managed session's user services.
+      environment = {
+        QT_QPA_PLATFORMTHEME = "qtengine";
+        QT_PLUGIN_PATH = "${pkgs.qtengine}/${pkgs.kdePackages.qtbase.qtPluginPrefix}";
+        QTENGINE_CONFIG = toString qtengineConfig;
+      };
       keybinds = {
         "Mod+Return" = "spawn:${lib.getExe pkgs.ghostty}";
         "Mod+Q" = "window-close";
@@ -35,10 +43,15 @@
   in {
     imports = [wlib.modules.default];
     options = {
-      noctaliaPackage = lib.mkOption {
-        type = lib.types.package;
-        default = self.packages.${pkgs.stdenv.hostPlatform.system}.mynoctalia;
-        description = "Noctalia wrapper used for autostart and IPC keybinds.";
+      qtengineSettings = lib.mkOption {
+        type = json.type;
+        default = {
+          theme = {
+            colorScheme = "~/.local/share/color-schemes/noctalia.colors";
+            style = "Fusion";
+          };
+        };
+        description = "Bundled Qt6 platform-theme configuration. Override theme.colorScheme when using a custom XDG_DATA_HOME; qtengine expands ~ but not environment variables.";
       };
       settings = lib.mkOption {
         type = toml.type;
@@ -52,6 +65,7 @@
       passthru = {
         providedSessions = pkgs.umbriel.providedSessions;
         generatedConfig = settings;
+        generatedQtengineConfig = qtengineConfig;
       };
       # Commands such as `msg`/`validate` require the subcommand first.
       runShell = [
@@ -73,9 +87,7 @@
   }: {
     programs.umbriel = {
       enable = true;
-      package = self.packages.${pkgs.stdenv.hostPlatform.system}.myumbriel.wrap {
-        noctaliaPackage = config.wrappers.mynoctalia.wrapper;
-      };
+      package = self.packages.${pkgs.stdenv.hostPlatform.system}.myumbriel;
     };
     # The upstream unit embeds its original store path, bypassing the wrapper.
     # Reset ExecStart before replacing it in the generated systemd drop-in.
