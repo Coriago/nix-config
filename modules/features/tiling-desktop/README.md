@@ -87,9 +87,24 @@ configuration machinery. Rebuild and restart the session after changing it.
 
 ## Application theming
 
-GTK uses the system-installed `adw-gtk3` theme. Home Manager selects it through
-dconf on activation; Noctalia's GTK templates can subsequently change the mode.
-No `nwg-look` step is required. Enable GTK 3/4 templates in Noctalia if desired.
+`myumbriel` bundles `adw-gtk3` through `settings.environment.GTK_DATA_PREFIX`.
+This supplies GTK 3's fallback theme directory without forcing `GTK_THEME`, so
+GUI theme choices and Noctalia's light/dark switching remain effective. User
+themes and themes found through the existing XDG data paths retain precedence.
+
+`mynoctalia` also bundles the theme, GNOME settings schemas, dconf backend, and
+commands needed by its upstream GTK template hook. The GTK 3/4 templates already
+enabled in the snapshot generate writable CSS and select `adw-gtk3` or
+`adw-gtk3-dark` through GSettings when applied, including at shell startup.
+Home Manager no longer assigns the GTK theme on activation. Disabling those
+templates leaves appearance management to the user and upstream undo hooks.
+GTK 4 receives Noctalia's generated CSS and color-scheme preference; `adw-gtk3`
+provides the GTK 3 base theme.
+
+NixOS still enables dconf's D-Bus service. Package runs on another distribution
+need a working user D-Bus/dconf service; bundling client tools does not register
+host services. Package runs also share the user's GTK CSS and dconf state unless
+tested with a separate home/config and session bus.
 
 `myumbriel` bundles the Qt6 `qtengine` plugin and JSON configuration. Its
 `settings.environment` selects the plugin, provides its store plugin path and
@@ -110,16 +125,33 @@ The default `myumbriel.qtengineSettings.theme.colorScheme` is
 but not environment variables in this field (confirmed in its implementation).
 For a custom `XDG_DATA_HOME`, override this setting with the corresponding path.
 The pinned nixpkgs qtengine package supports Qt6 only, not Qt5; sandboxed apps
-also need their own plugin/theme access. GTK dconf activation remains NixOS/Home
-Manager integration rather than part of the portable Umbriel package.
+also need their own plugin/theme access.
 
 References: [Noctalia GTK/Qt guide](https://docs.noctalia.dev/noctalia/templates/official/gtk-qt/)
 and [qtengine 0.2.2](https://github.com/kossLAN/qtengine/tree/0.2.2).
 
+## Desktop portals
+
+The pinned NixOS `programs.umbriel` module already installs and registers
+`xdg-desktop-portal-umbriel`, the portal frontend, and the GTK fallback backend.
+Umbriel's backend implements ScreenCast and Screenshot, including the screen/window
+share picker and PipeWire capture. The shipped `umbriel-portals.conf` selects
+`umbriel;gtk`: GTK supplies supported interfaces such as FileChooser and Settings.
+These portals do not install GTK themes or replace a file manager.
+
+Keep their D-Bus/systemd registration and backend selection in NixOS integration.
+A separate portal wrapper is unnecessary with the upstream defaults; merely
+adding its executable to the compositor's PATH would not register it. A standalone
+or nested `myumbriel` run uses the host's portal setup and does not create an
+isolated portal session. Custom capture commands or limits can be configured later
+if needed, using the backend's supported configuration.
+
+Reference: [Umbriel portal README](https://github.com/noctalia-dev/xdg-desktop-portal-umbriel).
+
 ## Validation
 
 ```
-nix build 'path:.#checks.x86_64-linux.mynoctalia' 'path:.#checks.x86_64-linux.myumbriel' --no-link
+nix build 'path:.#checks.x86_64-linux.mynoctalia' 'path:.#checks.x86_64-linux.myumbriel' 'path:.#checks.x86_64-linux.noctalia-gtk' --no-link
 nix build 'path:.#nixosConfigurations.heliosdesk.config.system.build.toplevel' 'path:.#nixosConfigurations.heliosmac.config.system.build.toplevel' --no-link
 ```
 
@@ -127,6 +159,10 @@ Checks test pruning before merging, empty/missing GUI overrides, snapshots after
 reset, a simulated snapshot/rebuild roundtrip, inherited hook paths, invalid
 input preservation, and actual CLI precedence.
 The Umbriel check also runs a Qt6 application offscreen to verify that the bundled
-qtengine plugin loads its generated JSON and applies a simulated color scheme.
+qtengine plugin loads its generated JSON and applies a simulated color scheme,
+and checks GTK's actual theme loader against both bundled theme variants.
+The GTK hook check renders the upstream GTK templates through the Noctalia CLI
+on a private D-Bus with a fresh home and an empty PATH, checks dconf light/dark
+selection, and verifies existing CSS survives without duplicate imports.
 These are not live desktop/GUI tests and do not trigger a real shutdown or system
 activation.

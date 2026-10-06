@@ -17,6 +17,8 @@ in {
       general.autostart = [noctalia];
       # Umbriel also publishes these to the managed session's user services.
       environment = {
+        # Theme assets only: GSettings/Noctalia still select light/dark at runtime.
+        GTK_DATA_PREFIX = "${pkgs.adw-gtk3}";
         QT_QPA_PLATFORMTHEME = "qtengine";
         QT_PLUGIN_PATH = "${pkgs.qtengine}/${pkgs.kdePackages.qtbase.qtPluginPrefix}";
         QTENGINE_CONFIG = toString qtengineConfig;

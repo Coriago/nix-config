@@ -38,7 +38,19 @@
     };
     config = {
       package = lib.mkDefault pkgs.noctalia;
-      runtimePkgs = [pkgs.systemd];
+      # The shipped GTK template hook calls these tools; package runs must not
+      # depend on them being installed in the host profile.
+      runtimePkgs = [pkgs.systemd pkgs.bash pkgs.coreutils pkgs.glib pkgs.dconf];
+      suffixVar = [
+        {
+          name = "gtk-theme-data";
+          data = ["XDG_DATA_DIRS" ":" "${pkgs.adw-gtk3}/share:${pkgs.glib.getSchemaDataDirPath pkgs.gsettings-desktop-schemas}"];
+        }
+        {
+          name = "gtk-settings-backend";
+          data = ["GIO_EXTRA_MODULES" ":" "${pkgs.dconf.lib}/lib/gio/modules"];
+        }
+      ];
       env.NOCTALIA_CONFIG_HOME = configHome;
       env.NOCTALIA_STATE_HOME = {
         data = "\${XDG_STATE_HOME:-$HOME/.local/state}/mynoctalia";
@@ -77,7 +89,7 @@
     };
   };
 
-  flake.modules.nixos.noctalia = {config, lib, pkgs, ...}: let
+  flake.modules.nixos.noctalia = {lib, pkgs, ...}: let
     package = self.packages.${pkgs.stdenv.hostPlatform.system}.mynoctalia;
   in {
     programs.noctalia = {
@@ -101,14 +113,5 @@
       };
     };
     programs.dconf.enable = true;
-    # Set the initial theme on activation, without locking Noctalia's mode sync.
-    home-manager.users.${config.hostmeta.username}.dconf.settings = {
-      "org/gnome/desktop/interface".gtk-theme = "adw-gtk3";
-    };
-
-    # https://docs.noctalia.dev/noctalia/templates/official/gtk-qt/
-    environment.systemPackages = [
-      pkgs.adw-gtk3
-    ];
   };
 }

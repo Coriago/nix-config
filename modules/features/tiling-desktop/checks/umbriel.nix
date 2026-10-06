@@ -9,8 +9,8 @@ in {
     portable = local.flake.wrappers.myumbriel.wrap {inherit pkgs;};
   in {
     checks.myumbriel = pkgs.runCommand "umbriel-config-check" {
-      nativeBuildInputs = [pkgs.stdenv.cc pkgs.pkg-config pkgs.python3];
-      buildInputs = [pkgs.kdePackages.qtbase];
+      nativeBuildInputs = [pkgs.stdenv.cc pkgs.pkg-config pkgs.python3 pkgs.xvfb-run];
+      buildInputs = [pkgs.kdePackages.qtbase pkgs.gtk3];
     } ''
       export HOME="$TMPDIR/home"
       export XDG_RUNTIME_DIR="$TMPDIR/runtime"
@@ -37,6 +37,11 @@ in {
       COLORS
       $CXX ${./qtengine-check.cpp} -o qtengine-check $(pkg-config --cflags --libs Qt6Widgets)
       ./qtengine-check
+
+      # Use GTK's real theme loader with no host/user theme search paths.
+      export XDG_DATA_DIRS="$TMPDIR/empty-data"
+      $CC ${./gtk-theme-check.c} -o gtk-theme-check $(pkg-config --cflags --libs gtk+-3.0)
+      xvfb-run ./gtk-theme-check
       touch "$out"
     '';
   };
