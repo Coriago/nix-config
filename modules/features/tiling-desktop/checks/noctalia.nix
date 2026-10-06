@@ -10,13 +10,13 @@ in {
     wrapper = local.flake.wrappers.mynoctalia.wrap {
       inherit pkgs;
       settings.theme.mode = "light";
-      syncFile = "\${HOME}/synced.toml";
+      snapshotFile = "\${HOME}/snapshot.toml";
     };
   in {
     checks.mynoctalia = pkgs.runCommand "noctalia-config-check" {} ''
       export HOME="$TMPDIR/home"
       mkdir -p "$HOME"
-      ${python}/bin/python ${./noctalia-check.py} ${../noctalia-sync.py} ${lib.getExe wrapper}
+      ${python}/bin/python ${./noctalia-check.py} ${../noctalia-snapshot.py} ${lib.getExe wrapper} ${../noctalia-reset.py}
       touch "$out"
     '';
   };

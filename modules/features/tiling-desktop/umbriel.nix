@@ -1,4 +1,6 @@
-{self, ...}: {
+{self, config, ...}: let
+  local = config;
+in {
   flake.wrappers.myumbriel = {
     config,
     pkgs,
@@ -87,7 +89,12 @@
   }: {
     programs.umbriel = {
       enable = true;
-      package = self.packages.${pkgs.stdenv.hostPlatform.system}.myumbriel;
+      package = local.flake.wrappers.myumbriel.wrap {
+        inherit pkgs;
+        # The NixOS user service owns Noctalia startup. The standalone package
+        # retains compositor autostart for package testing.
+        settings.general.autostart = lib.mkForce [];
+      };
     };
     # The upstream unit embeds its original store path, bypassing the wrapper.
     # Reset ExecStart before replacing it in the generated systemd drop-in.

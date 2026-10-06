@@ -2,36 +2,69 @@
 
 ## Noctalia
 
-The flow is:
+The model is:
 
 ```
-local settings.toml → filter script → synced.toml
-                                      ↓
-                         deep merge with Nix settings
-                                      ↓
-                            generated config.toml
+config.toml   = snapshot.toml merged with explicit Nix settings
+snapshot.toml = config.toml merged with pruned settings.toml
 ```
 
-Run `noctalia-sync-preferences` to replace `noctalia-v5/synced.toml` with filtered
-GUI settings. Noctalia's logout/reboot/shutdown session hooks run the same command.
-Those hooks do not cover crashes, compositor exits or shutdowns outside Noctalia.
-The package's `syncFile` wrapper option selects the destination; its default is
-this repo under `$HOME/.config/nix-config`. The NixOS module installs
-`self.packages.<system>.mynoctalia` directly, and Umbriel references that same
-package for autostart and IPC. No `liveConfig` dependency or runtime links.
+Both merges are recursive: the right side wins, nested tables merge, and lists
+replace. Nix always generates `config.toml`. Noctalia's writable `settings.toml`
+contains GUI overrides, which take precedence at runtime.
 
-The filter removes monitor layouts/selectors, local paths, credentials, hooks
-and identified bookkeeping. Other preferences and Nix store paths remain.
-Review the diff: this is a denylist, not a guarantee of portability or privacy.
-The export replaces the previous snapshot; absent GUI keys disappear, including
-keys Noctalia removed because they matched the baseline. It does not accumulate
-historical preferences. Keep durable choices in Nix `settings` when appropriate.
+Run `noctalia-snapshot-preferences` to replace
+`noctalia/snapshot.toml`. The colors-changed and Noctalia logout/reboot/shutdown
+hooks run the same snapshot operation. They do not cover crashes, compositor
+exits, or shutdowns outside Noctalia. `snapshotFile` sets the destination; its
+default is this repo under `$HOME/.config/nix-config`.
 
-Nix uses `lib.recursiveUpdate synced settings`: explicit Nix values win, nested
-tables merge, and lists replace. Local GUI overrides still win at runtime.
+Only GUI overrides are pruned before merging. The filter removes monitor
+selectors/layouts, local paths, credentials, hooks, and identified bookkeeping
+such as `config_version`. If a GUI override is rejected, its baseline value is
+retained. The generated baseline is trusted and copied as-is, including its
+Nix-defined paths and hooks: keep host-specific choices out of that baseline
+when they should not enter the shared snapshot. Review the snapshot diff; the
+GUI filter is a denylist, not a guarantee of portability or privacy.
+
+An empty or missing `settings.toml` produces the baseline snapshot. Clearing an
+override therefore restores the baseline value in the next snapshot instead
+of deleting that preference. The previous destination file is not merged in;
+each snapshot is rebuilt from the current baseline and pruned GUI overrides.
+Malformed or missing baseline config and malformed GUI settings leave the
+previous snapshot intact. Native `config export` merges unfiltered overrides;
+filtering that result would lose a baseline value hidden by a rejected local
+override, so this helper prunes first to implement the model above.
+
+Explicit Nix choices still win when the snapshot is used for the next build.
 Raw settings/state stay under `${XDG_STATE_HOME:-~/.local/state}/mynoctalia/noctalia`.
-Rebuild and restart Noctalia to load a new generated baseline. Store-path strings
-do not keep assets alive; prefer Nix fetchers in `settings` for portable assets.
+The manual snapshot command uses its package's baseline and state directory;
+hooks inherit the running shell's configuration/state roots. Rebuild and switch
+before using a new package's baseline. Store-path strings alone do not keep
+assets alive; use Nix fetchers for durable baseline assets.
+
+The NixOS module runs `mynoctalia` through the upstream Noctalia user service,
+bound to `umbriel-session.target`. The standalone Umbriel package autostarts
+Noctalia; the NixOS Umbriel package leaves startup to the service.
+
+Run `noctalia-reset-overrides` to remove fields from local `settings.toml` that
+are defined in the package's generated `config.toml`. Tables are compared
+recursively; arrays and scalar values are removed as whole fields. Values do
+not need to match. Fields absent from `config.toml` remain, and the portability
+filter is not involved. Reset only edits `settings.toml` and is **manual only**.
+The next snapshot retains the baseline values for fields removed by reset.
+
+`nixos-rebuild switch` (or `test`) restarts a changed Noctalia user service using
+the pinned NixOS switch implementation. A build alone does not affect the
+running desktop. To restart manually, use `systemctl --user restart noctalia`.
+Noctalia's native `shell.launch_apps_as_systemd_services` setting is enabled so
+launcher/dock/taskbar applications survive shell restarts; `systemd-run` is
+bundled. Disabling that setting can cause those applications to stop with the
+shell service.
+
+When migrating from compositor autostart, an already-running Noctalia instance
+causes service startup to be skipped. Log out and back in once after switching
+to complete that migration. Subsequent changes do not require logout or reboot.
 
 ## Umbriel
 
@@ -73,10 +106,12 @@ and [qtengine 0.2.2](https://github.com/kossLAN/qtengine/tree/0.2.2).
 
 ```
 nix build 'path:.#checks.x86_64-linux.mynoctalia' 'path:.#checks.x86_64-linux.myumbriel' --no-link
-nix build 'path:.#nixosConfigurations.heliosdesk.config.system.build.toplevel' --no-link
+nix build 'path:.#nixosConfigurations.heliosdesk.config.system.build.toplevel' 'path:.#nixosConfigurations.heliosmac.config.system.build.toplevel' --no-link
 ```
 
-Checks test filtering, snapshot replacement and the actual CLI configuration.
+Checks test pruning before merging, empty/missing GUI overrides, snapshots after
+reset, a simulated snapshot/rebuild roundtrip, inherited hook paths, invalid
+input preservation, and actual CLI precedence.
 The Umbriel check also runs a Qt6 application offscreen to verify that the bundled
 qtengine plugin loads its generated JSON and applies a simulated color scheme.
 These are not live desktop/GUI tests and do not trigger a real shutdown or system

@@ -8,16 +8,19 @@
   }: let
     toml = pkgs.formats.toml {};
     python = pkgs.python3.withPackages (p: [p.tomli-w]);
-    synced = builtins.fromTOML (builtins.readFile ./noctalia-v5/synced.toml);
-    generated = toml.generate "config.toml" (lib.recursiveUpdate synced config.settings);
+    snapshot = builtins.fromTOML (builtins.readFile ./noctalia/snapshot.toml);
+    generated = toml.generate "config.toml" (lib.recursiveUpdate snapshot config.settings);
     configHome = pkgs.runCommand "noctalia-config" {} ''
       mkdir -p "$out/noctalia"
       ln -s ${generated} "$out/noctalia/config.toml"
     '';
-    sync = pkgs.writeShellScript "noctalia-sync-preferences" ''
-      exec ${python}/bin/python ${./noctalia-sync.py} \
-        "''${XDG_STATE_HOME:-$HOME/.local/state}/mynoctalia/noctalia/settings.toml" \
-        ${wlib.escapeShellArgWithEnv config.syncFile}
+    # Hooks inherit these roots from the running shell, avoiding a dependency
+    # cycle between the generated config and its own snapshot hook.
+    saveSnapshot = pkgs.writeShellScript "noctalia-snapshot-preferences" ''
+      exec ${python}/bin/python ${./noctalia-snapshot.py} \
+        "''${NOCTALIA_CONFIG_HOME:?}/noctalia/config.toml" \
+        "''${NOCTALIA_STATE_HOME:?}/noctalia/settings.toml" \
+        ${wlib.escapeShellArgWithEnv config.snapshotFile} "$@"
     '';
   in {
     imports = [wlib.modules.default];
@@ -25,16 +28,17 @@
       settings = lib.mkOption {
         type = toml.type;
         default = {};
-        description = "Settings deep-merged over synced.toml. Local GUI overrides still take precedence at runtime.";
+        description = "Settings deep-merged over snapshot.toml. Local GUI overrides still take precedence at runtime.";
       };
-      syncFile = lib.mkOption {
+      snapshotFile = lib.mkOption {
         type = lib.types.str;
-        default = "\${HOME}/.config/nix-config/modules/features/tiling-desktop/noctalia-v5/synced.toml";
-        description = "Writable checkout destination for preference exports; HOME is expanded at runtime.";
+        default = "\${HOME}/.config/nix-config/modules/features/tiling-desktop/noctalia/snapshot.toml";
+        description = "Writable checkout destination for config.toml merged with pruned GUI overrides; HOME is expanded at runtime.";
       };
     };
     config = {
       package = lib.mkDefault pkgs.noctalia;
+      runtimePkgs = [pkgs.systemd];
       env.NOCTALIA_CONFIG_HOME = configHome;
       env.NOCTALIA_STATE_HOME = {
         data = "\${XDG_STATE_HOME:-$HOME/.local/state}/mynoctalia";
@@ -42,16 +46,30 @@
       };
       # Preserve exported templates while adding the Qt6/KDE color output.
       settings.theme.templates.builtin_ids = lib.mkDefault (
-        lib.unique ((synced.theme.templates.builtin_ids or []) ++ ["kcolorscheme"])
+        lib.unique ((snapshot.theme.templates.builtin_ids or []) ++ ["kcolorscheme"])
       );
+      # Keep launcher applications alive when the shell service restarts.
+      settings.shell.launch_apps_as_systemd_services = lib.mkDefault true;
       settings.hooks =
         lib.genAttrs ["logging_out" "rebooting" "shutting_down" "colors_changed" ]
-        (_: lib.mkBefore ["${sync}"]);
-      constructFiles.syncPreferences = {
-        relPath = "bin/noctalia-sync-preferences";
+        (_: lib.mkBefore ["${saveSnapshot}"]);
+      constructFiles.snapshotPreferences = {
+        relPath = "bin/noctalia-snapshot-preferences";
         content = ''
           #!${pkgs.bash}/bin/bash
-          exec ${sync} "$@"
+          export NOCTALIA_CONFIG_HOME=${configHome}
+          export NOCTALIA_STATE_HOME="''${XDG_STATE_HOME:-$HOME/.local/state}/mynoctalia"
+          exec ${saveSnapshot} "$@"
+        '';
+        builder = ''cp "$1" "$2" && chmod +x "$2"'';
+      };
+      constructFiles.resetOverrides = {
+        relPath = "bin/noctalia-reset-overrides";
+        content = ''
+          #!${pkgs.bash}/bin/bash
+          exec ${python}/bin/python ${./noctalia-reset.py} \
+            "''${XDG_STATE_HOME:-$HOME/.local/state}/mynoctalia/noctalia/settings.toml" \
+            ${generated} "$@"
         '';
         builder = ''cp "$1" "$2" && chmod +x "$2"'';
       };
@@ -63,7 +81,28 @@
     };
   };
 
-  flake.modules.nixos.noctalia = {config, pkgs, ...}: {
+  flake.modules.nixos.noctalia = {config, lib, pkgs, ...}: let
+    package = self.packages.${pkgs.stdenv.hostPlatform.system}.mynoctalia;
+  in {
+    programs.noctalia = {
+      enable = true;
+      inherit package;
+      systemd.enable = true;
+      systemd.target = "umbriel-session.target";
+    };
+    systemd.user.services.noctalia = {
+      restartIfChanged = true;
+      serviceConfig = {
+        # During migration, leave the old compositor-started shell running
+        # until logout. Do not start a duplicate or reset its live settings.
+        ExecCondition = pkgs.writeShellScript "noctalia-service-available" ''
+          if ${lib.getExe package} msg status >/dev/null 2>&1; then
+            echo "Noctalia is already running outside this service; log out and back in once to complete the service migration."
+            exit 1
+          fi
+        '';
+      };
+    };
     programs.dconf.enable = true;
     # Set the initial theme on activation, without locking Noctalia's mode sync.
     home-manager.users.${config.hostmeta.username}.dconf.settings = {
@@ -72,7 +111,6 @@
 
     # https://docs.noctalia.dev/noctalia/templates/official/gtk-qt/
     environment.systemPackages = [
-      self.packages.${pkgs.stdenv.hostPlatform.system}.mynoctalia
       pkgs.adw-gtk3
     ];
   };
