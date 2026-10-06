@@ -27,6 +27,15 @@
 - Umbriel: https://docs.noctalia.dev/umbriel/ — compositor configuration, keybinds, and session startup.
 - Noctalia v5: https://docs.noctalia.dev/noctalia/configuration/ — TOML layers, GUI settings versus runtime state, includes, and hot reload. Hooks: https://docs.noctalia.dev/noctalia/automation/hooks/
 - Tomli-W: https://github.com/hukkin/tomli-w — TOML serialization for filtered preference exports.
+- Neovim LSP: https://neovim.io/doc/user/lsp.html — client capabilities, configuration merging, and file-watching defaults.
+- inotifywait: https://man7.org/linux/man-pages/man1/inotifywait.1.html — recursive Linux file watching, events, and limitations.
+
+- wdisplays: https://github.com/artizirk/wdisplays — display GUI; release README documents saving layouts to kanshi.
+- kanshi: https://gitlab.freedesktop.org/emersion/kanshi — monitor-profile daemon; README and man pages cover configuration and reloads.
+
+- Home Manager dconf: https://nix-community.github.io/home-manager/options.xhtml#opt-dconf.settings — declarative user settings; NixOS requires `programs.dconf.enable`.
+
+- qtengine: https://github.com/kossLAN/qtengine — KDE-compatible Qt platform theme; README covers JSON configuration and `QTENGINE_CONFIG`.
 
 ## Wrapper reference
 
