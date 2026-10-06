@@ -44,10 +44,6 @@
         data = "\${XDG_STATE_HOME:-$HOME/.local/state}/mynoctalia";
         esc-fn = wlib.escapeShellArgWithEnv;
       };
-      # Preserve exported templates while adding the Qt6/KDE color output.
-      settings.theme.templates.builtin_ids = lib.mkDefault (
-        lib.unique ((snapshot.theme.templates.builtin_ids or []) ++ ["kcolorscheme"])
-      );
       # Keep launcher applications alive when the shell service restarts.
       settings.shell.launch_apps_as_systemd_services = lib.mkDefault true;
       settings.hooks =
@@ -74,7 +70,7 @@
         builder = ''cp "$1" "$2" && chmod +x "$2"'';
       };
 
-      settings.wallpaper.default = pkgs.fetchurl {
+      settings.wallpaper.default.path = pkgs.fetchurl {
         url = "https://github.com/it-is-zane/wallpapers/blob/main/NixOS/NixOS_Black.png?raw=true";
         hash = "sha256-zO5ggrxgCocLSfAHd8xDa4PVkIN/DElNCN2MLi6qrP8=";
       };

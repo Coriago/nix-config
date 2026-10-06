@@ -6,7 +6,7 @@ The model is:
 
 ```
 config.toml   = snapshot.toml merged with explicit Nix settings
-snapshot.toml = config.toml merged with pruned settings.toml
+snapshot.toml = config.toml merged with pruned settings.toml, then store paths removed
 ```
 
 Both merges are recursive: the right side wins, nested tables merge, and lists
@@ -19,15 +19,18 @@ hooks run the same snapshot operation. They do not cover crashes, compositor
 exits, or shutdowns outside Noctalia. `snapshotFile` sets the destination; its
 default is this repo under `$HOME/.config/nix-config`.
 
-Only GUI overrides are pruned before merging. The filter removes monitor
+GUI overrides are pruned before merging. The filter removes monitor
 selectors/layouts, local paths, credentials, hooks, and identified bookkeeping
 such as `config_version`. If a GUI override is rejected, its baseline value is
-retained. The generated baseline is trusted and copied as-is, including its
-Nix-defined paths and hooks: keep host-specific choices out of that baseline
+retained. After merging, values containing `/nix/store/` paths are removed from either
+layer, including generated hooks and wallpaper paths. Lists containing such
+values are removed as a whole. Nix supplies these values again in `config.toml`;
+build-specific paths therefore do not churn the snapshot. Other baseline
+preferences are preserved: keep host-specific choices out of that baseline
 when they should not enter the shared snapshot. Review the snapshot diff; the
 GUI filter is a denylist, not a guarantee of portability or privacy.
 
-An empty or missing `settings.toml` produces the baseline snapshot. Clearing an
+An empty or missing `settings.toml` produces the baseline snapshot without store paths. Clearing an
 override therefore restores the baseline value in the next snapshot instead
 of deleting that preference. The previous destination file is not merged in;
 each snapshot is rebuilt from the current baseline and pruned GUI overrides.
@@ -40,8 +43,7 @@ Explicit Nix choices still win when the snapshot is used for the next build.
 Raw settings/state stay under `${XDG_STATE_HOME:-~/.local/state}/mynoctalia/noctalia`.
 The manual snapshot command uses its package's baseline and state directory;
 hooks inherit the running shell's configuration/state roots. Rebuild and switch
-before using a new package's baseline. Store-path strings alone do not keep
-assets alive; use Nix fetchers for durable baseline assets.
+before using a new package's baseline. Use Nix fetchers for durable baseline assets.
 
 The NixOS module runs `mynoctalia` through the upstream Noctalia user service,
 bound to `umbriel-session.target`. The standalone Umbriel package autostarts
@@ -51,8 +53,15 @@ Run `noctalia-reset-overrides` to remove fields from local `settings.toml` that
 are defined in the package's generated `config.toml`. Tables are compared
 recursively; arrays and scalar values are removed as whole fields. Values do
 not need to match. Fields absent from `config.toml` remain, and the portability
-filter is not involved. Reset only edits `settings.toml` and is **manual only**.
+filter is not involved. Reset only edits `settings.toml`.
 The next snapshot retains the baseline values for fields removed by reset.
+
+The systemd service runs this reset before every start, including login,
+manual restarts, crash restarts, and restarts during a rebuild switch. It uses
+the same package as the shell being started, so the new baseline takes effect
+before Noctalia reads its settings. Save GUI preferences to the snapshot before
+rebuilding if you want them included in that baseline. Reset does not write the
+snapshot. Standalone launches still use the manual reset command.
 
 `nixos-rebuild switch` (or `test`) restarts a changed Noctalia user service using
 the pinned NixOS switch implementation. A build alone does not affect the
@@ -65,6 +74,11 @@ shell service.
 When migrating from compositor autostart, an already-running Noctalia instance
 causes service startup to be skipped. Log out and back in once after switching
 to complete that migration. Subsequent changes do not require logout or reboot.
+
+The Nix wallpaper uses `wallpaper.default.path`. Saved
+`wallpaper.monitors.<connector>.path` selections take precedence over that
+default and survive the selective reset. To replace them on connected outputs,
+use the wallpaper picker's ALL view or `noctalia msg wallpaper-set <path>`.
 
 ## Umbriel
 

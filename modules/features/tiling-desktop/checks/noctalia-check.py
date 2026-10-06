@@ -115,7 +115,7 @@ assert export()["shell"]["launch_apps_as_systemd_services"] is True
 baseline_snapshot = capture()
 assert baseline_snapshot["theme"]["mode"] == "light"
 assert "/nix/store/" not in snapshotter.tomli_w.dumps(baseline_snapshot)
-assert export()["wallpaper"]["default"].startswith("/nix/store/")
+assert export()["wallpaper"]["default"]["path"].startswith("/nix/store/")
 state = Path(env["XDG_STATE_HOME"]) / "mynoctalia/noctalia"
 state.mkdir(parents=True, exist_ok=True)
 (state / "settings.toml").write_text('[theme]\nmode = "dark"\n')
