@@ -93,6 +93,7 @@
     systemd.user.services.noctalia = {
       restartIfChanged = true;
       serviceConfig = {
+        ExecStartPre = "${package}/bin/noctalia-reset-overrides";
         # During migration, leave the old compositor-started shell running
         # until logout. Do not start a duplicate or reset its live settings.
         ExecCondition = pkgs.writeShellScript "noctalia-service-available" ''
