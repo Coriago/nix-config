@@ -36,6 +36,9 @@
 - Home Manager dconf: https://nix-community.github.io/home-manager/options.xhtml#opt-dconf.settings — declarative user settings; NixOS requires `programs.dconf.enable`.
 
 - qtengine: https://github.com/kossLAN/qtengine — KDE-compatible Qt platform theme; README covers JSON configuration and `QTENGINE_CONFIG`.
+- GTK theme discovery: https://docs.gtk.org/gtk3/class.CssProvider.html — theme search precedence and `GTK_DATA_PREFIX`; https://docs.gtk.org/gtk3/running.html — runtime environment variables and their limits.
+- Umbriel portal: https://github.com/noctalia-dev/xdg-desktop-portal-umbriel — screen capture interfaces, share picker, and backend configuration.
+- Noctalia Greeter sync: https://docs.noctalia.dev/greeter/sync/ — appearance synchronization and the NixOS passwordless Polkit authorization option.
 
 ## Wrapper reference
 

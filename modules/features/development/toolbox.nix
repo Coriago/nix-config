@@ -3,6 +3,7 @@
     environment.systemPackages = with pkgs; [
       gh
       fzf
+      bubblewrap
       lazygit
 
       # TODO: Do not keep here, just for testing out codex vs pi

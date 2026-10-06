@@ -13,7 +13,7 @@ in {
     settings = toml.generate "umbriel-config.toml" config.settings;
     json = pkgs.formats.json {};
     qtengineConfig = json.generate "qtengine-config.json" config.qtengineSettings;
-    defaults = {
+    defaults = (builtins.fromTOML (builtins.readFile ./umbriel/config.toml)) // {
       general.autostart = [noctalia];
       # Umbriel also publishes these to the managed session's user services.
       environment = {
@@ -47,6 +47,11 @@ in {
   in {
     imports = [wlib.modules.default];
     options = {
+      configPath = lib.mkOption {
+        type = lib.types.str;
+        default = toString settings;
+        description = "Configuration path used when starting Umbriel. NixOS supplies a stable managed file for live reload; standalone runs use the generated store file. Validation always checks the generated settings.";
+      };
       qtengineSettings = lib.mkOption {
         type = json.type;
         default = {
@@ -75,7 +80,7 @@ in {
       runShell = [
         ''
           case "''${1-}" in
-            ""|-*) set -- -c ${settings} "$@" ;;
+            ""|-*) set -- -c ${lib.escapeShellArg config.configPath} "$@" ;;
             validate) shift; set -- validate -c ${settings} "$@" ;;
           esac
         ''
@@ -93,10 +98,17 @@ in {
       enable = true;
       package = local.flake.wrappers.myumbriel.wrap {
         inherit pkgs;
+        configPath = "/etc/umbriel/config.toml";
         # The NixOS user service owns Noctalia startup. The standalone package
         # retains compositor autostart for package testing.
         settings.general.autostart = lib.mkForce [];
       };
+    };
+    environment.etc."umbriel/config.toml" = {
+      source = config.programs.umbriel.package.generatedConfig;
+      # A real file is atomically replaced during activation. Umbriel's native
+      # watcher sees that replacement, without following /etc/static indirection.
+      mode = "0644";
     };
     # The upstream unit embeds its original store path, bypassing the wrapper.
     # Reset ExecStart before replacing it in the generated systemd drop-in.

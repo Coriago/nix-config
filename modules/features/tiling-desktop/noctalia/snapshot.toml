@@ -3,7 +3,13 @@
 enable_overdrive = true
 
 [bar.default]
-smart_auto_hide = true
+smart_auto_hide = false
+start = [
+    "launcher",
+    "bar",
+    "wallpaper",
+    "workspaces",
+]
 
 [control_center]
 width = 750
@@ -48,6 +54,7 @@ launch_apps_as_systemd_services = true
 polkit_agent = true
 telemetry_enabled = false
 umbriel_overview_type_to_launch_enabled = true
+settings_expand_all_groups = true
 
 [shell.greeter_sync]
 auto_sync = true
@@ -61,7 +68,7 @@ open_near_click_control_center = true
 transparency_mode = "soft"
 
 [theme]
-builtin = "Gruvbox"
+builtin = "Catppuccin"
 community_palette = "Oxocarbon"
 mode = "dark"
 source = "builtin"
@@ -75,3 +82,15 @@ builtin_ids = [
     "kcolorscheme",
     "umbriel",
 ]
+
+[plugin_settings."noctalia/umbriel-companion"]
+panel_placement = "floating"
+
+[plugins]
+enabled = [
+    "noctalia/bitwarden",
+    "noctalia/umbriel-companion",
+]
+
+[widget.bar]
+type = "noctalia/umbriel-companion:bar"

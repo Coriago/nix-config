@@ -8,6 +8,19 @@ in {
   }: let
     portable = local.flake.wrappers.myumbriel.wrap {inherit pkgs;};
   in {
+    checks.umbriel-reload = pkgs.runCommand "umbriel-reload-check" {
+      nativeBuildInputs = [pkgs.stdenv.cc pkgs.pkg-config];
+      buildInputs = [pkgs.wayland pkgs.wlroots_0_20];
+    } ''
+      # Exercise the pinned native watcher against NixOS-style atomic copies.
+      $CXX -std=c++23 -I${pkgs.umbriel.src}/src \
+        ${./umbriel-reload-check.cpp} \
+        ${pkgs.umbriel.src}/src/config/config_watcher.cpp \
+        ${pkgs.umbriel.src}/src/core/log.cpp \
+        $(pkg-config --cflags --libs wayland-server wlroots-0.20) -o watcher-check
+      ./watcher-check
+      touch "$out"
+    '';
     checks.myumbriel = pkgs.runCommand "umbriel-config-check" {
       nativeBuildInputs = [pkgs.stdenv.cc pkgs.pkg-config pkgs.python3 pkgs.xvfb-run];
       buildInputs = [pkgs.kdePackages.qtbase pkgs.gtk3];
@@ -21,7 +34,10 @@ in {
       # Test the generated session environment, not a system-installed plugin.
       python - ${portable.generatedConfig} <<'PY'
       import os, pathlib, shlex, sys, tomllib
-      env = tomllib.loads(pathlib.Path(sys.argv[1]).read_text())["environment"]
+      settings = tomllib.loads(pathlib.Path(sys.argv[1]).read_text())
+      assert settings["layout"]["mode"] == "scrolling"
+      assert abs(settings["layout"]["scrolling"]["default_extent_fraction"] - 2 / 3) < 1e-8
+      env = settings["environment"]
       assert env["QT_QPA_PLATFORMTHEME"] == "qtengine"
       pathlib.Path("qt-env").write_text("\n".join(
           f"export {key}={shlex.quote(value)}" for key, value in env.items()

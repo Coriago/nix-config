@@ -80,10 +80,44 @@ The Nix wallpaper uses `wallpaper.default.path`. Saved
 default and survive the selective reset. To replace them on connected outputs,
 use the wallpaper picker's ALL view or `noctalia msg wallpaper-set <path>`.
 
+## Greeter sync
+
+The greeter module sets `passwordlessSyncUsers` from `hostmeta.username`.
+The upstream Polkit rule allows that account's active local session to run the
+packaged, constrained appearance-sync helper without a password. Auto-sync is
+already enabled in the Noctalia snapshot. A keyring is not involved in this
+authorization.
+
+After rebuilding and switching, use Noctalia Settings → Security → Noctalia
+Greeter → Sync Now to check it, or let the next appearance change trigger sync.
+The rule takes effect without a reboot. Synced state remains local under
+`/var/lib/noctalia-greeter`; declarative greeter settings take precedence.
+
+Reference: [Greeter sync and authorization](https://docs.noctalia.dev/greeter/sync/).
+
 ## Umbriel
 
-`myumbriel.settings` generates its TOML directly. No checkout includes or live
-configuration machinery. Rebuild and restart the session after changing it.
+`umbriel/config.toml` holds the declarative layout defaults, read by
+`myumbriel.settings` when Nix generates its TOML. The default layout is scrolling;
+new columns use two-thirds of the available scrolling extent (width with the
+default workspace axis). Existing columns keep their current sizes.
+
+On NixOS the wrapper starts with `/etc/umbriel/config.toml`. NixOS atomically
+replaces this root-owned file on `nixos-rebuild switch` or `test`, and Umbriel's
+native watcher reloads it. No custom watcher or compositor restart is needed.
+Invalid configurations leave the last valid settings active. A build alone does
+not change the running session.
+
+After first switching to this setup, log out and back in once: an already-running
+compositor still watches its original store file. Later changes to layouts,
+keybinds, appearance and other reloadable settings apply live. Environment,
+autostart, Xwayland, DRM selection, and compositor binary updates still need a
+new session. Rebuilds do not restart the compositor.
+
+Standalone package runs continue to use their generated store file, keeping
+package testing independent of the installed `/etc` config. The wrapper's
+`configPath` option can select a stable file for a separate testing session;
+`umbriel validate` always validates the package's generated settings.
 
 ## Application theming
 
@@ -152,6 +186,7 @@ Reference: [Umbriel portal README](https://github.com/noctalia-dev/xdg-desktop-p
 
 ```
 nix build 'path:.#checks.x86_64-linux.mynoctalia' 'path:.#checks.x86_64-linux.myumbriel' 'path:.#checks.x86_64-linux.noctalia-gtk' --no-link
+nix build 'path:.#checks.x86_64-linux.umbriel-reload' --no-link
 nix build 'path:.#nixosConfigurations.heliosdesk.config.system.build.toplevel' 'path:.#nixosConfigurations.heliosmac.config.system.build.toplevel' --no-link
 ```
 
@@ -164,5 +199,9 @@ and checks GTK's actual theme loader against both bundled theme variants.
 The GTK hook check renders the upstream GTK templates through the Noctalia CLI
 on a private D-Bus with a fresh home and an empty PATH, checks dconf light/dark
 selection, and verifies existing CSS survives without duplicate imports.
+The reload check compiles the pinned Umbriel file watcher and verifies repeated
+atomic replacements of a stable config file deliver the new content. It does
+not exercise compositor layout changes: the headless compositor requires a
+buffer allocator device unavailable in the build sandbox.
 These are not live desktop/GUI tests and do not trigger a real shutdown or system
 activation.
