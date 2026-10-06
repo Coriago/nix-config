@@ -13,8 +13,13 @@ in {
     settings = toml.generate "umbriel-config.toml" config.settings;
     json = pkgs.formats.json {};
     qtengineConfig = json.generate "qtengine-config.json" config.qtengineSettings;
-    defaults = (builtins.fromTOML (builtins.readFile ./umbriel/config.toml)) // {
+    defaults = lib.recursiveUpdate (builtins.fromTOML (builtins.readFile ./umbriel/config.toml)) {
       general.autostart = [noctalia];
+      # Application launchers use the wrapped packages; other bindings live in TOML.
+      keybinds = {
+        "Mod+G" = "spawn:${lib.getExe pkgs.ghostty}";
+        "Mod+S" = "spawn:${noctalia} msg panel-toggle launcher";
+      };
       # Umbriel also publishes these to the managed session's user services.
       environment = {
         # Theme assets only: GSettings/Noctalia still select light/dark at runtime.
@@ -22,26 +27,6 @@ in {
         QT_QPA_PLATFORMTHEME = "qtengine";
         QT_PLUGIN_PATH = "${pkgs.qtengine}/${pkgs.kdePackages.qtbase.qtPluginPrefix}";
         QTENGINE_CONFIG = toString qtengineConfig;
-      };
-      keybinds = {
-        "Mod+Return" = "spawn:${lib.getExe pkgs.ghostty}";
-        "Mod+Q" = "window-close";
-        "Mod+S" = "spawn:${noctalia} msg panel-toggle launcher";
-        "Mod+Escape" = "session-quit";
-        "Mod+H" = "window-focus-left";
-        "Mod+L" = "window-focus-right";
-        "Mod+Shift+H" = {
-          action = "workspace-move-to-output-left";
-          repeat = false;
-        };
-        "Mod+Shift+L" = {
-          action = "workspace-move-to-output-right";
-          repeat = false;
-        };
-        "Mod+K" = "window-focus-up";
-        "Mod+J" = "window-focus-down";
-        "Mod+F" = "window-toggle-fullscreen";
-        "Mod+O" = "overview-toggle";
       };
     };
   in {
