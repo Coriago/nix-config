@@ -116,6 +116,7 @@ baseline_snapshot = capture()
 assert baseline_snapshot["theme"]["mode"] == "light"
 assert "/nix/store/" not in snapshotter.tomli_w.dumps(baseline_snapshot)
 assert export()["wallpaper"]["default"]["path"].startswith("/nix/store/")
+assert Path(export()["wallpaper"]["default"]["path"]).suffix == ".png", "Greeter sync needs a clean wallpaper extension"
 state = Path(env["XDG_STATE_HOME"]) / "mynoctalia/noctalia"
 state.mkdir(parents=True, exist_ok=True)
 (state / "settings.toml").write_text('[theme]\nmode = "dark"\n')

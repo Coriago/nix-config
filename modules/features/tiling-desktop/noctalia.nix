@@ -83,6 +83,8 @@
       };
 
       settings.wallpaper.default.path = pkgs.fetchurl {
+        # Greeter sync preserves the extension and rejects URL query characters.
+        name = "NixOS_Black.png";
         url = "https://github.com/it-is-zane/wallpapers/blob/main/NixOS/NixOS_Black.png?raw=true";
         hash = "sha256-zO5ggrxgCocLSfAHd8xDa4PVkIN/DElNCN2MLi6qrP8=";
       };

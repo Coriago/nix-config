@@ -48,13 +48,22 @@ max_visible = 3
 [osd]
 background_opacity = 0.7999999821186066
 
+[plugin_settings."noctalia/umbriel-companion"]
+panel_placement = "floating"
+
+[plugins]
+enabled = [
+    "noctalia/bitwarden",
+    "noctalia/umbriel-companion",
+]
+
 [shell]
 external_ip_enabled = true
 launch_apps_as_systemd_services = true
 polkit_agent = true
+settings_expand_all_groups = true
 telemetry_enabled = false
 umbriel_overview_type_to_launch_enabled = true
-settings_expand_all_groups = true
 
 [shell.greeter_sync]
 auto_sync = true
@@ -68,7 +77,7 @@ open_near_click_control_center = true
 transparency_mode = "soft"
 
 [theme]
-builtin = "Catppuccin"
+builtin = "Gruvbox"
 community_palette = "Oxocarbon"
 mode = "dark"
 source = "builtin"
@@ -81,15 +90,6 @@ builtin_ids = [
     "ghostty",
     "kcolorscheme",
     "umbriel",
-]
-
-[plugin_settings."noctalia/umbriel-companion"]
-panel_placement = "floating"
-
-[plugins]
-enabled = [
-    "noctalia/bitwarden",
-    "noctalia/umbriel-companion",
 ]
 
 [widget.bar]
