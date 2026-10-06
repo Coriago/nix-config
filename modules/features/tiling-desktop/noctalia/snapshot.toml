@@ -51,6 +51,10 @@ background_opacity = 0.7999999821186066
 [plugin_settings."noctalia/umbriel-companion"]
 panel_placement = "floating"
 
+[plugin_settings."mindnbytes/nix-status"]
+details_placement = "floating"
+nixos_configuration = "heliosdesk"
+
 [plugins]
 enabled = [
     "noctalia/bitwarden",

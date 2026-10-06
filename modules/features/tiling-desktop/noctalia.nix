@@ -59,7 +59,7 @@
       # Keep launcher applications alive when the shell service restarts.
       settings.shell.launch_apps_as_systemd_services = lib.mkDefault true;
       settings.hooks =
-        lib.genAttrs ["logging_out" "rebooting" "shutting_down" "colors_changed"]
+        lib.genAttrs ["logging_out" "rebooting" "shutting_down" "colors_changed" "session_locked"]
         (_: lib.mkBefore ["${saveSnapshot}"]);
       constructFiles.snapshotPreferences = {
         relPath = "bin/noctalia-snapshot-preferences";
