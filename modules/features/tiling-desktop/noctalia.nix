@@ -33,7 +33,7 @@
       snapshotFile = lib.mkOption {
         type = lib.types.str;
         default = "\${HOME}/.config/nix-config/modules/features/tiling-desktop/noctalia/snapshot.toml";
-        description = "Writable checkout destination for config.toml merged with pruned GUI overrides; HOME is expanded at runtime.";
+        description = "Writable checkout destination for config.toml merged with pruned GUI overrides, excluding Nix store paths; HOME is expanded at runtime.";
       };
     };
     config = {

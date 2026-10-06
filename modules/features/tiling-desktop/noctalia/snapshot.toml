@@ -8,20 +8,6 @@ smart_auto_hide = true
 [control_center]
 width = 750
 
-[hooks]
-colors_changed = [
-    "/nix/store/jds7a6mp42np1g9ch07ma5dq4m3ml74l-noctalia-snapshot-preferences",
-]
-logging_out = [
-    "/nix/store/jds7a6mp42np1g9ch07ma5dq4m3ml74l-noctalia-snapshot-preferences",
-]
-rebooting = [
-    "/nix/store/jds7a6mp42np1g9ch07ma5dq4m3ml74l-noctalia-snapshot-preferences",
-]
-shutting_down = [
-    "/nix/store/jds7a6mp42np1g9ch07ma5dq4m3ml74l-noctalia-snapshot-preferences",
-]
-
 [idle]
 behavior_order = [
     "lock",
@@ -75,7 +61,7 @@ open_near_click_control_center = true
 transparency_mode = "soft"
 
 [theme]
-builtin = "Catppuccin"
+builtin = "Gruvbox"
 community_palette = "Oxocarbon"
 mode = "dark"
 source = "builtin"
@@ -89,6 +75,3 @@ builtin_ids = [
     "kcolorscheme",
     "umbriel",
 ]
-
-[wallpaper]
-default = "/nix/store/p0illsi0f7cmvxv07x38ldkwb28clcsy-NixOS_Black.png?raw=true"

@@ -27,7 +27,6 @@ filtered = snapshotter.prune(fixture)
 assert filtered == {
     "theme": {"mode": "dark"}, "audio": {"enable_overdrive": False},
     "bar": {"default": {"position": "top"}},
-    "wallpaper": {"default": {"path": "/nix/store/example/image.png"}},
 }
 
 home = Path(os.environ["HOME"])
@@ -44,7 +43,8 @@ source.write_text(snapshotter.tomli_w.dumps(fixture))
 snapshotter.snapshot(config_file, source, destination)
 combined = tomllib.loads(destination.read_text())
 assert combined["theme"] == {"mode": "dark", "source": "builtin", "templates": {"builtin_ids": ["gtk3"]}}
-assert combined["shell"]["avatar_path"] == baseline["shell"]["avatar_path"]
+assert "shell" not in combined
+assert "wallpaper" not in combined
 assert combined["hooks"] == baseline["hooks"]
 assert combined["audio"] == {"enable_overdrive": False}
 assert "monitor" not in combined["bar"]
@@ -60,10 +60,25 @@ assert tomllib.loads(destination.read_text())["theme"]["templates"]["builtin_ids
 for contents in ["", "config_version = 14\n"]:
     source.write_text(contents)
     snapshotter.snapshot(config_file, source, destination)
-    assert tomllib.loads(destination.read_text()) == baseline
+    assert tomllib.loads(destination.read_text()) == snapshotter.prune_store_paths(baseline)
 source.unlink()
 snapshotter.snapshot(config_file, source, destination)
-assert tomllib.loads(destination.read_text()) == baseline
+assert tomllib.loads(destination.read_text()) == snapshotter.prune_store_paths(baseline)
+
+# Changing build paths must not churn the snapshot or rewrite an identical file.
+previous = destination.read_bytes()
+previous_mtime = destination.stat().st_mtime_ns
+baseline["shell"]["avatar_path"] = "/nix/store/next-build/avatar.png"
+baseline["hooks"]["colors_changed"] = ["exec /nix/store/next-build/bin/snapshot"]
+config_file.write_text(snapshotter.tomli_w.dumps(baseline))
+source.write_text('[wallpaper]\ndefault = "file:///nix/store/gui/image.png"\n')
+snapshotter.snapshot(config_file, source, destination)
+assert destination.read_bytes() == previous
+assert destination.stat().st_mtime_ns == previous_mtime
+assert snapshotter.prune_store_paths({"only": ["plain", "/nix/store/build/bin/tool"]}) is snapshotter.DROP
+assert snapshotter.prune_store_paths({"empty": [], "nested": {}, "enabled": False}) == {
+    "empty": [], "nested": {}, "enabled": False,
+}
 
 # Invalid input must not replace the last good snapshot.
 previous = destination.read_bytes()
@@ -99,6 +114,8 @@ assert export()["theme"]["mode"] == "light"
 assert export()["shell"]["launch_apps_as_systemd_services"] is True
 baseline_snapshot = capture()
 assert baseline_snapshot["theme"]["mode"] == "light"
+assert "/nix/store/" not in snapshotter.tomli_w.dumps(baseline_snapshot)
+assert export()["wallpaper"]["default"].startswith("/nix/store/")
 state = Path(env["XDG_STATE_HOME"]) / "mynoctalia/noctalia"
 state.mkdir(parents=True, exist_ok=True)
 (state / "settings.toml").write_text('[theme]\nmode = "dark"\n')
@@ -164,7 +181,7 @@ hook_env = env | {
     "NOCTALIA_CONFIG_HOME": str(hook_root),
     "NOCTALIA_STATE_HOME": str(state.parent),
 }
-for hook in baseline_snapshot["hooks"]["colors_changed"]:
+for hook in export()["hooks"]["colors_changed"]:
     subprocess.run(hook, shell=True, env=hook_env, check=True)
 assert tomllib.loads(destination.read_text()) == roundtrip
 print("Passed: prune-before-merge, empty/missing overrides, reset/snapshot roundtrip, hook roots, invalid input and real CLI precedence.")
