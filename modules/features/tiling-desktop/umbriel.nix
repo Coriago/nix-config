@@ -1,4 +1,8 @@
-{self, config, ...}: let
+{
+  self,
+  config,
+  ...
+}: let
   local = config;
 in {
   flake.wrappers.myumbriel = {
@@ -86,6 +90,10 @@ in {
       package = local.flake.wrappers.myumbriel.wrap {
         inherit pkgs;
         configPath = "/etc/umbriel/config.toml";
+        settings.keybinds."Mod+G" =
+          lib.mkIf
+          (lib.attrByPath ["wrappers" "myghostty" "enable"] false config)
+          (lib.mkForce "spawn:${lib.getExe config.wrappers.myghostty.wrapper}");
         # The NixOS user service owns Noctalia startup. The standalone package
         # retains compositor autostart for package testing.
         settings.general.autostart = lib.mkForce [];

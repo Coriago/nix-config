@@ -16,6 +16,11 @@ local: {
         # Move the conflicting file to a dated backup
         mv "$1" "$1.$TIMESTAMP.bak"
       '';
+      users.${config.hostmeta.username} = {
+        imports = [
+          local.config.flake.modules.homeManager.base
+        ];
+      };
     };
   };
 

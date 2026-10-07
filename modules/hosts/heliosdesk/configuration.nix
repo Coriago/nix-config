@@ -9,8 +9,10 @@
       workstation
       boot
       nvidia
+      keyboard
       local-llm
       cachyos-kernel
+      gaming
     ];
 
     liveConfig.enable = true;

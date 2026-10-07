@@ -44,7 +44,14 @@
 - Alacritty: https://alacritty.org/ — configuration, release history, and links to versioned feature and escape-sequence documentation.
 - kitty: https://sw.kovidgoyal.net/kitty/ — terminal features, shell integration, performance methodology, protocols, and multiplexer caveats.
 - Ghostty: https://ghostty.org/docs/ — terminal features, versioned release notes, Linux integration, configuration, and terminfo troubleshooting.
+- Noctalia app theming: https://docs.noctalia.dev/noctalia/theming/app-theming/ — supported applications, writable theme files, and apply/reload hooks.
 - Herdr: https://herdr.dev/docs/ — terminal multiplexer configuration, graphics support, keyboard handling, and session persistence.
+
+- Dolphin: https://docs.kde.org/stable_kf6/en/dolphin/dolphin/ — file management, remote protocols, panels, and preferences.
+- KIO-FUSE: https://github.com/KDE/kio-fuse — remote-file access for applications without KIO support and D-Bus activation.
+- Thunar: https://docs.xfce.org/xfce/thunar/start — file manager features, plugins, preferences, and GVfs requirements for remote storage.
+- GVfs: https://wiki.gnome.org/Projects/gvfs/doc — on-demand backends, session requirements, and FUSE access to remote mounts.
+- GNOME Files remote storage: https://help.gnome.org/gnome-help/nautilus-connect.html — server connections and supported network protocols.
 
 ## Wrapper reference
 

@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.desktop-services = {...}: {
+  flake.modules.nixos.desktop-essentials = {pkgs, ...}: {
     hardware.bluetooth.enable = true;
     networking.networkmanager.enable = true;
     security.rtkit.enable = true;
@@ -7,7 +7,10 @@
     services = {
       upower.enable = true;
       power-profiles-daemon.enable = true;
-
+      printing = {
+        enable = true;
+        drivers = [pkgs.hplip];
+      };
       avahi = {
         enable = true;
         nssmdns4 = true;
