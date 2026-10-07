@@ -7,7 +7,7 @@ smart_auto_hide = false
 start = [
     "launcher",
     "bar",
-    "wallpaper",
+    "bar_2",
     "workspaces",
 ]
 
@@ -59,6 +59,7 @@ panel_placement = "floating"
 enabled = [
     "noctalia/bitwarden",
     "noctalia/umbriel-companion",
+    "prponkshe/umbriel-displays",
 ]
 
 [shell]
@@ -98,3 +99,6 @@ builtin_ids = [
 
 [widget.bar]
 type = "noctalia/umbriel-companion:bar"
+
+[widget.bar_2]
+type = "prponkshe/umbriel-displays:bar"
