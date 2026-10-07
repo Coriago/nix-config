@@ -29,6 +29,10 @@ vim.opt.confirm = true
 vim.opt.termguicolors = true
 vim.schedule(function() vim.opt.clipboard = 'unnamedplus' end)
 
+vim.opt.expandtab = true
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+
 -- Basic keymaps --------------------------------------------------------------
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
@@ -131,7 +135,7 @@ require('which-key').setup {
   },
 }
 require('tokyonight').setup { styles = { comments = { italic = false } } }
-vim.cmd.colorscheme 'tokyonight-night'
+vim.cmd.colorscheme 'unokai'
 require('todo-comments').setup { signs = false }
 require('mini.ai').setup { n_lines = 500, mappings = { around_next = 'aa', inside_next = 'ii' } }
 require('mini.surround').setup()
