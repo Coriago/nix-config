@@ -25,6 +25,7 @@
 - Use Context7 for library/API documentation when available: resolve the library ID, then query the relevant version. Fetch full official pages as needed; snippets do not replace complete documentation reads.
 
 - Umbriel: https://docs.noctalia.dev/umbriel/ — compositor configuration, keybinds, and session startup.
+- Niri: https://niri-wm.github.io/niri/ — compositor configuration, window management, screencasting, and application compatibility.
 - Noctalia v5: https://docs.noctalia.dev/noctalia/configuration/ — TOML layers, GUI settings versus runtime state, includes, and hot reload. Hooks: https://docs.noctalia.dev/noctalia/automation/hooks/
 - Tomli-W: https://github.com/hukkin/tomli-w — TOML serialization for filtered preference exports.
 - Neovim LSP: https://neovim.io/doc/user/lsp.html — client capabilities, configuration merging, and file-watching defaults.
@@ -39,6 +40,11 @@
 - GTK theme discovery: https://docs.gtk.org/gtk3/class.CssProvider.html — theme search precedence and `GTK_DATA_PREFIX`; https://docs.gtk.org/gtk3/running.html — runtime environment variables and their limits.
 - Umbriel portal: https://github.com/noctalia-dev/xdg-desktop-portal-umbriel — screen capture interfaces, share picker, and backend configuration.
 - Noctalia Greeter sync: https://docs.noctalia.dev/greeter/sync/ — appearance synchronization and the NixOS passwordless Polkit authorization option.
+
+- Alacritty: https://alacritty.org/ — configuration, release history, and links to versioned feature and escape-sequence documentation.
+- kitty: https://sw.kovidgoyal.net/kitty/ — terminal features, shell integration, performance methodology, protocols, and multiplexer caveats.
+- Ghostty: https://ghostty.org/docs/ — terminal features, versioned release notes, Linux integration, configuration, and terminfo troubleshooting.
+- Herdr: https://herdr.dev/docs/ — terminal multiplexer configuration, graphics support, keyboard handling, and session persistence.
 
 ## Wrapper reference
 

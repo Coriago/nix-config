@@ -10,6 +10,7 @@ default_extent_fraction = 0.6666666666666666
 "Mod+Q" = { action = "window-close", repeat = false }
 "Mod+Escape" = "session-quit"
 "Mod+Shift+Escape" = { action = "shortcuts-inhibit-toggle", allow_when_inhibited = true, repeat = false }
+"Mod+C" = "cheatsheet-toggle"
 
 # Focus and movement
 "Mod+Left" = "window-focus-left"
@@ -20,11 +21,14 @@ default_extent_fraction = 0.6666666666666666
 "Mod+J" = "window-focus-down"
 "Mod+K" = "window-focus-up"
 "Mod+L" = "window-focus-right"
-"Mod+F1" = "window-focus-next"
 "Mod+Shift+Left" = "column-move-left"
 "Mod+Shift+Down" = "window-move-down"
 "Mod+Shift+Up" = "window-move-up"
 "Mod+Shift+Right" = "column-move-right"
+"Mod+Shift+H" = "column-move-left"
+"Mod+Shift+J" = "window-move-down"
+"Mod+Shift+K" = "window-move-up"
+"Mod+Shift+L" = "column-move-right"
 
 # Window state and layout
 "Mod+T" = { action = "window-toggle-floating", repeat = false }
