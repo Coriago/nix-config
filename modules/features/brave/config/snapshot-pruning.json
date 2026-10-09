@@ -1,7 +1,0 @@
-[
-  "^(account_info|account_tracker_service_last_update|signin|sync|sync_promo|gaia_cookie|google|gcm|invalidation|push_messaging|protection|extensions|extension_commands|default_search_provider_data|default_search_provider|search_provider_overrides|search|sessions|session|optimization_guide|segmentation_platform|commerce|media_router|media|webrtc|web_apps|web_app_ids|devtools|download|savefile|printing|partition|partition_alloc|network|net|ssl|safebrowsing|safe_browsing|password_manager|autofill|payments|translate_site_blacklist|site_engagement|domain_diversity|domain_actions)(\\.|$)",
-  "^profile\\.(content_settings|avatar_index|name|gaia_info_picture_url|using_default_avatar|using_default_name|created_by_version|creation_time|exit_type|exited_cleanly|last_engagement_time|last_time_obsolete_http_credentials_removed|password_hash_data_list)(\\.|$)",
-  "^browser\\.(window_placement|app_window_placement|last_known_google_url)(\\.|$)",
-  "^brave\\.(wallet|rewards|skus|vpn|p3a|stats|ads|news|today|ai_chat|sync|tor|webtorrent)(\\.|$)",
-  "(?i)(^|\\.)(.*token.*|.*secret.*|.*password.*|.*passphrase.*|.*private_key.*|.*session_id.*|.*client_id.*|.*device_id.*|.*account_id.*|.*last_used.*|.*last_active.*|.*last_seen.*|.*last_updated.*|.*timestamp.*|.*fingerprint.*|.*installation_id.*|.*metrics.*|.*migration.*)(\\.|$)"
-]

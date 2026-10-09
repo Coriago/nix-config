@@ -1,5 +1,6 @@
 use anyhow::{Context, Result, ensure};
-use clap::{Args, Parser, Subcommand};
+use clap::{ArgMatches, Args, CommandFactory, FromArgMatches, Parser, Subcommand};
+mod direct;
 use std::{
     ffi::OsString,
     fs,
@@ -9,7 +10,7 @@ use std::{
     time::Duration,
 };
 use sync_snap::{
-    config::{Manifest, resolve, variable},
+    config::{Manifest, Program, resolve, variable},
     engine::{self, Event, Operation, Options},
 };
 
@@ -47,10 +48,12 @@ enum Action {
 struct Selection {
     /// JSON or TOML manifest (version 1).
     #[arg(long)]
-    config: PathBuf,
+    config: Option<PathBuf>,
+    #[command(flatten)]
+    direct: direct::Direct,
     #[arg(long, conflicts_with = "all")]
     program: Option<String>,
-    #[arg(long)]
+    #[arg(long, requires = "config")]
     all: bool,
     /// Override the shared lock/hash directory; default: $XDG_STATE_HOME/sync-snap.
     #[arg(long)]
@@ -63,26 +66,57 @@ struct Selection {
     jq: String,
 }
 
-fn perform(selection: &Selection, op: Operation, event: Event) -> Result<bool> {
-    let path = fs::canonicalize(&selection.config).context("locate manifest")?;
-    let base = path.parent().context("manifest has no parent directory")?;
-    let input = fs::read_to_string(&path).context("read manifest")?;
-    let manifest: Manifest = if path.extension().is_some_and(|e| e == "toml") {
-        toml::from_str(&input).context("invalid TOML manifest")?
-    } else {
-        serde_json::from_str(&input).context("invalid JSON manifest")?
-    };
-    ensure!(
-        manifest.version == 1,
-        "unsupported manifest version {}",
-        manifest.version
-    );
-    if let Some(name) = &selection.program {
+fn perform(
+    selection: &Selection,
+    op: Operation,
+    event: Event,
+    matches: &ArgMatches,
+) -> Result<bool> {
+    let (manifest, base) = if let Some(config) = &selection.config {
+        let path = fs::canonicalize(config).context("locate manifest")?;
+        let base = path.parent().context("manifest has no parent directory")?;
+        let input = fs::read_to_string(&path).context("read manifest")?;
+        let manifest: Manifest = if path.extension().is_some_and(|e| e == "toml") {
+            toml::from_str(&input).context("invalid TOML manifest")?
+        } else {
+            serde_json::from_str(&input).context("invalid JSON manifest")?
+        };
         ensure!(
-            manifest.programs.contains_key(name),
-            "unknown program: {name}"
+            manifest.version == 1,
+            "unsupported manifest version {}",
+            manifest.version
         );
-    }
+        if let Some(name) = &selection.program {
+            ensure!(
+                manifest.programs.contains_key(name),
+                "unknown program: {name}"
+            );
+        }
+        (manifest, base.to_path_buf())
+    } else {
+        let entries = direct::entries(matches)?;
+        let name = selection
+            .program
+            .clone()
+            .context("direct arguments require --program")?;
+        let program = match op {
+            Operation::Sync => Program {
+                sync: entries,
+                snapshot: vec![],
+            },
+            Operation::Snapshot => Program {
+                sync: vec![],
+                snapshot: entries,
+            },
+        };
+        (
+            Manifest {
+                version: 1,
+                programs: [(name, program)].into(),
+            },
+            std::env::current_dir()?,
+        )
+    };
     let state = match &selection.state_dir {
         Some(path) => resolve(
             path.to_str().context("non-UTF-8 state path")?,
@@ -91,7 +125,7 @@ fn perform(selection: &Selection, op: Operation, event: Event) -> Result<bool> {
         None => PathBuf::from(variable("XDG_STATE_HOME")?).join("sync-snap"),
     };
     let options = Options {
-        base,
+        base: &base,
         state: &state,
         event,
         timeout: Duration::from_millis(selection.lock_timeout_ms),
@@ -123,17 +157,29 @@ fn report(result: Result<bool>) -> ExitCode {
     }
 }
 fn main() -> ExitCode {
-    match Cli::parse().command {
+    let matches = Cli::command().get_matches();
+    let cli = Cli::from_arg_matches(&matches).unwrap_or_else(|error| error.exit());
+    let (_, arguments) = matches.subcommand().expect("required subcommand");
+    match cli.command {
         Action::Sync { selection, startup } => report(perform(
             &selection,
             Operation::Sync,
             if startup { Event::Start } else { Event::Manual },
+            arguments,
         )),
-        Action::Snapshot { selection } => {
-            report(perform(&selection, Operation::Snapshot, Event::Manual))
-        }
+        Action::Snapshot { selection } => report(perform(
+            &selection,
+            Operation::Snapshot,
+            Event::Manual,
+            arguments,
+        )),
         Action::Run { selection, command } => {
-            let _ = report(perform(&selection, Operation::Sync, Event::Start));
+            let _ = report(perform(
+                &selection,
+                Operation::Sync,
+                Event::Start,
+                arguments,
+            ));
             // perform's file handles, locks, and temporary files have been dropped.
             // Exec preserves application signals, arguments, and exit status.
             let e = Command::new(&command[0]).args(&command[1..]).exec();

@@ -486,3 +486,112 @@ fn concurrent_startups_serialize_and_release_locks() {
     assert_eq!(read(p, "runtime.json"), json!({"a":[1,2,3],"b":true}));
     assert!(files::lock(&p.join("state"), "test-app", Duration::ZERO).is_ok());
 }
+
+#[test]
+fn direct_arguments_batch_sources_snapshot_and_fail_open() {
+    let t = TempDir::new().unwrap();
+    let p = t.path();
+    let direct = |action: &str| {
+        let mut cmd = Command::new(env!("CARGO_BIN_EXE_sync-snap"));
+        cmd.current_dir(p)
+            .arg(action)
+            .args(["--program", "direct-test", "--state-dir", "state"]);
+        cmd
+    };
+    write(p, "source with spaces", r#"{"a":1,"secret":"remove"}"#);
+    write(p, "override.json", r#"{"a":2}"#);
+    write(p, "second.toml", "enabled = true");
+    let args = [
+        "--destination=first.json",
+        "--source",
+        "source with spaces",
+        "--source-format",
+        "json",
+        "--source",
+        "override.json",
+        "--policy",
+        "merge",
+        "--destination",
+        "second.json",
+        "--source",
+        "second.toml",
+        "--policy",
+        "merge",
+    ];
+    assert!(direct("sync").args(args).output().unwrap().status.success());
+    assert_eq!(read(p, "first.json")["a"], 2);
+    assert_eq!(read(p, "second.json"), json!({"enabled":true}));
+    assert!(
+        direct("snapshot")
+            .args([
+                "--destination",
+                "snapshot.json",
+                "--source",
+                "first.json",
+                "--prune-key-contains",
+                "^secret$",
+                "--transform",
+                ".captured = true"
+            ])
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert_eq!(read(p, "snapshot.json"), json!({"a":2,"captured":true}));
+    write(p, "override.json", r#"{"a":3}"#);
+    write(p, "second.json", "broken");
+    assert!(!direct("sync").args(args).output().unwrap().status.success());
+    assert_eq!(read(p, "first.json")["a"], 2);
+    assert_eq!(
+        direct("run")
+            .args(args)
+            .args(["--", "sh", "-c", "exit 23"])
+            .output()
+            .unwrap()
+            .status
+            .code(),
+        Some(23)
+    );
+    assert!(
+        !direct("sync")
+            .args(["--source", "override.json", "--destination", "bad.json"])
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert!(!p.join("bad.json").exists());
+    // A source modifier belongs to the preceding source, never the next file.
+    assert!(
+        !direct("sync")
+            .args([
+                "--destination",
+                "bad.json",
+                "--source-format",
+                "json",
+                "--source",
+                "override.json"
+            ])
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert!(
+        direct("sync")
+            .args([
+                "--destination",
+                "optional.json",
+                "--source",
+                "missing.json",
+                "--source-optional",
+                "true"
+            ])
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert!(!p.join("optional.json").exists());
+}

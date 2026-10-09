@@ -34,6 +34,43 @@ arguments, signals, and exit status. Even a missing or malformed manifest does
 not prevent execution. An invalid CLI invocation or a missing application
 executable still fails normally.
 
+## Direct arguments (no manifest required)
+
+```sh
+sync-snap sync --program myapp \
+  --destination '${XDG_CONFIG_HOME}/myapp/settings.json' \
+  --source /path/to/baseline.json --policy merge \
+  --destination '${XDG_CONFIG_HOME}/myapp/other.toml' \
+  --source /path/to/other.toml --policy fill-missing
+
+sync-snap snapshot --program myapp \
+  --destination /path/to/snapshot.json \
+  --source '${XDG_CONFIG_HOME}/myapp/settings.json' \
+  --prune-key-contains '^session$'
+```
+
+Each `--destination` begins a file entry. Following `--source` arguments append
+ordered inputs to that entry. `--source-format json|toml|raw` and
+`--source-optional true|false` modify the most recent source. Entry options are
+`--format`, `--policy`, `--trigger`, `--directory true|false`, and repeatable
+`--prune-key-contains`, `--prune-value-contains`, `--transform` filters. Scalar
+options use their last value within the entry. Defaults match the manifest schema
+below (CLI policy defaults to `seed`; the Nix addon explicitly chooses `merge`).
+Put file options after their destination and source modifiers after their source.
+
+`--program` supplies the lock/cache identity. Relative paths resolve against the
+working directory. Literal HOME/XDG placeholders are expanded by Rust; shell
+variables can also be expanded by the caller with normal shell quoting. No extra
+configuration environment variables are required. `run` accepts the same file
+arguments followed by `-- APP ARGS...` and still launches after sync failures.
+Multiple destinations retain program-wide sync validation and locking in one
+invocation. Direct options cannot be combined with `--config`; `--all` requires
+that legacy manifest interface. OS command-line size limits apply to declarations,
+not config contents, which are read from files.
+
+The standalone [Nix addon](../../lib/sync-snap/README.md) generates this interface
+from wrapper `constructFiles` and `sync.files`/`snapshot.files` declarations.
+
 ## Manifest
 
 Version 1 accepts TOML (`.toml`) or JSON. Unknown fields are errors. This example

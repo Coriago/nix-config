@@ -13,9 +13,9 @@ native configuration layers and upstream wrapper options where they fit the chos
 ownership policy. For partially declarative writable files, the optional
 [sync-snap package](../packages/sync-snap/README.md) implements shared sync and
 snapshot operations, including baseline priority when native overrides would
-otherwise win. Use the [shared Nix adapter](../lib/wrappers/README.md) for
-`syncSnap` options, generated commands, and startup wiring. Keep personal settings
-in `modules/features/<app>/config/`, reusable adapters in `lib/wrappers/`, and
+otherwise win. Use the [shared Nix adapter](../lib/sync-snap/README.md) for
+`sync` and `snapshot` options, generated commands, and startup wiring. Keep personal settings
+in `modules/features/<app>/config/`, custom wrappers in `wrapperModules/`, and
 checks in `tests/wrappers/`. See the [agreed lifecycle design](proposal-portable-mutability.md).
 
 This guide defines the approach for new wrappers and incremental migrations. The
@@ -420,7 +420,6 @@ snapshot/reset semantics and limitations.
 | [myneovim](../modules/features/neovim/neovim.nix) | Lua tree, plugins, tools, generated integration info | Host overrides `settings.config_directory` with `liveConfig.link`; data/cache/state isolated by `NVIM_APPNAME` | Restart Neovim for configuration changes; no general automatic Lua reload |
 | [mypi](../modules/features/pi-agent/pi-agent.nix) | Extensions, browser settings, MCP executable, plugin dependencies | Host overrides `configDir` with a live link; Pi keeps native user settings/credentials/sessions | `/reload` or restart; ensure browser/MCP subprocess restarts for its config changes |
 | [myghostty](../modules/features/ghostty/ghostty.nix) | Keybinding policy | Ordinary host config enabled for writable Noctalia themes; no repo live-source option currently | Reload action or theme hook; packaged keybindings are loaded after host config |
-| [mybrave](../modules/features/brave/README.md) | HM-generated Bitwarden manifest, recommended Google defaults, captured snapshot + native preferences | Isolated writable profile; sync-snap merges before cold launch; filtered manual export; optional live policies | `brave-sync` adopts baseline; `brave-snapshot` captures Preferences; close Brave before sync/export; policy reload remains native |
 | [mynoctalia](../modules/features/tiling-desktop/noctalia.nix) | Snapshot merged with Nix settings into store TOML | Native GUI overrides in `$XDG_STATE_HOME/mynoctalia/noctalia`; filtered snapshot command/hooks; no live baseline currently | GUI state is reloadable; changing repo snapshot needs rebuild; old overrides can mask it |
 | [myumbriel](../modules/features/tiling-desktop/umbriel.nix) | TOML and Qt integration | Standalone store file; NixOS root-owned `/etc/umbriel/config.toml`; writable optional Noctalia theme include | Native reload after activation replaces `/etc` file or theme changes; editing repo baseline still needs build/activation |
 | [myopencode](../modules/features/opencode-agent/opencode.nix) | Generated provider/agent/MCP JSON | Upstream `envDefault.OPENCODE_CONFIG` allows explicit caller override; native user/project config and credentials remain; no live repo JSON currently | Restart the persistent service after wrapper config changes; standalone session avoids service reuse |

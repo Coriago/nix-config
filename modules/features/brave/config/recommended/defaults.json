@@ -1,7 +1,0 @@
-{
-  "PasswordManagerEnabled": false,
-  "DefaultSearchProviderEnabled": true,
-  "DefaultSearchProviderName": "Google",
-  "DefaultSearchProviderKeyword": "google.com",
-  "DefaultSearchProviderSearchURL": "https://www.google.com/search?q={searchTerms}"
-}
