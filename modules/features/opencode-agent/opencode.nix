@@ -23,6 +23,7 @@ in {
       exePath = "bin/opencode2";
       binName = "opencode";
       sync.defaultDir = "\${XDG_CONFIG_HOME}/syncopencode";
+      snapshot.enable = true;
       cli-settings = {
         theme.name = "gruvbox";
       };

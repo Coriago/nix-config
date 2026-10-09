@@ -20,6 +20,7 @@
 
 - Add official documentation sites to this list whenever they prove useful during a task. Include a short description, prefer canonical URLs, and avoid duplicate entries.
 - nix-wrapper-modules: https://nix-community.github.io/nix-wrapper-modules/ — wrapper options, integration, and examples.
+- flake-parts: https://flake.parts/options/flake-parts.html — `perSystem` options and conventional `apps` outputs; prefer the pinned modules' option documentation.
 - Context7: https://context7.com/docs/ — documentation lookup and MCP setup; Pi integration: https://context7.com/docs/clients/pi
 - Pi: https://github.com/earendil-works/pi/tree/main/packages/coding-agent/docs — agent configuration, extensions, and native MCP.
 - Bun: https://bun.sh/docs/bundler/executables — standalone executable builds, worker entrypoints, and embedded assets.

@@ -10,6 +10,10 @@
   };
 
   perSystem = {pkgs, ...}: {
+    checks.sync-snap-addon = import ../lib/sync-snap/check.nix {
+      inherit pkgs;
+      wlib = inputs.wrapper-modules.lib;
+    };
     checks.directory-mappings = import ../lib/directory-mappings/check.nix {
       inherit pkgs;
       wlib = inputs.wrapper-modules.lib;
@@ -18,6 +22,7 @@
 
   # Flake parts addon modules
   imports = [
+    ../lib/sync-snap/flake-module.nix
     inputs.flake-parts.flakeModules.modules
     inputs.wrapper-modules.flakeModules.wrappers
     inputs.home-manager.flakeModules.home-manager

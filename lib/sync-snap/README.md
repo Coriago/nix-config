@@ -32,13 +32,13 @@ constructFiles.settings → packaged settings.json
                          ↓ sync before launch
               $XDG_CONFIG_HOME/myapp/settings.json ← app GUI writes
                          ↓ myapp-snapshot
-              /home/helios/.config/nix-config/snapshot/settings.json
+              /home/helios/.config/nix-config/snapshot/myapp/settings.json
 ```
 
 The application wrapper must tell the app to read that runtime location when it
 differs from its native default. This addon cannot infer application config flags.
-It neither imports snapshots back into the baseline nor changes the app's reload
-behavior; wrappers can explicitly include captured files in `sources`.
+Existing structured snapshots are embedded as baseline inputs by default; the
+application's reload behavior remains application-specific.
 
 ## Options and generated defaults
 
@@ -48,8 +48,12 @@ a snapshot-only wrapper still gets the automatic reverse mappings.
 | Option | Default |
 | --- | --- |
 | `sync.defaultDir` | `${XDG_CONFIG_HOME}/<binName>`; unset XDG falls back to `$HOME/.config` |
-| `snapshot.defaultDir` | `/home/helios/.config/nix-config/snapshot` |
-| `sync.files.<name>.sources` | Corresponding `constructFiles.<name>.path` |
+| `snapshot.name` | Package attribute name supplied by flake integration; standalone wrappers fall back to `binName` |
+| `snapshot.defaultDir` | `/home/helios/.config/nix-config/snapshot/<snapshot.name>` |
+| `snapshot.autoMerge` | `true` |
+| `snapshot.files.<name>.autoMerge` | `true`; effective only when global `snapshot.autoMerge` is also true |
+| `snapshot.sourceDir` | `snapshot/<snapshot.name>` inside the evaluated flake source |
+| `sync.files.<name>.sources` | Existing structured snapshot, then corresponding `constructFiles.<name>.path` |
 | `sync.files.<name>.destinationDir` | `sync.defaultDir` |
 | `sync.files.<name>.destinationPath` | Corresponding `constructFiles.<name>.relPath` |
 | `sync.files.<name>.policy` | `merge` |
@@ -104,9 +108,83 @@ sync.files.helper.enable = false;
 ```
 
 Every `constructFiles` entry is included unless disabled. The `_syncSnap` prefix
-is reserved for the addon's commands and excluded from discovery. No app-name
-subdirectory is added to snapshots automatically: choose an app-specific
-`snapshot.defaultDir` to avoid collisions between apps with identical filenames.
+is reserved for the addon's commands and excluded from discovery. Each app gets
+its own snapshot directory by default. File-relative paths remain beneath it,
+for example `snapshot/myapp/nested/settings.json`. Explicit `snapshot.defaultDir`
+and per-file destination overrides remain supported.
+
+## Automatic registration, manual execution
+
+Enable snapshot export inside the configured package in its feature:
+
+```nix
+snapshot.enable = true;
+```
+
+`snapshot.enable` defaults to `false`. The imported `flake-module.nix` discovers
+enabled packages in `perSystem.packages` and exposes conventional Nix apps:
+
+```sh
+nix run .#snapshot-myopencode
+nix run .#snapshot-all
+```
+
+Use `path:.#...` while testing new untracked files. There is no separate
+registration list or export variant. The feature's enabled package supplies the
+generated snapshot executable directly, without starting the application,
+running sync, or entering directory mappings. Snapshot sources already point
+at the actual writable files.
+
+The default export directory for this registration is
+`/home/helios/.config/nix-config/snapshot/myopencode`. Flake integration supplies
+the actual package attribute name to the addon, even if its binary is named
+`opencode`. Explicit destination settings still take precedence. Package names
+use letters, digits, hyphens and underscores; `all` is reserved.
+
+`snapshot-all` processes registered names alphabetically, continues on failure,
+and exits nonzero if any snapshot fails. With no registrations it succeeds
+without doing anything. CLI arguments are forwarded to each command, such as
+`--lock-timeout-ms 5000`. No application-close hooks or Git commits are added.
+Existing Rust validation, pruning,
+sidecar logging and unchanged-output skipping apply.
+
+## Automatically importing snapshots
+
+`snapshot.autoMerge = true` reads existing JSON/TOML snapshots during Nix
+evaluation, validates their syntax and object/array root, and embeds their bytes
+in the package closure. Each generated sync file looks up the corresponding
+snapshot entry's `destinationPath` beneath `snapshot.sourceDir`. Missing files
+are ignored; malformed files fail evaluation with the source path in the error.
+
+The source order is **snapshot, then declared config**. Sync-snap's existing
+merge combines them when materializing the writable runtime file: declared
+values win conflicts, snapshot-only keys survive, nested objects merge, and
+arrays are replaced whole. The wrapper's `settings` options and original
+`constructFiles` contents still represent the hand-declared layer. Runtime sync
+policies such as `seed` and `fill-missing` continue to apply afterwards.
+
+Importing is independent of `snapshot.enable`, so a package can use a saved
+baseline without exposing an export command. Set `snapshot.autoMerge = false`
+to disable all automatic imports, even if an individual entry explicitly enables
+them. For a per-file exception, use:
+
+```nix
+snapshot.files.opencodeTuiConfig.autoMerge = false;
+```
+
+This still exports that file when snapshotting; it only disables importing its
+saved baseline. Other files continue to auto-merge. Disabled snapshot entries, raw files and raw
+directories are not auto-merged. Explicit `sync.files.<name>.sources` replaces
+the generated source list, including its automatic snapshot input.
+
+`sourceDir` is a build input; `defaultDir` is a writable export destination. Their
+defaults refer to the same repository directory before and after Nix copies the
+flake into the store. This avoids impure reads of `/home/helios` during builds.
+If you export elsewhere, set `snapshot.sourceDir` to the matching Nix-accessible
+source directory too. Per-file destination directories do not change sourceDir.
+Files must be included in the flake source: Git flakes omit untracked snapshots;
+`path:.` includes them while testing. A new snapshot affects the next build/run,
+not an already-built wrapper, and never becomes a runtime dependency on the repo.
 
 ## Execution: arguments, not a manifest
 
@@ -142,10 +220,13 @@ not writes made by an already-running app.
 See [sync-snap's documentation](../../packages/sync-snap/README.md) for policies,
 arrays, sidecar errors, locking, and publication limits.
 
-## Standalone check
+## Check
 
-`check.nix` is a disposable fake-app check, deliberately not registered in the
-flake. Evaluate it with the repository's pinned `pkgs` and `wlib`, then build the
-returned derivation. It checks generated paths, overrides, reverse snapshots,
+Run `nix build path:.#checks.x86_64-linux.sync-snap-addon`. The adjacent
+`check.nix` uses a disposable fake app. It checks generated paths, overrides, reverse snapshots,
 independent enable switches, pruning, multi-file failure behavior, arguments,
-and launch after sync failure. It does not run a real application or a GUI.
+and launch after sync failure. Registry checks verify disabled/unrelated packages
+are excluded, runtime edits are captured without startup sync, and `snapshot-all`
+continues after failure. AutoMerge checks cover missing files, disabling imports,
+JSON/TOML merging, nested keys, and whole-array replacement. It does
+not run a real application or a GUI.

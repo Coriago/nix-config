@@ -69,4 +69,11 @@ in `syncopencode/`. The wrapper supplies `directoryMappings` to present that dir
 OpenCode's native `opencode/` path. The feature declares the directory and personal theme in
 `modules/features/opencode-agent/opencode.nix`. The generic wrapper
 still inherits upstream's default package; select a v2 package to use `cli-settings`.
-Snapshot remains disabled.
+The feature sets `snapshot.enable = true`, automatically exposing
+`snapshot-myopencode` and participating in `snapshot-all`.
+These manual commands capture files from `syncopencode/` into
+`snapshot/myopencode/` in this checkout's configured absolute location. They do
+not launch OpenCode or sync its baseline first; no automatic snapshot trigger is enabled.
+`snapshot.autoMerge` defaults to true: existing JSON snapshots in the flake's
+`snapshot/myopencode/` directory become packaged baseline sources. Explicit
+settings take precedence over snapshot values on the next build/run.
