@@ -16,13 +16,20 @@ directory = Path(os.environ["XDG_CONFIG_HOME"]) / "ghostty"
 config = directory / "config.ghostty"
 # Action commands intentionally bypass the wrapper's launch flags. Reproduce
 # normal user-config + packaged-config loading explicitly for these checks.
-config.write_text(f"font-size = 17\nkeybind = ctrl+alt+t=new_tab\nconfig-file = {generated}\n")
+config.write_text(f"font-size = 17\nkeybind = ctrl+shift+t=new_tab\nkeybind = ctrl+alt+f=increase_font_size:2\nconfig-file = {generated}\n")
 
 def output(action):
     return subprocess.check_output([ghostty, action], text=True)
 
 subprocess.run([ghostty, "+validate-config"], check=True)
 bindings = output("+list-keybinds")
+assert "ctrl+alt+f=increase_font_size:2" in bindings, bindings
+assert "escape=end_search" in bindings, bindings
+# CLI listings omit flags. Preserve upstream conditional search/selection
+# handling by ensuring the packaged policy only removes selected bindings.
+policy = Path(generated).read_text().splitlines()
+assert "keybind = clear" not in policy
+assert all(line.endswith("=unbind") for line in policy if line.startswith("keybind = "))
 for action in (
     "new_tab", "previous_tab", "next_tab", "goto_tab", "last_tab", "move_tab",
     "close_tab", "new_split", "goto_split", "resize_split", "toggle_split_zoom",

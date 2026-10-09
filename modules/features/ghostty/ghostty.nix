@@ -8,52 +8,51 @@ in {
     ...
   }: {
     imports = [wlib.wrapperModules.ghostty];
+    # Preserve upstream defaults and their flags. Escape's search action is
+    # performable-only; +list-keybinds/+show-config omit that flag. Recreating
+    # their listing would consume Escape even when no terminal search is active.
     settings.keybind = [
-      "clear"
+      # Tabs: creation, closing, navigation, and numbered selection.
+      "ctrl+shift+t=unbind"
+      "ctrl+shift+w=unbind"
+      "ctrl+shift+tab=unbind"
+      "ctrl+tab=unbind"
+      "ctrl+shift+arrow_left=unbind"
+      "ctrl+shift+arrow_right=unbind"
+      "ctrl+page_up=unbind"
+      "ctrl+page_down=unbind"
+      "alt+digit_1=unbind"
+      "alt+1=unbind"
+      "alt+digit_2=unbind"
+      "alt+2=unbind"
+      "alt+digit_3=unbind"
+      "alt+3=unbind"
+      "alt+digit_4=unbind"
+      "alt+4=unbind"
+      "alt+digit_5=unbind"
+      "alt+5=unbind"
+      "alt+digit_6=unbind"
+      "alt+6=unbind"
+      "alt+digit_7=unbind"
+      "alt+7=unbind"
+      "alt+digit_8=unbind"
+      "alt+8=unbind"
+      "alt+9=unbind"
 
-      # Configuration.
-      "ctrl+,=open_config"
-      "ctrl+shift+,=reload_config"
-      "ctrl+shift+p=toggle_command_palette"
-
-      # Clipboard and selection.
-      "copy=copy_to_clipboard:mixed"
-      "paste=paste_from_clipboard"
-      "ctrl+insert=copy_to_clipboard:mixed"
-      "shift+insert=paste_from_selection"
-      "ctrl+shift+c=copy_to_clipboard:mixed"
-      "ctrl+shift+v=paste_from_clipboard"
-      "ctrl+shift+a=select_all"
-      "shift+arrow_left=adjust_selection:left"
-      "shift+arrow_right=adjust_selection:right"
-      "shift+arrow_up=adjust_selection:up"
-      "shift+arrow_down=adjust_selection:down"
-
-      # Font size.
-      "ctrl+==increase_font_size:1"
-      "ctrl++=increase_font_size:1"
-      "ctrl+-=decrease_font_size:1"
-      "ctrl+0=reset_font_size"
-
-      # Scrollback and search.
-      "shift+page_up=scroll_page_up"
-      "shift+page_down=scroll_page_down"
-      "shift+home=scroll_to_top"
-      "shift+end=scroll_to_bottom"
-      "ctrl+shift+page_up=jump_to_prompt:-1"
-      "ctrl+shift+page_down=jump_to_prompt:1"
-      "ctrl+shift+f=start_search"
-      "escape=end_search"
-      "super+ctrl+shift+j=write_screen_file:copy,plain"
-      "ctrl+shift+j=write_screen_file:paste,plain"
-      "ctrl+alt+shift+j=write_screen_file:open,plain"
-
-      # Windows and diagnostics.
-      "ctrl+shift+n=new_window"
-      "ctrl+shift+q=quit"
-      "alt+f4=close_window"
-      "ctrl+enter=toggle_fullscreen"
-      "ctrl+shift+i=inspector:toggle"
+      # Splits: creation, navigation, resizing, and zoom.
+      "ctrl+shift+o=unbind"
+      "ctrl+shift+e=unbind"
+      "super+ctrl+[=unbind"
+      "super+ctrl+]=unbind"
+      "ctrl+alt+arrow_up=unbind"
+      "ctrl+alt+arrow_down=unbind"
+      "ctrl+alt+arrow_left=unbind"
+      "ctrl+alt+arrow_right=unbind"
+      "super+ctrl+shift+arrow_up=unbind"
+      "super+ctrl+shift+arrow_down=unbind"
+      "super+ctrl+shift+arrow_left=unbind"
+      "super+ctrl+shift+arrow_right=unbind"
+      "ctrl+shift+enter=unbind"
     ];
 
     # The upstream wrapper disables host config by default. Keep it writable

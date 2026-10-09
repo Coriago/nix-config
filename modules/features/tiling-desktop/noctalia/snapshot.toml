@@ -96,6 +96,16 @@ builtin_ids = [
     "kcolorscheme",
     "umbriel",
 ]
+community_ids = [
+    "codex",
+    "pi-agent",
+    "brave",
+    "discord",
+    "neovim",
+    "steam",
+    "herdr",
+    "lazygit",
+]
 
 [widget.bar]
 type = "noctalia/umbriel-companion:bar"
