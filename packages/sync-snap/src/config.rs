@@ -32,6 +32,8 @@ pub struct Entry {
     #[serde(default)]
     pub trigger: Trigger,
     #[serde(default)]
+    pub duration: Option<String>,
+    #[serde(default)]
     pub format: Option<Format>,
     #[serde(default)]
     pub directory: bool,
@@ -78,12 +80,13 @@ pub enum Policy {
     Replace,
 }
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "camelCase")]
 pub enum Trigger {
-    OnInit,
     #[default]
-    OnStart,
-    Never,
+    OnEveryStart,
+    OnEveryBoot,
+    OnEveryLogin,
+    OnDuration,
 }
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]

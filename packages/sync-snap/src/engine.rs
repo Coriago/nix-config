@@ -1,6 +1,6 @@
 use crate::{
     config::{Entry, Format, Policy, Program, Source, Trigger, resolve},
-    data, files,
+    data, files, triggers,
 };
 use anyhow::{Context, Result, bail, ensure};
 use serde_json::Value;
@@ -37,6 +37,8 @@ pub struct Options<'a> {
     pub event: Event,
     pub timeout: Duration,
     pub jq: &'a str,
+    /// Deterministic clock/session context for tests; normal invocations detect it.
+    pub trigger_context: Option<&'a triggers::Context>,
 }
 #[derive(Default, Debug)]
 pub struct Stats {
@@ -52,6 +54,7 @@ struct Planned {
     temporary: Option<NamedTempFile>,
     cache: Option<String>,
     cached: bool,
+    trigger_fingerprint: Option<String>,
 }
 
 fn hash_field(h: &mut blake3::Hasher, bytes: &[u8]) {
@@ -72,9 +75,21 @@ fn prepare(
     op: Operation,
     options: &Options<'_>,
     cache: &BTreeMap<String, String>,
-) -> Result<Planned> {
+    trigger_state: &triggers::State,
+    trigger_context: &triggers::Context,
+) -> Result<Option<Planned>> {
     let dst = files::destination(&resolve(&entry.destination, options.base)?)?;
-    let original = files::read_optional(&dst)?;
+    let duration = if op == Operation::Sync {
+        triggers::duration_seconds(entry)?
+    } else {
+        None
+    };
+    // Preserve seed's existing no-op behavior, including not reading unused sources.
+    let original = if op == Operation::Sync && entry.policy == Policy::Seed {
+        files::read_optional(&dst)?
+    } else {
+        None
+    };
     let original_hash = original.as_deref().map(files::digest);
     let mut plan = Planned {
         destination: dst.clone(),
@@ -82,14 +97,10 @@ fn prepare(
         temporary: None,
         cache: None,
         cached: false,
+        trigger_fingerprint: None,
     };
-    if op == Operation::Sync
-        && ((options.event == Event::Start
-            && (entry.trigger == Trigger::Never
-                || (entry.trigger == Trigger::OnInit && original.is_some())))
-            || (entry.policy == Policy::Seed && original.is_some()))
-    {
-        return Ok(plan);
+    if op == Operation::Sync && entry.policy == Policy::Seed && original.is_some() {
+        return Ok(Some(plan));
     }
     ensure!(!entry.sources.is_empty(), "source list is empty");
     if op == Operation::Sync {
@@ -135,14 +146,34 @@ fn prepare(
     }
     // All optional sources absent: no export/reset, even when an old destination exists.
     if inputs.is_empty() {
-        return Ok(plan);
+        plan.original = files::read_optional(&dst)?.as_deref().map(files::digest);
+        return Ok(Some(plan));
     }
     let key = dst.to_string_lossy().into_owned();
+    let input_fingerprint = hasher.finalize().to_hex().to_string();
+    if op == Operation::Sync {
+        if options.event == Event::Start
+            && !triggers::due(
+                entry.trigger,
+                duration,
+                trigger_state.files.get(&key),
+                &input_fingerprint,
+                dst.try_exists()?,
+                trigger_context,
+            )
+        {
+            return Ok(None);
+        }
+        plan.trigger_fingerprint = Some(input_fingerprint);
+    }
+    // A closed trigger gate never reads or hashes the mutable destination.
+    let original = files::read_optional(&dst)?;
+    plan.original = original.as_deref().map(files::digest);
     let before = fingerprint(&hasher, original.as_deref());
     if op == Operation::Sync && cache.get(&key) == Some(&before) {
         plan.cache = Some(before);
         plan.cached = true;
-        return Ok(plan);
+        return Ok(Some(plan));
     }
     let output = if format == Format::Raw {
         ensure!(
@@ -200,7 +231,7 @@ fn prepare(
     if original.as_deref() != Some(output.as_slice()) {
         plan.temporary = Some(files::stage(&dst, &output)?);
     }
-    Ok(plan)
+    Ok(Some(plan))
 }
 
 fn unchanged(plan: &Planned) -> Result<()> {
@@ -370,15 +401,33 @@ pub fn execute(name: &str, program: &Program, op: Operation, options: &Options<'
         .ok()
         .and_then(|b| serde_json::from_slice(&b).ok())
         .unwrap_or_default();
+    let trigger_path = triggers::state_path(options.state, name);
+    let mut trigger_state = triggers::State::read(&trigger_path);
+    let trigger_context = options
+        .trigger_context
+        .cloned()
+        .unwrap_or_else(triggers::Context::current);
+    if op == Operation::Sync && options.event == Event::Start {
+        if trigger_context.session_id.is_none()
+            && entries.iter().any(|e| e.trigger == Trigger::OnEveryLogin)
+        {
+            eprintln!(
+                "sync-snap: {name}: no login session ID; onEveryLogin falls back to onEveryBoot"
+            );
+        }
+        if trigger_context.boot_id.is_none()
+            && entries
+                .iter()
+                .any(|e| matches!(e.trigger, Trigger::OnEveryBoot | Trigger::OnEveryLogin))
+        {
+            eprintln!(
+                "sync-snap: {name}: no boot ID; boot/login triggers are eligible on every start"
+            );
+        }
+    }
     let mut plans = Vec::new();
     let mut seen = BTreeSet::new();
     for original_entry in entries {
-        if op == Operation::Sync
-            && options.event == Event::Start
-            && original_entry.trigger == Trigger::Never
-        {
-            continue;
-        }
         let expanded = match expand(original_entry, options.base) {
             Ok(es) => {
                 if original_entry.directory
@@ -402,11 +451,19 @@ pub fn execute(name: &str, program: &Program, op: Operation, options: &Options<'
             let result = (|| {
                 let dst = files::destination(&resolve(&entry.destination, options.base)?)?;
                 ensure!(seen.insert(dst), "duplicate destination in program {name}");
-                prepare(&entry, op, options, &cache)
+                prepare(
+                    &entry,
+                    op,
+                    options,
+                    &cache,
+                    &trigger_state,
+                    &trigger_context,
+                )
             })();
             match result {
-                Ok(plan) if op == Operation::Sync => plans.push(plan),
-                Ok(plan) => {
+                Ok(None) => stats.skipped += 1,
+                Ok(Some(plan)) if op == Operation::Sync => plans.push(plan),
+                Ok(Some(plan)) => {
                     let dst = plan.destination.clone();
                     if let Err(e) = commit(plan, op, &mut cache, &mut stats) {
                         files::report(&dst, op.name(), &e);
@@ -447,13 +504,18 @@ pub fn execute(name: &str, program: &Program, op: Operation, options: &Options<'
                 );
             }
         } else {
+            let mut completed = Vec::new();
             for plan in plans {
                 let dst = plan.destination.clone();
+                let trigger_fingerprint = plan.trigger_fingerprint.clone();
                 if let Err(e) = commit(plan, op, &mut cache, &mut stats) {
                     files::report(&dst, op.name(), &e);
                     stats.failed += 1;
                     // Publication is per file. Do not pretend earlier renames rolled back.
                     break;
+                }
+                if let Some(input_fingerprint) = trigger_fingerprint {
+                    completed.push((dst.to_string_lossy().into_owned(), input_fingerprint));
                 }
             }
             if stats.failed == 0 {
@@ -463,6 +525,26 @@ pub fn execute(name: &str, program: &Program, op: Operation, options: &Options<'
                     && let Err(e) = files::atomic_write(&cache_path, &bytes)
                 {
                     eprintln!("sync-snap: could not save cache: {e:#}");
+                }
+                if !completed.is_empty() {
+                    let mut success_context = trigger_context.clone();
+                    if options.trigger_context.is_none() {
+                        success_context.epoch = triggers::Context::epoch_now();
+                    }
+                    for (destination, input_fingerprint) in completed {
+                        trigger_state.record_success(
+                            destination,
+                            input_fingerprint,
+                            &success_context,
+                        );
+                    }
+                    let bytes = serde_json::to_vec_pretty(&trigger_state)
+                        .expect("string trigger state serializes");
+                    if fs::read(&trigger_path).ok().as_deref() != Some(bytes.as_slice())
+                        && let Err(e) = files::atomic_write(&trigger_path, &bytes)
+                    {
+                        eprintln!("sync-snap: could not save trigger state: {e:#}");
+                    }
                 }
             }
         }

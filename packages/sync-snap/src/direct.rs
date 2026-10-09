@@ -24,9 +24,12 @@ pub struct Direct {
     /// Current file's sync policy: seed (CLI default), fill-missing, merge, replace.
     #[arg(long, requires = "destination")]
     policy: Vec<String>,
-    /// Current file's startup trigger: on-start (default), on-init, never.
+    /// Startup trigger: onEveryStart (default), onEveryBoot, onEveryLogin, onDuration.
     #[arg(long, requires = "destination")]
     trigger: Vec<String>,
+    /// Interval for onDuration: positive integer plus s, m/min, h/hr, or d (e.g. 1h).
+    #[arg(long, requires = "destination")]
+    duration: Vec<String>,
     /// Current entry is a raw directory overlay: true or false.
     #[arg(long, requires = "destination")]
     directory: Vec<String>,
@@ -51,6 +54,7 @@ pub fn entries(matches: &ArgMatches) -> Result<Vec<Entry>> {
         "format",
         "policy",
         "trigger",
+        "duration",
         "directory",
         "prune_key_contains",
         "prune_value_contains",
@@ -115,6 +119,7 @@ pub fn entries(matches: &ArgMatches) -> Result<Vec<Entry>> {
             "trigger" => {
                 entry.trigger = serde_json::from_value(parsed()).context("invalid trigger")?
             }
+            "duration" => entry.duration = Some(value.clone()),
             "directory" => {
                 entry.directory = value.parse().context("directory requires true or false")?
             }

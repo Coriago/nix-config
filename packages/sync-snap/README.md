@@ -52,7 +52,7 @@ sync-snap snapshot --program myapp \
 Each `--destination` begins a file entry. Following `--source` arguments append
 ordered inputs to that entry. `--source-format json|toml|raw` and
 `--source-optional true|false` modify the most recent source. Entry options are
-`--format`, `--policy`, `--trigger`, `--directory true|false`, and repeatable
+`--format`, `--policy`, `--trigger`, `--duration`, `--directory true|false`, and repeatable
 `--prune-key-contains`, `--prune-value-contains`, `--transform` filters. Scalar
 options use their last value within the entry. Defaults match the manifest schema
 below (CLI policy defaults to `seed`; the Nix addon explicitly chooses `merge`).
@@ -86,7 +86,7 @@ sources = [
   "/nix/store/…-personal/settings.json",
 ]
 policy = "merge"
-trigger = "on-start"
+trigger = "onEveryStart"
 format = "json"
 
 [[programs.myapp.snapshot]]
@@ -119,7 +119,8 @@ snapshotting does not commit changes, rebuild packages, or reload applications.
 | Source `optional` | `false`; only absence is optional, not invalid contents |
 | `format` | Destination format: `json`, `toml`, or `raw`; inferred if absent |
 | `policy` | `seed`; used by sync |
-| `trigger` | `on-start`; used by automatic sync |
+| `trigger` | `onEveryStart`; used by automatic sync |
+| `duration` | Required only for `onDuration`: positive integer plus `s`, `m`/`min`, `h`/`hr`, or `d` |
 | `directory` | `false`; raw directory overlay when enabled |
 | `prune_key_contains` | Empty list of regexes; snapshot only |
 | `prune_value_contains` | Empty list of regexes; snapshot only |
@@ -156,12 +157,51 @@ There is no array appending, index matching, inferred identity, or deletion mark
 
 `run` and `sync --startup` honor triggers:
 
-- `on-start`: process on every launch, subject to policy and hash skipping.
-- `on-init`: process only when the individual destination is absent.
-- `never`: skip automatic sync.
+- `onEveryStart`: eligible on every launch, subject to policy and cache skipping.
+- `onEveryBoot`: eligible once per input fingerprint and Linux boot ID.
+- `onEveryLogin`: eligible once per input fingerprint and login session within a
+  boot. Uses `XDG_SESSION_ID`; if absent, falls back to `onEveryBoot` and reports
+  that fallback. If the boot ID is unavailable, boot/login entries are eligible
+  on every launch.
+- `onDuration`: eligible on the first launch after `duration` has elapsed since
+  the last successful sync. Uses Unix epoch seconds, including time across
+  reboots. There is no background timer or special wall-clock correction logic.
+
+These replace the former `on-start`, `on-init`, and `never` values. The default
+remains sync eligibility on every launch. Use `seed` for create-only behavior.
+
+Missing destinations, absent/corrupt trigger state, or changed input fingerprints
+make entries eligible immediately. Ordinary destination edits do not affect
+eligibility. The fingerprint covers the serialized entry options, resolved paths,
+source presence and bytes, and the existing cache/tool version identifiers; it
+contains no destination contents. Sources are still read and hashed at startup;
+this implementation does not add build-time precomputed fingerprints.
+
+Trigger state lives in one JSON file per program:
+`${XDG_STATE_HOME}/sync-snap/<program>.trigger` (or `--state-dir`). Ordinary binary
+names remain readable; other filename bytes are percent-encoded. Records are
+keyed by resolved destination and contain `input_fingerprint`, `boot_id`,
+`session_ids`, and `last_success_epoch`, with a top-level schema version. Session
+IDs already processed in the current boot are retained so alternating concurrent
+logins do not repeatedly reset shared configuration. Changing inputs or boots
+resets that session list. Raw directory entries track their expanded files.
+
+The existing per-program OS lock protects reading and updating both cache and
+trigger state. State is written atomically only after all participating sync
+files succeed, including successful cache hits and unchanged outputs. Skipped
+triggers, absent optional inputs, and failures do not advance their records.
+Existing `seed` destinations remain unconditional no-ops without inspecting unused
+sources or updating trigger records. A state-write failure is diagnostic and can
+cause a later launch to retry. No failure cooldown or retry cap is imposed.
+
+A closed gate skips destination reads, parsing and writes. Once eligible, the
+existing destination-sensitive cache and sync policy apply normally. On a later
+publication failure, earlier file replacements can survive but trigger state is
+not advanced. This does not prevent already-running apps from writing config.
 
 Manual `sync` ignores triggers but retains each entry's policy. In particular,
-manual `seed` still preserves an existing file. An `on-start` merge intentionally
+manual `seed` still preserves an existing file. Successful manual sync also updates
+trigger state. An `onEveryStart` merge intentionally
 reapplies declared values after GUI edits. `fill-missing` can restore a key removed
 at runtime. There is no three-way merge against the previous baseline.
 
@@ -221,7 +261,7 @@ sources = ["/nix/store/…-lua-baseline"]
 directory = true
 format = "raw"
 policy = "seed"
-trigger = "on-start"
+trigger = "onEveryStart"
 ```
 
 Directory entries overlay regular source files in sorted traversal order using

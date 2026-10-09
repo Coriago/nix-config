@@ -79,9 +79,15 @@
         description = "How the baseline updates existing runtime contents. Raw files require seed or replace.";
       };
       trigger = mkOption {
-        type = types.enum ["on-init" "on-start" "never"];
-        default = "on-start";
+        type = types.enum ["onEveryStart" "onEveryBoot" "onEveryLogin" "onDuration"];
+        default = "onEveryStart";
         description = "Automatic sync trigger; manual sync ignores it.";
+      };
+      duration = mkOption {
+        type = types.nullOr (types.strMatching "[1-9][0-9]*(s|m|min|h|hr|d)");
+        default = null;
+        example = "1h";
+        description = "Interval for onDuration, such as 30m or 1hr. Required only for onDuration.";
       };
     };
   });
@@ -161,7 +167,12 @@
     ++ lib.optionals (entry.format != null) ["--format" entry.format]
     ++ lib.optionals entry.directory ["--directory" "true"];
   syncArgs = entry:
-    fileArgs entry ++ ["--policy" entry.policy "--trigger" entry.trigger];
+    if (entry.trigger == "onDuration") != (entry.duration != null)
+    then throw "sync-snap: duration must be supplied exactly when trigger is onDuration"
+    else
+      fileArgs entry
+      ++ ["--policy" entry.policy "--trigger" entry.trigger]
+      ++ lib.optionals (entry.duration != null) ["--duration" entry.duration];
   snapshotArgs = entry:
     fileArgs entry
     ++ lib.concatMap (v: ["--prune-key-contains" v]) entry.pruneKeyContains

@@ -26,7 +26,7 @@ enum Action {
     Sync {
         #[command(flatten)]
         selection: Selection,
-        /// Honor on-start/on-init/never. Without this, explicitly synchronize all entries.
+        /// Honor per-file startup triggers. Without this, bypass trigger schedules.
         #[arg(long)]
         startup: bool,
     },
@@ -130,6 +130,7 @@ fn perform(
         event,
         timeout: Duration::from_millis(selection.lock_timeout_ms),
         jq: &selection.jq,
+        trigger_context: None,
     };
     let mut success = true;
     for (name, program) in &manifest.programs {

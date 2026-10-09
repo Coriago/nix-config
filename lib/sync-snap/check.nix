@@ -61,6 +61,13 @@
     sync.defaultDir = pkgs.lib.mkForce "\${HOME}/selective-merge";
   };
   missing = merged.wrap {snapshot.sourceDir = pkgs.lib.mkForce "${./checks/snapshots}/absent";};
+  timed = app.wrap {
+    sync.defaultDir = "\${HOME}/timed";
+    sync.files.preferences = {
+      trigger = "onDuration";
+      duration = "1hr";
+    };
+  };
   registry =
     (pkgs.lib.evalModules {
       modules = [
@@ -87,6 +94,13 @@ in
     pkgs.runCommand "sync-snap-addon-check" {nativeBuildInputs = [pkgs.jq];} ''
       export HOME="$TMPDIR/home" XDG_CONFIG_HOME="$TMPDIR/config with spaces" XDG_STATE_HOME="$TMPDIR/state"
       mkdir -p "$HOME"
+      ${timed}/bin/fixture-sync --startup
+      printf '{"declared":false}' > "$HOME/timed/custom/settings.json"
+      ${timed}/bin/fixture-sync --startup
+      jq -e '.declared == false' "$HOME/timed/custom/settings.json"
+      test -f "$XDG_STATE_HOME/sync-snap/fixture.trigger"
+      ${timed}/bin/fixture-sync
+      jq -e '.declared' "$HOME/timed/custom/settings.json"
       ${merged}/bin/fixture-sync
       jq -e '.declared and .captured == 42 and .nested.saved and .nested.conflict == "nix" and .array == [{"new":true}]' "$HOME/merged/custom/settings.json"
       grep -q 'enabled = true' "$HOME/merged/other.toml"

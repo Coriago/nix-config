@@ -12,20 +12,27 @@ Capture `locallib` in the outer flake-parts module:
 
 ```nix
 {locallib, ...}: {
-  flake.wrappers.myapp = {pkgs, ...}: {
+  flake.wrappers.myapp = {config, lib, pkgs, wlib, ...}: {
     imports = [locallib.sync-snap];
-    package = pkgs.myapp; # Replace with the actual package.
-    constructFiles.settings = {
-      relPath = "settings.json";
-      content = builtins.toJSON {theme = "dark";};
+    options.settings = lib.mkOption {
+      type = wlib.types.structuredValueWith {typeName = "JSON";};
+      default = {};
     };
-    sync.enable = true;
-    snapshot.enable = true;
+    config = {
+      package = pkgs.myapp; # Replace with the actual package.
+      constructFiles.settings = {
+        relPath = "settings.json";
+        content = builtins.toJSON config.settings;
+      };
+      sync.enable = lib.mkDefault true;
+    };
   };
 }
 ```
 
-For an executable named `myapp`, this produces:
+The feature consumes this adapter with `.wrap`, supplies `settings`, and chooses
+whether to set `snapshot.enable = true`. With export enabled and an executable
+named `myapp`, the flow is:
 
 ```text
 constructFiles.settings → packaged settings.json
@@ -84,7 +91,31 @@ literal, while `wlib.escapeShellArgWithEnv` expands HOME/XDG at launch and quote
 paths containing spaces. Fixed store paths do not need expansion. Keep this
 setting on runtime path values rather than changing escaping globally.
 
-Sync entries have `trigger` (`on-start`, `on-init`, `never`). Policies are `seed`,
+Sync entries have `trigger` (`onEveryStart`, `onEveryBoot`, `onEveryLogin`,
+`onDuration`), defaulting to `onEveryStart`. For example:
+
+```nix
+sync.files.opencodeCliConfig.trigger = "onEveryLogin";
+sync.files.opencodeTuiConfig = {
+  trigger = "onDuration";
+  duration = "1hr";
+};
+```
+
+`duration` is required only for `onDuration`; accepted units are `s`, `m`/`min`,
+`h`/`hr`, and `d`, with a positive integer. Triggers are checked at app launch.
+Runtime edits survive until the next eligible boot/login/interval, but changed
+inputs and missing destinations are eligible immediately. Login detection uses
+`XDG_SESSION_ID`, falling back to the boot ID if absent. Epoch-based durations
+continue across reboots. Existing manual sync commands bypass schedules.
+
+The engine maintains `<binName>.trigger` in `$XDG_STATE_HOME/sync-snap` alongside
+its existing cache and lock files. This one state file holds records per output,
+without destination hashes. Records advance only after successful program-wide
+sync. See the [engine documentation](../../packages/sync-snap/README.md#sync-policies-and-triggers)
+for failure, cache, session and directory behavior.
+
+Policies are `seed`,
 `fill-missing`, `merge`, and `replace`. Raw files/directories require `seed` or
 `replace`; the requested `merge` default is for structured JSON/TOML.
 Snapshot entries have `pruneKeyContains`, `pruneValueContains`, and `transform`
@@ -193,7 +224,7 @@ The helper converts file declarations into safely quoted CLI arguments:
 ```sh
 sync-snap sync --program myapp \
   --destination '${XDG_CONFIG_HOME}/myapp/settings.json' \
-  --source /nix/store/…/settings.json --policy merge --trigger on-start
+  --source /nix/store/…/settings.json --policy merge --trigger onEveryStart
 ```
 
 Every `--destination` starts another entry. All sync files run in **one process**
