@@ -1,5 +1,10 @@
 # Portable applications with partially declarative configuration
 
+> Historical design proposal. Use [Creating and using wrappers](wrappers.md) for
+> the current repository standard, and the [addon](../lib/sync-snap/README.md)
+> and [engine](../packages/sync-snap/README.md) references for implemented behavior.
+> Examples and alternatives below are design history, not instructions for new wrappers.
+
 ## Goal
 
 Keep enough configuration declarative to automate a useful personal setup while
@@ -7,7 +12,7 @@ allowing normal runtime editing, including application GUI settings. Fully
 declarative configuration can be awkward to interact with; entirely unmanaged
 configuration loses that automation. Portability is an additional choice.
 
-This document records the agreed design. The first implementation is
+This document records the early design. The implementation is
 [`packages/sync-snap`](../packages/sync-snap/README.md), a shared Rust codebase
 with `sync`, `snapshot`, and `run` CLI subcommands. Its README specifies the actual
 manifest format; the YAML examples here illustrate the design.
@@ -59,12 +64,16 @@ Each destination has a named policy, independently paired with a trigger:
 | `merge` | Create from combined sources | Recursively merge objects; source values win for supplied keys; preserve other destination keys |
 | `replace` | Create from combined sources | Replace the entire file |
 
-Triggers retain the names `on-init`, `on-start`, and `never`. `never` disables
-automatic invocation; manual invocation remains possible. `on-init` means that
-the individual destination file does not exist, not that the package was rebuilt.
-`on-start + seed` also initializes missing files without a separate marker.
+Startup triggers are `onEveryStart`, `onEveryBoot`, `onEveryLogin`, and
+`onDuration` (with an interval such as `1h`). Missing destinations, missing state,
+and changed inputs are immediately eligible. Otherwise runtime edits survive
+until the trigger is due. One `<bin-name>.trigger` file in the sync-snap state
+directory stores input fingerprints, boot/login identity and last-success epoch
+times under the existing lock. No destination hash participates in eligibility.
+Manual sync bypasses schedules; successful sync advances the relevant records.
+See the [implemented trigger behavior](../packages/sync-snap/README.md#sync-policies-and-triggers).
 
-`on-start + merge` deliberately reapplies packaged values. Unsnapshotted runtime
+`onEveryStart + merge` deliberately reapplies packaged values. Unsnapshotted runtime
 changes to those keys are lost at the next synchronization. `seed` preserves them,
 but does not propagate later baseline changes. `fill-missing` can restore a key
 that was deliberately deleted at runtime. These are explicit ownership choices.
@@ -92,14 +101,14 @@ Illustrative configuration; this is not an existing Nix API:
 ```yaml
 sync_store_config:
   "${XDG_CONFIG_HOME}/myapp/config.toml":
-    trigger: on-start
+    trigger: onEveryStart
     policy: merge
     store_paths:
       - /nix/store/.../defaults.toml
       - /nix/store/.../personal.toml
 
   "${XDG_CONFIG_HOME}/myapp/extras":
-    trigger: on-start
+    trigger: onEveryStart
     policy: replace
     store_paths:
       - path: /nix/store/.../extra-settings

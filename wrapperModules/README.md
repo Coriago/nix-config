@@ -1,79 +1,26 @@
-# Custom wrapper modules
+# Application adapters
 
-Files here are flake-parts modules declaring `flake.wrappers.<name>`.
-`flake.nix` discovers them through `import-tree`, alongside `modules/`.
-The standard upstream integration exports the wrapper modules and packages.
+Follow [Creating and using wrappers](../docs/wrappers.md). Files here are
+flake-parts modules declaring `flake.wrappers.<app>`, automatically imported by
+`flake.nix`. Capture the shared `locallib` argument in the outer module to import
+addons into a wrapper.
 
-To extend an upstream wrapper and add sync/snapshot support:
+Keep application behavior here: config discovery, fixed native paths, generated
+files, missing settings options, reusable plugin interfaces, and sensible snapshot
+pruning defaults. Features consume these modules and choose preferences, runtime
+directories, dependencies, plugins, and snapshot enablement. An adapter may enable
+sync when needed to deliver writable config.
 
-```nix
-{locallib, ...}: {
-  flake.wrappers.myapp = {wlib, ...}: {
-    imports = [wlib.wrapperModules.myapp locallib.sync-snap];
-    sync.enable = true;
-  };
-}
-```
+[OpenCode](opencode.nix) is the reference adapter. It extends the upstream module,
+redirects config/TUI environment defaults to writable sync files, and adds
+`cli-settings` for v2. Nonempty CLI settings create `cli.json`; the generic package
+still inherits upstream's version, so select a v2 package to use this option.
+Its directory mapping presents the feature's chosen config directory at OpenCode's
+fixed native location. Other contents of the original directory are hidden in the
+wrapped process, not copied over. Caller config environment overrides still win;
+sync continues managing its declared destinations. Keep synced files valid JSON,
+not JSONC. The app's native configuration layers still apply.
 
-`locallib` is a shared flake-parts argument defined in `modules/flake-parts.nix`.
-Capture it in the outer module as above. There is no custom `wlib` or registration layer.
-It provides `sync-snap` and [directory-mappings](../lib/directory-mappings/README.md)
-as independently importable wrapper addons.
-
-## OpenCode
-
-Run `nix run path:.#opencode`. Configure upstream `settings` and `tui-settings`
-through `flake.wrappers.opencode` or extend `wrappers.opencode.wrap`.
-The module imports upstream OpenCode and the sync-snap addon, enables sync, and
-points `OPENCODE_CONFIG` / `OPENCODE_TUI_CONFIG` to the computed sync file paths.
-Like upstream, these are `envDefault` values: caller-provided paths take precedence.
-Sync still manages its declared destinations when a caller selects another config.
-
-Default writable files:
-
-- `${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode-config.json`
-- `${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode-tui-config.json`
-
-The shared sync-snap addon supplies `$HOME/.config` as the `envDefault` for
-XDG_CONFIG_HOME before application environment defaults are expanded.
-If supplied, XDG_CONFIG_HOME should be an absolute path. `sync.defaultDir` and individual destination overrides update the
-file mappings and application environment together. Sources are generated JSON;
-keep the runtime files valid JSON, since sync-snap does not parse JSONC comments.
-
-The default baseline is `{}` for each file. Sync merges declared values on each
-launch while preserving runtime-only keys. The native global/project config
-layers still apply; these environment variables select custom files rather than
-isolating all OpenCode configuration. See the [OpenCode config documentation](https://opencode.ai/docs/config/).
-
-For OpenCode v2, the additional `cli-settings` option configures `cli.json`:
-
-```nix
-cli-settings.theme = {
-  name = "lucent-orng";
-  mode = "system"; # or "dark" / "light"
-};
-```
-
-It defaults to `{}`, which leaves `cli.json` unmanaged. When nonempty, it uses
-the same constructFiles and sync-snap flow. OpenCode v2 always reads this file
-from `${XDG_CONFIG_HOME:-$HOME/.config}/opencode/cli.json`. There is no supported
-file-path environment override. The wrapper stores it under `sync.defaultDir`
-and automatically maps that directory onto OpenCode's native directory when
-the configured paths differ. This app-specific mapping belongs to the wrapper;
-features choose `sync.defaultDir` and personal settings. Runtime-only keys survive sync; declared keys
-are reapplied at launch. Keep this file valid JSON too.
-See the [v2 CLI configuration documentation](https://opencode.ai/v2/docs/cli/config).
-
-`myopencode` uses this wrapper with OpenCode v2 and stores all three config files
-in `syncopencode/`. The wrapper supplies `directoryMappings` to present that directory at
-OpenCode's native `opencode/` path. The feature declares the directory and personal theme in
-`modules/features/opencode-agent/opencode.nix`. The generic wrapper
-still inherits upstream's default package; select a v2 package to use `cli-settings`.
-The feature sets `snapshot.enable = true`, automatically exposing
-`snapshot-myopencode` and participating in `snapshot-all`.
-These manual commands capture files from `syncopencode/` into
-`snapshot/myopencode/` in this checkout's configured absolute location. They do
-not launch OpenCode or sync its baseline first; no automatic snapshot trigger is enabled.
-`snapshot.autoMerge` defaults to true: existing JSON snapshots in the flake's
-`snapshot/myopencode/` directory become packaged baseline sources. Explicit
-settings take precedence over snapshot values on the next build/run.
+The [myopencode feature](../modules/features/opencode-agent/opencode.nix) selects
+v2, personal settings and tools, `syncopencode/`, and manual snapshot export.
+See [snapshot review](../docs/snapshot-review.md) when adding pruning rules.

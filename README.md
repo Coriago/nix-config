@@ -16,19 +16,12 @@ TODO
 
 ## Wrapper package standard
 
-The [wrapper guide](docs/wrappers.md) defines the common approach to portable
-packages, embedded defaults, writable runtime preferences, live checkout files,
-and GUI preference snapshots. It includes a reusable module example, the current
-wrapper inventory, and validation requirements.
-
-The [Brave trial](modules/features/brave/README.md) uses Home Manager-generated
-Bitwarden installation metadata and sync-snap for a writable preferences baseline
-and filtered exports. It recommends Google search and disables built-in password
-saving by default. Run `nix run path:.#mybrave`; use `mybrave-sync` and
-`mybrave-snapshot` for explicit baseline adoption and capture. The existing
-installed Brave is unchanged. Personal settings live in
-[Brave's config directory](modules/features/brave/config/default.nix); the
-[shared sync/snapshot adapter](lib/wrappers/README.md) supports future wrappers.
+The [wrapper guide](docs/wrappers.md) describes the current OpenCode-based pattern:
+generic app adapters in `wrapperModules/`, personal configuration in features, and
+shared addons in `lib/`. It covers creating, running, and validating wrappers.
+Use the [snapshot review guide](docs/snapshot-review.md) when enabling preference
+capture. [Brave configuration notes](docs/brave-configuration.md) retain lessons
+from the earlier experiment; there is no current Brave wrapper implementation.
 
 ## Umbriel desktop
 
@@ -71,7 +64,11 @@ a graphical session and does not persist browser logins between sessions.
 The wrapper syncs its packaged configuration into
 `${XDG_CONFIG_HOME:-$HOME/.config}/syncopencode/` before launch and supplies the
 writable files through `OPENCODE_CONFIG` and `OPENCODE_TUI_CONFIG`. Declared values
-are reapplied on launch; runtime-only settings are retained. Snapshotting is disabled.
+are reapplied on eligible launches; runtime-only settings are retained. Capture
+preferences manually with `nix run .#snapshot-myopencode`, then review
+`snapshot/myopencode/`. The next build embeds that baseline, with explicit Nix
+settings taking precedence. CLI settings use the wrapper's directory mapping
+to read and write `syncopencode/cli.json` at OpenCode's native path.
 An explicit
 `OPENCODE_CONFIG` overrides that default; ordinary user/project configuration and
 credentials continue to use OpenCode's normal locations. OpenCode updates are
@@ -399,14 +396,13 @@ module** and override the installed wrapper's runtime config path using
 The helper lives in [modules/liveconfig.nix](modules/liveconfig.nix) and works
 for files or directories. Consumers must read the link at runtime:
 `builtins.readFile`, copying, or build-time substitution cannot turn a live link
-into reloadable configuration. See the [wrapper guide](docs/wrappers.md#live-configuration)
-for an example and the distinction between live files, writable preferences,
-and preference export.
+into reloadable configuration. This is existing Neovim/Pi behavior; see the
+[wrapper guide](docs/wrappers.md) for the current standard for new adapters.
 
 The toggle currently affects Neovim and Pi. Noctalia's repo snapshot,
 Umbriel's generated baseline, and OpenCode's generated JSON still require builds.
-Their native writable layers have separate reload behavior, described in the
-[wrapper inventory](docs/wrappers.md#current-wrapper-inventory).
+Their native writable layers have separate reload behavior; consult each
+feature's documentation.
 
 Edit `modules/features/neovim/neovim/init.lua` for editor behavior and
 `modules/features/neovim/neovim.nix` for plugins/tools. Plugins and tools are
