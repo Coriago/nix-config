@@ -3,10 +3,19 @@
   pkgs,
   wlib,
 }: let
-  app = wlib.evalPackage {
+  app = wlib.evalPackage ({config, ...}: {
     inherit pkgs;
     imports = [./default.nix];
-    package = pkgs.writeShellScriptBin "fixture" ''printf '%s\n' "$@"; exit 23'';
+    package = pkgs.writeShellScriptBin "fixture" ''
+      test "$FIXTURE_CONFIG" = "$XDG_CONFIG_HOME/fixture/custom/settings.json" || exit 1
+      test -f "$FIXTURE_CONFIG" || exit 1
+      printf '%s\n' "$@"
+      exit 23
+    '';
+    envDefault.FIXTURE_CONFIG = {
+      data = config.sync.files.preferences.path;
+      esc-fn = wlib.escapeShellArgWithEnv;
+    };
     constructFiles = {
       preferences = {
         relPath = "nested/settings.json";
@@ -29,7 +38,7 @@
     snapshot.enable = true;
     snapshot.defaultDir = "\${HOME}/snapshots";
     snapshot.files.preferences.pruneKeyContains = ["^secret$"];
-  };
+  });
   disabled = app.wrap {
     sync.enable = pkgs.lib.mkForce false;
     snapshot.enable = pkgs.lib.mkForce false;
@@ -44,6 +53,10 @@ in
     test ! -e ${snapshotOnly}/bin/fixture-sync
     test -x ${snapshotOnly}/bin/fixture-snapshot
     test ! -e ${app}/share/sync-snap
+    fallback_status=0
+    env -u XDG_CONFIG_HOME ${app}/bin/fixture || fallback_status=$?
+    test "$fallback_status" = 23
+    jq -e '.declared' "$HOME/.config/fixture/custom/settings.json"
     status=0
     ${app}/bin/fixture 'argument with spaces' > args || status=$?
     test "$status" = 23

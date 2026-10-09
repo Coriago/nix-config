@@ -4,6 +4,8 @@
   lib,
   ...
 }: {
+  _module.args.SyncSnapWrapperModule = ../lib/sync-snap;
+
   # Flake parts addon modules
   imports = [
     inputs.flake-parts.flakeModules.modules

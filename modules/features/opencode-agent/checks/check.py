@@ -1,6 +1,7 @@
 """Check the wrapped CLI and exercise its Playwright browser over MCP, offline."""
 
 import json
+import os
 from pathlib import Path
 import queue
 import subprocess
@@ -11,19 +12,31 @@ import time
 
 package = Path(sys.argv[1])
 binary = package / "bin/opencode"
-config_path = package / "opencode-config.json"
-config = json.loads(config_path.read_text())
+baseline = json.loads((package / "opencode-config.json").read_text())
+config_path = Path(os.environ["XDG_CONFIG_HOME"]) / "syncopencode/opencode-config.json"
+tui_path = config_path.with_name("opencode-tui-config.json")
 
 version = subprocess.check_output([binary, "--version"], text=True, timeout=30)
 assert "v2." in version, version
 print(version.strip(), flush=True)
+config = json.loads(config_path.read_text())
+assert config == baseline, "Synced config differs from the personalized baseline"
+assert json.loads(tui_path.read_text()) == json.loads((package / "opencode-tui-config.json").read_text())
+assert not config_path.is_symlink() and not tui_path.is_symlink()
+assert os.access(config_path, os.W_OK) and os.access(tui_path, os.W_OK)
+# Reapply declared values while preserving a valid runtime-only preference.
+config_path.write_text(json.dumps({**config, "autoupdate": True, "logLevel": "WARN"}))
 
 sources = subprocess.run(
     [binary, "debug", "config"], text=True, capture_output=True, timeout=60
 )
 assert sources.returncode == 0, sources.stdout + sources.stderr
 assert str(config_path) in sources.stdout, sources.stdout + sources.stderr
-print("Wrapped configuration discovered by OpenCode", flush=True)
+synced = json.loads(config_path.read_text())
+assert synced["autoupdate"] is False
+assert synced["logLevel"] == "WARN"
+assert {key: synced[key] for key in baseline} == baseline
+print("Writable configuration discovered; declared defaults restored and runtime preference retained", flush=True)
 
 for _ in range(10):
     status = subprocess.run(

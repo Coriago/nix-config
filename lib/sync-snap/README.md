@@ -3,8 +3,7 @@
 This is a **helper module importing `wlib.modules.default`**. Upstream calls
 modules that select an application package “wrapper modules”; this helper leaves
 `package` and application-specific options to the importing wrapper. It uses no
-Home Manager evaluation. Custom wrappers can import it as
-`wlib.modules.sync-snap`; see [wrapperModules](../../wrapperModules/README.md).
+Home Manager evaluation. Custom wrappers import `lib/sync-snap` directly; see [wrapperModules](../../wrapperModules/README.md).
 
 ## Smallest example
 
@@ -69,7 +68,14 @@ Snapshot format/directory defaults follow the sync entry.
 Both kinds expose a read-only `path`, computed from `destinationDir` and
 `destinationPath`. Application environment variables can refer to this path;
 HOME/XDG placeholders require runtime expansion (for example using
-`wlib.escapeShellArgWithEnv`). Ensure the app and sync use the same XDG fallback.
+`wlib.escapeShellArgWithEnv`). The addon supplies the standard
+`XDG_CONFIG_HOME` fallback through `envDefault` and orders it before application
+environment values. Applications do not need their own fallback configuration.
+
+`esc-fn` controls shell quoting: the upstream default keeps `$` expressions
+literal, while `wlib.escapeShellArgWithEnv` expands HOME/XDG at launch and quotes
+paths containing spaces. Fixed store paths do not need expansion. Keep this
+setting on runtime path values rather than changing escaping globally.
 
 Sync entries have `trigger` (`on-start`, `on-init`, `never`). Policies are `seed`,
 `fill-missing`, `merge`, and `replace`. Raw files/directories require `seed` or
@@ -135,7 +141,7 @@ arrays, sidecar errors, locking, and publication limits.
 
 ## Standalone check
 
-`test.nix` is a disposable fake-app check, deliberately not registered in the
+`check.nix` is a disposable fake-app check, deliberately not registered in the
 flake. Evaluate it with the repository's pinned `pkgs` and `wlib`, then build the
 returned derivation. It checks generated paths, overrides, reverse snapshots,
 independent enable switches, pruning, multi-file failure behavior, arguments,

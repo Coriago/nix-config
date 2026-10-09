@@ -171,6 +171,14 @@ in {
   });
   config = lib.mkMerge [
     {
+      # Expand runtime config paths after providing the standard XDG fallback.
+      envDefault.XDG_CONFIG_HOME = {
+        data = mkDefault "\${HOME}/.config";
+        esc-fn = mkDefault wlib.escapeShellArgWithEnv;
+        before =
+          lib.filter (name: name != "XDG_CONFIG_HOME")
+          (lib.unique (lib.attrNames config.env ++ lib.attrNames config.envDefault));
+      };
       sync.files =
         lib.mapAttrs (_: file: {
           sources = mkDefault [file.path];

@@ -1,20 +1,22 @@
 # Custom wrapper modules
 
-Add a `<name>.nix` file here. `flake.nix` discovers these files automatically and
-exports `wrapperModules.<name>`, `wrappers.<name>`, and `packages.<system>.<name>`.
-Each file is an ordinary wrapper module, not a flake-parts or NixOS module.
-Assets and README files are ignored; discovery currently covers this directory's
-immediate `.nix` files.
+Files here are flake-parts modules declaring `flake.wrappers.<name>`.
+`flake.nix` discovers them through `import-tree`, alongside `modules/`.
+The standard upstream integration exports the wrapper modules and packages.
 
-All flake-registered wrappers receive the extended `wlib`. Import
-`wlib.modules.sync-snap` to use the shared addon. `wlib.wrapperModules` still
-contains upstream application modules, so extending one does not import yourself.
-For standalone evaluation, use this flake's `lib.wlib.evalPackage`.
+To extend an upstream wrapper and add sync/snapshot support:
 
-The pinned upstream flake-parts integration creates its own fixed `wlib`.
-`lib/wrapper-flake-module.nix` preserves its registration/package-selection
-interface while evaluating with the extended library from
-`lib/wrapper-module-lib.nix`. Recheck this small integration when updating upstream.
+```nix
+{SyncSnapWrapperModule, ...}: {
+  flake.wrappers.myapp = {wlib, ...}: {
+    imports = [wlib.wrapperModules.myapp SyncSnapWrapperModule];
+    sync.enable = true;
+  };
+}
+```
+
+`SyncSnapWrapperModule` is a shared flake-parts argument defined in `modules/flake-parts.nix`.
+Capture it in the outer module as above. There is no custom `wlib` or registration layer.
 
 ## OpenCode
 
@@ -30,7 +32,8 @@ Default writable files:
 - `${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode-config.json`
 - `${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode-tui-config.json`
 
-An unset XDG_CONFIG_HOME defaults to `$HOME/.config` through `envDefault`.
+The shared sync-snap addon supplies `$HOME/.config` as the `envDefault` for
+XDG_CONFIG_HOME before application environment defaults are expanded.
 If supplied, XDG_CONFIG_HOME should be an absolute path. `sync.defaultDir` and individual destination overrides update the
 file mappings and application environment together. Sources are generated JSON;
 keep the runtime files valid JSON, since sync-snap does not parse JSONC comments.

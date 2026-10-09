@@ -17,11 +17,12 @@ in {
     self',
     ...
   }: {
-    packages.myopencode = inputs.wrapper-modules.wrappers.opencode.wrap {
+    packages.myopencode = config.flake.wrappers.opencode.wrap {
       inherit pkgs;
       package = inputs.llm-agents.packages.${system}.opencode2;
       exePath = "bin/opencode2";
       binName = "opencode";
+      sync.defaultDir = "\${XDG_CONFIG_HOME}/syncopencode";
       settings = {
         "$schema" = "https://opencode.ai/config.json";
         autoupdate = false;
@@ -112,19 +113,5 @@ in {
       program = lib.getExe' self'.packages.myopencode "opencode";
       meta.description = "OpenCode v2 with packaged Playwright MCP";
     };
-
-    checks.myopencode =
-      pkgs.runCommand "myopencode-smoke-test" {
-        nativeBuildInputs = [pkgs.python3];
-      } ''
-        export HOME="$TMPDIR/home"
-        export XDG_CONFIG_HOME="$HOME/.config"
-        export XDG_DATA_HOME="$HOME/.local/share"
-        export XDG_STATE_HOME="$HOME/.local/state"
-        export XDG_CACHE_HOME="$HOME/.cache"
-        mkdir -p "$HOME"
-        python ${./opencode-check.py} ${self'.packages.myopencode}
-        touch "$out"
-      '';
   };
 }
