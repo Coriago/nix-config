@@ -3,22 +3,25 @@
 This is a **helper module importing `wlib.modules.default`**. Upstream calls
 modules that select an application package “wrapper modules”; this helper leaves
 `package` and application-specific options to the importing wrapper. It uses no
-Home Manager evaluation. Custom wrappers import `lib/sync-snap` directly; see [wrapperModules](../../wrapperModules/README.md).
+Home Manager evaluation. Custom wrappers import `locallib.sync-snap`; see
+[wrapperModules](../../wrapperModules/README.md) for the shared flake-parts argument.
 
 ## Smallest example
 
-Inside a custom wrapper module:
+Capture `locallib` in the outer flake-parts module:
 
 ```nix
-{pkgs, ...}: {
-  imports = [../../lib/sync-snap]; # Adjust for your module's location.
-  package = pkgs.myapp; # Replace with the actual package.
-  constructFiles.settings = {
-    relPath = "settings.json";
-    content = builtins.toJSON {theme = "dark";};
+{locallib, ...}: {
+  flake.wrappers.myapp = {pkgs, ...}: {
+    imports = [locallib.sync-snap];
+    package = pkgs.myapp; # Replace with the actual package.
+    constructFiles.settings = {
+      relPath = "settings.json";
+      content = builtins.toJSON {theme = "dark";};
+    };
+    sync.enable = true;
+    snapshot.enable = true;
   };
-  sync.enable = true;
-  snapshot.enable = true;
 }
 ```
 

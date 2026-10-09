@@ -23,6 +23,9 @@ in {
       exePath = "bin/opencode2";
       binName = "opencode";
       sync.defaultDir = "\${XDG_CONFIG_HOME}/syncopencode";
+      cli-settings = {
+        theme.name = "gruvbox";
+      };
       settings = {
         "$schema" = "https://opencode.ai/config.json";
         autoupdate = false;

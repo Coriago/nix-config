@@ -1,6 +1,7 @@
 {
   perSystem = {
     pkgs,
+    lib,
     self',
     ...
   }: {
@@ -15,7 +16,9 @@
         export XDG_CACHE_HOME="$HOME/.cache"
         unset OPENCODE_CONFIG OPENCODE_TUI_CONFIG
         mkdir -p "$HOME"
-        python ${./check.py} ${self'.packages.myopencode}
+        python ${./check.py} ${self'.packages.myopencode.wrap {
+          cli-settings.theme.name = lib.mkForce "opencode";
+        }}
         touch "$out"
       '';
   };

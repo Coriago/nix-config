@@ -15,6 +15,13 @@ binary = package / "bin/opencode"
 baseline = json.loads((package / "opencode-config.json").read_text())
 config_path = Path(os.environ["XDG_CONFIG_HOME"]) / "syncopencode/opencode-config.json"
 tui_path = config_path.with_name("opencode-tui-config.json")
+cli_path = config_path.with_name("cli.json")
+cli_path.parent.mkdir(parents=True, exist_ok=True)
+cli_path.write_text(json.dumps({"theme": {"name": "system", "mode": "dark"}, "mouse": False}))
+native_cli = Path(os.environ["XDG_CONFIG_HOME"]) / "opencode/cli.json"
+native_cli.parent.mkdir(parents=True, exist_ok=True)
+native_cli.write_text('{"theme":{"name":"gruvbox"}}')
+native_before = native_cli.read_bytes()
 
 version = subprocess.check_output([binary, "--version"], text=True, timeout=30)
 assert "v2." in version, version
@@ -24,6 +31,11 @@ assert config == baseline, "Synced config differs from the personalized baseline
 assert json.loads(tui_path.read_text()) == json.loads((package / "opencode-tui-config.json").read_text())
 assert not config_path.is_symlink() and not tui_path.is_symlink()
 assert os.access(config_path, os.W_OK) and os.access(tui_path, os.W_OK)
+assert json.loads(cli_path.read_text()) == {
+    "theme": {"name": "opencode", "mode": "dark"}, "mouse": False
+}, "CLI theme baseline must merge at the native path and preserve runtime-only preferences"
+assert not cli_path.is_symlink() and os.access(cli_path, os.W_OK)
+assert native_cli.read_bytes() == native_before, "Native CLI preferences must remain untouched"
 # Reapply declared values while preserving a valid runtime-only preference.
 config_path.write_text(json.dumps({**config, "autoupdate": True, "logLevel": "WARN"}))
 

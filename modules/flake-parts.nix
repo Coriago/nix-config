@@ -4,7 +4,17 @@
   lib,
   ...
 }: {
-  _module.args.SyncSnapWrapperModule = ../lib/sync-snap;
+  _module.args.locallib = {
+    sync-snap = ../lib/sync-snap;
+    directory-mappings = ../lib/directory-mappings;
+  };
+
+  perSystem = {pkgs, ...}: {
+    checks.directory-mappings = import ../lib/directory-mappings/check.nix {
+      inherit pkgs;
+      wlib = inputs.wrapper-modules.lib;
+    };
+  };
 
   # Flake parts addon modules
   imports = [
