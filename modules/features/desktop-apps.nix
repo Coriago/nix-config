@@ -4,11 +4,9 @@ local: {
     pkgs,
     ...
   }: {
-    imports = with local.config.flake.modules.nixos; [
-      ghostty
-    ];
     programs.kdeconnect.enable = true;
     environment.systemPackages = with pkgs; [
+      ghostty
       kdePackages.partitionmanager
       kdePackages.isoimagewriter
       ark

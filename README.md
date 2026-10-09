@@ -14,16 +14,29 @@ TODO
 
 # Overview
 
-## Niri desktop
+## Wrapper package standard
 
-The workstation profile provides a **Niri** login session with a wrapped
-`niri` binary, Ghostty, Fuzzel, Waybar, and Mako. Apply with `nixos apply`,
-then select Niri at login. **Super+Shift+N** opens this checkout in the packaged
-Neovim; **Super+Return** opens a terminal and **Super+?** shows shortcut help.
+The [wrapper guide](docs/wrappers.md) defines the common approach to portable
+packages, embedded defaults, writable runtime preferences, live checkout files,
+and GUI preference snapshots. It includes a reusable module example, the current
+wrapper inventory, and validation requirements.
 
-Try nested with `nix run .#myniri` (uses **Alt** instead of Super), or validate
-with `nix run .#myniri -- validate`. See [the Niri guide](docs/niri-workflow.md)
-for all bindings and configuration paths.
+The [Brave trial](modules/features/brave/README.md) uses Home Manager-generated
+Bitwarden installation metadata and sync-snap for a writable preferences baseline
+and filtered exports. It recommends Google search and disables built-in password
+saving by default. Run `nix run path:.#mybrave`; use `mybrave-sync` and
+`mybrave-snapshot` for explicit baseline adoption and capture. The existing
+installed Brave is unchanged. Personal settings live in
+[Brave's config directory](modules/features/brave/config/default.nix); the
+[shared sync/snapshot adapter](lib/wrappers/README.md) supports future wrappers.
+
+## Umbriel desktop
+
+The workstation profile provides an **Umbriel** session with the `myumbriel`
+wrapper, Noctalia, and Ghostty. Validate the packaged compositor configuration
+with `nix run .#myumbriel -- validate`. See the
+[desktop guide](modules/features/tiling-desktop/README.md) for configuration
+layers, preference snapshots, services, theming, and reload behavior.
 
 ## Portable Pi agent
 
@@ -74,7 +87,7 @@ nix run .#myopencode -- --standalone
 ```
 
 The NixOS `development` bundle installs the `opencode` executable. Package and
-MCP settings live in `modules/features/development/opencode.nix`. The smoke test checks
+MCP settings live in `modules/features/opencode-agent/opencode.nix`. The smoke test checks
 OpenCode's MCP connection, browser startup, JavaScript execution, and snapshots:
 
 ```sh
@@ -375,14 +388,21 @@ live config.
 No environment variables or `--impure` are needed. Flake checks use deterministic
 package outputs with live config disabled by default.
 
-For additional wrappers, take the `liveConfig` argument in `perSystem` and pass
-`liveConfig.link ./config-directory` wherever the application receives a runtime
-config path.
-The helper lives in `modules/liveconfig.nix` and works for files or directories.
-Consumers must read the link at runtime: `builtins.readFile`, copying, or
-build-time substitution cannot turn a live link into reloadable configuration.
-Niri's substituted KDL and OpenCode's Nix-generated JSON still require builds.
+For additional wrappers, take the `liveConfig` argument in the **NixOS feature
+module** and override the installed wrapper's runtime config path using
+`liveConfig.link ./config-directory`. It is not a `perSystem` argument.
+The helper lives in [modules/liveconfig.nix](modules/liveconfig.nix) and works
+for files or directories. Consumers must read the link at runtime:
+`builtins.readFile`, copying, or build-time substitution cannot turn a live link
+into reloadable configuration. See the [wrapper guide](docs/wrappers.md#live-configuration)
+for an example and the distinction between live files, writable preferences,
+and preference export.
 
-Edit `modules/features/development/neovim/init.lua` for editor behavior and
-`modules/features/development/neovim.nix` for plugins/tools. Rerun the command to
-rebuild with your changes. Plugins and tools are pinned through `flake.lock`.
+The toggle currently affects Neovim and Pi. Noctalia's repo snapshot,
+Umbriel's generated baseline, and OpenCode's generated JSON still require builds.
+Their native writable layers have separate reload behavior, described in the
+[wrapper inventory](docs/wrappers.md#current-wrapper-inventory).
+
+Edit `modules/features/neovim/neovim/init.lua` for editor behavior and
+`modules/features/neovim/neovim.nix` for plugins/tools. Plugins and tools are
+pinned through `flake.lock`.
