@@ -14,6 +14,7 @@
 
 - Do not modify profiles or enable features on hosts unless explicitly requested. The user decides when to enable modules.
 - Preserve unrelated working-tree changes and Git staging. Do not stage or reset files merely to run checks.
+- Do not create a repository-root `tests/` directory. Keep tests beside the module or application they cover: use `check.nix` for a single-file check, or a local `checks/` directory when multiple files are needed.
 
 ## Useful documentation sites
 
