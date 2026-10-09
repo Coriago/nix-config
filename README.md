@@ -68,7 +68,11 @@ nix run .#myopencode -- auth login
 Playwright runs headlessly with an isolated browser profile, so it works without
 a graphical session and does not persist browser logins between sessions.
 
-The wrapper supplies default configuration through `OPENCODE_CONFIG`. An explicit
+The wrapper syncs its packaged configuration into
+`${XDG_CONFIG_HOME:-$HOME/.config}/syncopencode/` before launch and supplies the
+writable files through `OPENCODE_CONFIG` and `OPENCODE_TUI_CONFIG`. Declared values
+are reapplied on launch; runtime-only settings are retained. Snapshotting is disabled.
+An explicit
 `OPENCODE_CONFIG` overrides that default; ordinary user/project configuration and
 credentials continue to use OpenCode's normal locations. OpenCode updates are
 managed through the flake rather than self-update.
@@ -87,7 +91,8 @@ nix run .#myopencode -- --standalone
 ```
 
 The NixOS `development` bundle installs the `opencode` executable. Package and
-MCP settings live in `modules/features/opencode-agent/opencode.nix`. The smoke test checks
+MCP settings live in `modules/features/opencode-agent/opencode.nix`. Tests live
+beside it in `checks/`. The smoke test checks writable config synchronization,
 OpenCode's MCP connection, browser startup, JavaScript execution, and snapshots:
 
 ```sh

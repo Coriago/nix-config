@@ -58,6 +58,10 @@
 
 ## Wrapper reference
 
+- Bubblewrap: https://github.com/containers/bubblewrap — per-process directory bind mounts; consult the pinned version's `bwrap.xml` for namespace and mount behavior.
+
+- OpenCode v2 CLI config: https://opencode.ai/v2/docs/cli/config — native `cli.json` location, theme preferences, runtime updates, and inline overrides.
+
 - Rust file locks: https://doc.rust-lang.org/std/fs/struct.File.html#method.try_lock — advisory OS locks, contention, and release on handle closure.
 - tempfile: https://docs.rs/tempfile/latest/tempfile/struct.NamedTempFile.html — atomic persistence, permission defaults, and explicit durability requirements.
 - Rust packaging: https://nixos.org/manual/nixpkgs/stable/#rust — `buildRustPackage`, Cargo lockfile vendoring, and build/check hooks; prefer the pinned nixpkgs copy of this manual.
