@@ -4,9 +4,12 @@ local: {
     pkgs,
     ...
   }: {
+    imports = with local.config.flake.modules.nixos; [
+      ghostty
+      brave
+    ];
     programs.kdeconnect.enable = true;
     environment.systemPackages = with pkgs; [
-      ghostty
       kdePackages.partitionmanager
       kdePackages.isoimagewriter
       ark
@@ -21,11 +24,9 @@ local: {
 
   flake.modules.homeManager.desktop-apps = {pkgs, ...}: {
     programs = {
-      brave.enable = true;
       discord.enable = true;
     };
 
-    home.sessionVariables.BROWSER = "brave";
     home.packages = with pkgs; [
       orca-slicer
       krita

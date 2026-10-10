@@ -27,7 +27,7 @@ in {
         general.autostart = [noctalia];
         include.optional.files = ["$XDG_CONFIG_HOME/umbriel/noctalia.toml"];
         keybinds = {
-          "Mod+G" = "spawn:${lib.getExe pkgs.ghostty}";
+          "Mod+G" = "spawn:${lib.getExe self'.packages.myghostty}";
           "Mod+S" = "spawn:${noctalia} msg panel-toggle launcher";
         };
         environment = {

@@ -41,5 +41,6 @@ in {
 
   flake.modules.nixos.brave = {pkgs, ...}: {
     environment.systemPackages = [local.flake.packages.${pkgs.stdenv.hostPlatform.system}.mybrave];
+    environment.sessionVariables.BROWSER = "brave";
   };
 }

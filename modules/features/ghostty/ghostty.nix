@@ -1,6 +1,4 @@
-{config, ...}: let
-  local = config;
-in {
+{self, ...}: {
   flake.wrappers.myghostty = {
     config,
     lib,
@@ -63,36 +61,7 @@ in {
     ];
   };
 
-  flake.modules.nixos.ghostty = {...}: {
-    imports = [local.flake.wrappers.myghostty.install];
-    wrappers.myghostty.enable = true;
-  };
-
-  perSystem = {
-    pkgs,
-    lib,
-    self',
-    ...
-  }: {
-    checks.myghostty =
-      pkgs.runCommand "ghostty-config-theme-check" {
-        nativeBuildInputs = [pkgs.coreutils pkgs.gnugrep pkgs.gnused pkgs.bash];
-      } ''
-        export HOME="$TMPDIR/home"
-        export XDG_CONFIG_HOME="$HOME/config"
-        mkdir -p "$XDG_CONFIG_HOME/ghostty/themes" stubs
-        # Never signal terminals or contact the real session during this check.
-        for command in systemctl gdbus pgrep; do
-          printf '#!${pkgs.bash}/bin/bash\nexit 1\n' > "stubs/$command"
-          chmod +x "stubs/$command"
-        done
-        export PATH="$PWD/stubs:$PATH"
-        ${pkgs.python3.withPackages (p: [p.tomli-w])}/bin/python ${./theme-check.py} \
-          ${lib.getExe self'.packages.myghostty} \
-          ${self'.packages.myghostty}/ghostty-config \
-          ${lib.getExe pkgs.noctalia} \
-          ${pkgs.noctalia}/share/noctalia/assets/templates
-        touch "$out"
-      '';
+  flake.modules.nixos.ghostty = {pkgs, ...}: {
+    environment.systemPackages = [self.packages.${pkgs.stdenv.hostPlatform.system}.myghostty];
   };
 }

@@ -1,3 +1,6 @@
+[general]
+autostart = []
+
 [keybinds]
 "Mod+1" = "workspace-switch:1"
 "Mod+2" = "workspace-switch:2"
