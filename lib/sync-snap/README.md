@@ -52,6 +52,12 @@ application's reload behavior remains application-specific.
 `sync.enable` and `snapshot.enable` both default to `false`. They are independent;
 a snapshot-only wrapper still gets the automatic reverse mappings.
 
+The directory default below is a low-level fallback. If an application wrapper
+exposes a runtime location option, it should derive `sync.defaultDir` from that
+option (normally using `lib.mkDefault`) and let features configure the public
+application option. Use direct sync directory overrides only where no such
+interface exists or a documented implementation exception requires them.
+
 | Option | Default |
 | --- | --- |
 | `sync.defaultDir` | `${XDG_CONFIG_HOME}/<binName>`; unset XDG falls back to `$HOME/.config` |
@@ -123,8 +129,10 @@ lists, matching the Rust CLI's regex pruning and ordered jq filters.
 
 Sources accept path strings, Nix paths, or
 `{path = "..."; format = "json"; optional = true;}`. Source format defaults to
-null and optional defaults to false. Destination format does not override source
-format. Specify source format for extensionless files such as `Preferences`.
+null and optional defaults to false. Generated `constructFiles` sources inherit
+the sync entry's explicit `format`, supporting extensionless native filenames
+such as `Preferences`. Explicitly supplied sources retain independent formats;
+set `format` on those source objects when their suffix cannot identify it.
 Destination paths must be relative without `.` or `..` components.
 
 ```nix

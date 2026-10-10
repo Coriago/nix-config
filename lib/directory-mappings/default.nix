@@ -16,13 +16,18 @@ in {
     default = [];
     type = lib.types.listOf (lib.types.submodule {
       options = {
+        directory = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Map a directory; set false for an existing file read by the app. File mounts do not support atomic replacement or follow source inode replacement until relaunch.";
+        };
         source = lib.mkOption {
           type = lib.types.str;
-          description = "Actual writable directory. Created if missing. Supports runtime shell environment expansion.";
+          description = "Actual directory (created if missing), or existing file when directory is false. Supports runtime shell environment expansion.";
         };
         target = lib.mkOption {
           type = lib.types.str;
-          description = "Absolute directory the application sees. Its original contents are hidden in the wrapped process.";
+          description = "Absolute path the application sees. Its original contents are hidden in the wrapped process.";
         };
       };
     });
@@ -60,9 +65,15 @@ in {
               echo 'directoryMappings: source and target must expand to absolute paths' >&2
               exit 1
             fi
-            ${pkgs.coreutils}/bin/mkdir -p -- "$mapping_source" || exit 1
-            if [[ ! -d "$mapping_source" ]]; then
-              echo 'directoryMappings: source must be a directory' >&2
+            ${lib.optionalString entry.directory ''
+              ${pkgs.coreutils}/bin/mkdir -p -- "$mapping_source" || exit 1
+            ''}
+            if [[ ! -${
+              if entry.directory
+              then "d"
+              else "f"
+            } "$mapping_source" ]]; then
+              echo 'directoryMappings: source has the wrong type or is missing' >&2
               exit 1
             fi
           '')

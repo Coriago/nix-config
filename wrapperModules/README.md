@@ -14,7 +14,10 @@ Keep application behavior here: config discovery, fixed native paths, generated
 files, missing settings options, reusable plugin interfaces, and sensible snapshot
 pruning defaults. Features consume these modules and choose preferences, runtime
 directories, dependencies, plugins, and snapshot enablement. An adapter may enable
-sync when needed to deliver writable config.
+sync when needed to deliver writable config. Derive `sync.defaultDir` from an
+existing application runtime-location option inside the adapter; features should
+configure that public option. Direct sync paths are a fallback or documented
+implementation exception.
 
 [OpenCode](opencode.nix) is the reference adapter. It extends the upstream module,
 redirects config/TUI environment defaults to writable sync files, and adds
@@ -36,4 +39,6 @@ discovery paths, with temporary parent directories for missing root-owned policy
 paths. Profiles remain writable. Browser-owned Preferences are seeded only when
 missing, and snapshots retain a typed scalar allowlist instead of full profile
 state. The [mybrave feature](../modules/features/brave/README.md) chooses Bitwarden,
-Google, the homepage, a sync directory, and snapshot export.
+Google, the homepage, `userDataDir`, and snapshot export. The adapter derives
+its sync directory from `userDataDir`; `profileDirectory` controls the relative
+Preferences path for launch, sync, and snapshot.

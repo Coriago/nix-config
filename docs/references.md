@@ -69,3 +69,5 @@ references here with a short description and avoid duplicate entries.
 - Noctalia wrapper: https://nix-community.github.io/nix-wrapper-modules/wrapperModules/noctalia-shell.html
 - Review `settings`, `outOfStoreConfig`, and `autoCopyConfig` together before implementing writable settings. The module provides configuration generation and non-overwriting runtime copying; evaluate those facilities before adding custom copy logic.
 - The pinned `noctalia-shell` wrapper targets legacy JSON configuration. This repo's `mynoctalia` uses Noctalia v5 TOML layers; assess version compatibility before reusing the legacy options.
+- Chromium user data directory: https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md — profile paths, `--user-data-dir`, cache derivation, and concurrent-instance limitations.
+- Chrome Linux extension packaging: https://developer.chrome.com/docs/extensions/how-to/distribute/host-on-linux — packing CRX files, update-manifest protocol, signing and version requirements.

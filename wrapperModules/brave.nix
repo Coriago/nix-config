@@ -5,7 +5,21 @@
     pkgs,
     wlib,
     ...
-  }: {
+  }: let
+    externalExtensions = builtins.filter (extension: extension.installationMode == "external") config.extensions;
+    managedExtensions = builtins.filter (extension: extension.installationMode != "external") config.extensions;
+    extensionPolicies = lib.listToAttrs (map (extension: {
+        name = extension.id;
+        value = {
+          installation_mode = extension.installationMode;
+          update_url =
+            if extension.crxPath != null
+            then throw "Brave managed extensions require an update URL, not crxPath"
+            else extension.updateUrl;
+        };
+      })
+      managedExtensions);
+  in {
     imports = [locallib.sync-snap locallib.directory-mappings];
 
     options = {
@@ -15,7 +29,8 @@
         description = ''
           Writable browser data directory, shared by all profiles. Supports
           sync-snap's HOME/XDG placeholders. Set this option rather than passing a different
-          --user-data-dir, so external extension discovery uses the same directory.
+          --user-data-dir. Sync defaults to this directory, keeping preferences,
+          policies, and external extension manifests with the selected browser data.
         '';
       };
       profileDirectory = lib.mkOption {
@@ -52,7 +67,22 @@
           options = {
             id = lib.mkOption {
               type = lib.types.strMatching "[a-p]{32}";
-              description = "Extension ID from the Chrome Web Store.";
+              description = "Extension ID from the Chrome Web Store or packaged CRX public key.";
+            };
+            crxPath = lib.mkOption {
+              type = lib.types.nullOr lib.types.path;
+              default = null;
+              description = "Prebuilt CRX file, as in Home Manager's Chromium module. Requires version and external installation mode; installed without downloading the initial package.";
+            };
+            version = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "Version from the prebuilt CRX manifest; required when crxPath is set.";
+            };
+            installationMode = lib.mkOption {
+              type = lib.types.enum ["external" "normal_installed" "force_installed"];
+              default = "external";
+              description = "external uses the Home Manager manifest and respects UI removal. normal_installed uses managed policy and allows disabling; force_installed requires the extension and prevents removal or disabling.";
             };
             updateUrl = lib.mkOption {
               type = lib.types.str;
@@ -68,7 +98,9 @@
           GUI-installed extensions and their writable storage remain in the profile.
           Include other externally managed extensions here as well: hiding their
           manifests can cause Brave to uninstall them.
-          Removing an extension in the UI blocks automatic reinstallation.
+          External mode respects removal in the UI. Managed modes use Chromium
+          ExtensionSettings in a process-local policy file; other mandatory host
+          policy files remain visible. Brave may show a managed-browser indicator.
         '';
       };
     };
@@ -76,6 +108,7 @@
     config = {
       package = lib.mkDefault pkgs.brave;
       sync.enable = lib.mkDefault true;
+      sync.defaultDir = lib.mkDefault config.userDataDir;
       flags."--profile-directory" = {
         data = config.profileDirectory;
         sep = "=";
@@ -87,15 +120,17 @@
       };
       # Binding a missing /etc target cannot create it in root-owned host dirs.
       # Recreate only its parents, retaining unrelated /etc and managed policies.
-      directoryMappingParentDirs = lib.optionals (config.recommendedPolicies != {}) [
-        "/etc"
-        "/etc/brave"
-        "/etc/brave/policies"
-      ];
+      directoryMappingParentDirs =
+        lib.optionals (config.recommendedPolicies != {} || managedExtensions != []) [
+          "/etc"
+          "/etc/brave"
+          "/etc/brave/policies"
+        ]
+        ++ lib.optional (managedExtensions != []) "/etc/brave/policies/managed";
       constructFiles =
         {
           bravePreferences = {
-            relPath = "brave-preferences.json";
+            relPath = "${config.profileDirectory}/Preferences";
             content = builtins.toJSON config.preferences;
           };
         }
@@ -105,25 +140,51 @@
             content = builtins.toJSON config.recommendedPolicies;
           };
         }
+        // lib.optionalAttrs (managedExtensions != []) {
+          braveManagedExtensions = {
+            relPath = "brave-policies/managed/nix-wrapper-extensions.json";
+            content = builtins.toJSON {ExtensionSettings = extensionPolicies;};
+          };
+        }
         // lib.listToAttrs (map (extension: {
             name = "braveExtension-${extension.id}";
             value = {
               relPath = "brave-extensions/${extension.id}.json";
-              content = builtins.toJSON {external_update_url = extension.updateUrl;};
+              content =
+                if extension.crxPath != null && (extension.version == null || extension.installationMode != "external")
+                then throw "Brave prebuilt extensions require version and installationMode = external"
+                else
+                  builtins.toJSON (
+                    if extension.crxPath != null
+                    then {
+                      external_crx = extension.crxPath;
+                      external_version = extension.version;
+                    }
+                    else {external_update_url = extension.updateUrl;}
+                  );
             };
           })
-          config.extensions);
-      sync.files.bravePreferences = {
-        destinationDir = lib.mkDefault config.userDataDir;
-        destinationPath = lib.mkOverride 900 "${config.profileDirectory}/Preferences";
-        format = lib.mkDefault "json";
-        # Browser-owned files must not be merged while a profile is running.
-        policy = lib.mkDefault "seed";
-      };
+          externalExtensions);
+      sync.files =
+        {
+          bravePreferences = {
+            format = lib.mkDefault "json";
+            # Browser-owned files must not be merged while a profile is running.
+            policy = lib.mkDefault "seed";
+          };
+        }
+        // lib.optionalAttrs (managedExtensions != []) {
+          # Do not retain removed required IDs. Omit the sync entry without its source.
+          braveManagedExtensions.policy = lib.mkDefault "replace";
+        }
+        // lib.listToAttrs (map (extension: {
+            name = "braveExtension-${extension.id}";
+            value.policy = lib.mkDefault "replace";
+          })
+          externalExtensions);
       snapshot.files =
         {
           bravePreferences = {
-            destinationPath = lib.mkOverride 900 "Preferences.json";
             # A whitelist drops private/stateful objects even as new keys appear.
             # Only retain documented scalar UI and password-manager preferences.
             transform = lib.mkDefault [
@@ -146,12 +207,13 @@
           };
           # These are declared wiring, not browser-owned preferences.
           braveRecommendedPolicies.enable = false;
+          braveManagedExtensions.enable = false;
         }
         // lib.listToAttrs (map (extension: {
             name = "braveExtension-${extension.id}";
             value.enable = false;
           })
-          config.extensions);
+          externalExtensions);
       directoryMappings =
         lib.optional (config.recommendedPolicies != {}) {
           source =
@@ -160,13 +222,25 @@
             else "${placeholder "out"}/brave-policies/recommended";
           target = "/etc/brave/policies/recommended";
         }
-        ++ lib.optional (config.extensions != []) {
+        ++ lib.optional (managedExtensions != []) {
           source =
             if config.sync.enable
-            then "${config.sync.defaultDir}/brave-extensions"
-            else "${placeholder "out"}/brave-extensions";
+            then config.sync.files.braveManagedExtensions.path
+            else "${placeholder "out"}/brave-policies/managed/nix-wrapper-extensions.json";
+          target = "/etc/brave/policies/managed/nix-wrapper-extensions.json";
+          directory = false;
+        }
+        ++ lib.optional (externalExtensions != []) {
+          # Expose only declared IDs, even if old synced manifests remain on disk.
+          source = "${placeholder "out"}/brave-extensions";
           target = "${config.userDataDir}/External Extensions";
-        };
+        }
+        ++ lib.optionals config.sync.enable (map (extension: {
+            source = config.sync.files."braveExtension-${extension.id}".path;
+            target = "${config.userDataDir}/External Extensions/${extension.id}.json";
+            directory = false;
+          })
+          externalExtensions);
     };
   };
 }

@@ -297,7 +297,15 @@ in {
       };
       sync.files =
         lib.mapAttrs (name: file: {
-          sources = mkDefault (snapshotSource name ++ [file.path]);
+          sources = mkDefault (snapshotSource name
+            ++ [
+              {
+                path = file.path;
+                # Generated config shares its declared format with the destination,
+                # including native extensionless names such as Brave's Preferences.
+                format = config.sync.files.${name}.format;
+              }
+            ]);
           destinationPath = mkDefault file.relPath;
         })
         generated;

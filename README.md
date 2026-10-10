@@ -20,8 +20,8 @@ The [wrapper guide](docs/wrappers.md) describes the current OpenCode-based patte
 generic app adapters in `wrapperModules/`, personal configuration in features, and
 shared addons in `lib/`. It covers creating, running, and validating wrappers.
 Use the [snapshot review guide](docs/snapshot-review.md) when enabling preference
-capture. [Brave configuration notes](docs/brave-configuration.md) retain lessons
-from the earlier experiment; there is no current Brave wrapper implementation.
+capture. The [Brave feature](modules/features/brave/brave.nix) uses a separate
+browser profile, writable policies, and required Bitwarden installation.
 
 ## Umbriel desktop
 

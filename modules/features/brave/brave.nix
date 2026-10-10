@@ -9,10 +9,18 @@ in {
   }: {
     packages.mybrave = local.flake.wrappers.brave.wrap {
       inherit pkgs;
-      sync.defaultDir = "\${XDG_CONFIG_HOME}/syncbrave";
+      userDataDir = "\${XDG_CONFIG_HOME}/syncbrave";
       snapshot.enable = true;
       preferences.credentials_enable_autosignin = false;
-      extensions = ["nngceckbapebfimnlniiiahkandclblb"]; # Bitwarden
+      extensions = [
+        {
+          id = "nngceckbapebfimnlniiiahkandclblb"; # Bitwarden
+          installationMode = "force_installed";
+        }
+        {
+          id = "mnjggcdmjocbbbhaepdhchncahnbgone";
+        }
+      ];
       recommendedPolicies = {
         # Bitwarden's default-manager permission still needs user confirmation.
         PasswordManagerEnabled = false;

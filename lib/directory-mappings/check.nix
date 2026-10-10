@@ -35,6 +35,8 @@
       test "$(readlink "$HOME/parent tree/dangling")" = absent
       test "$(cat "$HOME/parent tree/sibling/file")" = sibling
       test "$(cat "$HOME/parent tree/nested/mapped/settings")" = updated
+      test "$(cat "$HOME/parent tree/nested/policy.json")" = baseline
+      test "$(cat "$HOME/parent tree/nested/host-policy.json")" = host-policy
       touch "$HOME/parent tree/transient"
     '';
     directoryMappingParentDirs = [
@@ -43,6 +45,11 @@
       "\${HOME}/parent tree/nested"
     ];
     directoryMappings = [
+      {
+        source = "\${HOME}/actual dir/policy.json";
+        target = "\${HOME}/parent tree/nested/policy.json";
+        directory = false;
+      }
       {
         source = "\${HOME}/actual dir";
         target = "/etc/nix-wrapper-directory-mappings-check";
@@ -75,11 +82,15 @@ in
     printf sibling > "$HOME/parent tree/sibling/file"
     ln -s absent "$HOME/parent tree/dangling"
     printf baseline > "$HOME/actual dir/settings"
+    printf baseline > "$HOME/actual dir/policy.json"
+    mkdir -p "$HOME/parent tree/nested"
+    printf host-policy > "$HOME/parent tree/nested/host-policy.json"
     ${parentFixture}/bin/mapping-parent-fixture
     test "$(cat "$HOME/actual dir/settings")" = updated
     test ! -e /etc/nix-wrapper-directory-mappings-check
     test ! -e "$HOME/parent tree/transient"
-    test ! -e "$HOME/parent tree/nested"
+    test ! -e "$HOME/parent tree/nested/policy.json"
+    test "$(cat "$HOME/parent tree/nested/host-policy.json")" = host-policy
     test "$(cat "$HOME/parent tree/.hidden")" = hidden
     touch "$out"
   ''

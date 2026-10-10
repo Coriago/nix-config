@@ -28,6 +28,17 @@ of known application state and credentials belongs in the adapter. Expose reusab
 plugin configuration options there when doing so keeps features declarative and
 readable; plugin selection and preferences remain feature choices.
 
+When an adapter exposes a clear application runtime-location option, use that as
+the public interface and derive `sync.defaultDir` from it inside the adapter.
+Features should not need to keep two directory settings aligned. Derived paths
+are application wiring, while the feature still chooses the actual location.
+For example, Brave sets `sync.defaultDir = lib.mkDefault config.userDataDir` and
+constructs Preferences at `${config.profileDirectory}/Preferences`; sync and
+snapshot inherit that relative path. Reserve direct `sync.defaultDir` settings
+for wrappers without a clear application location interface or documented
+implementation exceptions. Low-level overrides must keep application discovery
+and file delivery aligned.
+
 ## Create an adapter
 
 1. Read the pinned application's config documentation and the upstream wrapper's
@@ -70,7 +81,8 @@ The key part of the OpenCode adapter is:
 This is an excerpt, not a replacement for the full adapter. The existing module
 also redirects TUI config and exposes `cli-settings`. OpenCode v2 cannot override
 its native `cli.json` path, so the adapter maps `sync.defaultDir` onto the native
-OpenCode directory. The feature only chooses where it wants config stored.
+OpenCode directory. This adapter has no dedicated runtime-directory option, so
+`sync.defaultDir` remains its fallback interface for choosing where config lives.
 
 `envDefault` lets an explicit caller environment win. `mkForce` replaces the
 upstream module's default path, not the caller's environment. `esc-fn` expands

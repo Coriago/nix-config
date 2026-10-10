@@ -1,85 +1,113 @@
-# Brave
+# Brave wrapper
 
-`mybrave` adds Bitwarden using the same user-level external-extension JSON format
-as the pinned Home Manager `programs.brave.extensions` implementation. Brave
-downloads the extension from the Chrome Web Store and handles its updates.
+Run `nix run path:.#mybrave`. Browser data lives in
+`$XDG_CONFIG_HOME/syncbrave/user-data`, separate from ordinary Brave. Sync's
+configuration directory alone does not isolate browser sessions; `userDataDir`
+controls the actual profile, singleton lock, extension storage and snapshots.
+The adapter derives `sync.defaultDir` from `userDataDir`; the feature only sets
+`userDataDir` and, optionally, `profileDirectory`. Preferences is synced beneath
+`<userDataDir>/<profileDirectory>/Preferences`, while generated policy and
+extension manifests are stored in `brave-policies/` and `brave-extensions/` below
+`userDataDir`. Changing the public directory option moves their destinations
+together. Existing browser data is not automatically migrated between directories.
+A second launch using the same user-data directory normally hands its request to
+the already-running instance and exits. Changes to policies or extension wiring
+require closing that wrapped instance and launching again.
 
-Recommended policies set Google as the search engine, disable built-in password
-saving, and set `https://homepage.backyard-host.com/` as the Home button's URL.
-The Home button is shown. Homepage, startup pages, and new-tab pages are distinct;
-this feature changes the homepage. These defaults remain editable in Brave's UI;
-an existing explicit preference or mandatory host policy takes precedence.
-Fresh profiles also disable the browser's automatic sign-in through a native
-preference. Existing profiles keep their saved setting until changed in Brave
-or through Bitwarden's default-manager action.
+The feature chooses Google, the Backyard homepage, and Bitwarden. The browser's
+built-in password manager is disabled by an editable recommended policy.
+Bitwarden's default-manager permission requires confirmation inside Bitwarden.
+Bitwarden uses `force_installed`: it is downloaded automatically, including after
+an earlier external installation was removed, and cannot be removed or disabled
+in the browser UI. Edit the feature's extension list to change that requirement.
+Brave can show a managed-browser indicator. The wrapper presents policy files
+only to its process tree and retains other host mandatory policy files.
 
-```sh
-nix run path:.#mybrave
-nix run path:.#snapshot-mybrave
-nix build path:.#mybrave path:.#checks.x86_64-linux.mybrave --no-link -L
+## Prebuilt extensions
+
+The adapter follows the pinned Home Manager Chromium/Brave module's extension
+interface and JSON manifest format, without evaluating Home Manager:
+
+```nix
+extensions = [
+  "extension-id-from-the-store"
+  {
+    id = "actual-extension-id-from-the-crx";
+    crxPath = ./extension.crx; # Or "${extensionPackage}/extension.crx".
+    version = "1.2.3"; # Must match the CRX manifest.
+  }
+];
 ```
 
-Close an already-running Brave session normally before launching this wrapper.
-Brave can otherwise reuse that existing process, which has no wrapper mappings.
-The optional `flake.modules.nixos.brave` installs the package; no host/profile
-enables it. Existing Home Manager Brave installations are unchanged.
+IDs must be 32 letters in the range a–p. `crxPath` defaults to null; `version`
+defaults to null and is required for CRX installation. These entries default to
+`installationMode = "external"`, which respects user removal in the browser UI.
+The generated manifest uses `external_crx` and `external_version`. Initial local
+installation requires no download. Future updating also depends on the packaged
+extension's own update manifest; this option does not force a version downgrade.
 
-After Bitwarden is installed, sign in and accept **Make Bitwarden your default
-password manager** and **Allow**. The same option is in Bitwarden's **Settings →
-Autofill**. Installing the extension and disabling browser password saving cannot
-grant this optional extension permission. Previously saved browser passwords
-can still autofill, and browser automatic sign-in is not controlled by
-`PasswordManagerEnabled`; Bitwarden's default-manager action disables the
-competing settings. See [Bitwarden's instructions](https://bitwarden.com/help/disable-browser-autofill/).
+URL-based entries use `updateUrl`, defaulting to the Chrome Web Store update
+service, and may choose `normal_installed` (automatic, disabling allowed) or
+`force_installed` (required, removal/disabling prevented). Those managed modes
+require an update URL and cannot directly take `crxPath`. To require a locally
+packaged extension, serve its CRX through the documented update-manifest protocol.
 
-The generic [adapter](../../../wrapperModules/brave.nix) exposes `extensions`,
-`recommendedPolicies`, `preferences`, `userDataDir`, and `profileDirectory`.
-It imports sync-snap and enables sync by default. `mybrave` chooses
-`$XDG_CONFIG_HOME/syncbrave` for writable policies/manifests and enables snapshot
-export. The directory-mappings addon presents those synced files at Brave's
-fixed discovery paths. Browser profiles and login state stay in the normal
-writable data directory; `profileDirectory` defaults to `Default`.
+## Validation and snapshot review
 
-Policies and extension manifests use the normal merge-on-start sync behavior.
-They are generated wiring and are excluded from snapshots. Native `Preferences`
-uses **seed**: a missing file is initialized from the reviewed snapshot followed
-by explicit `preferences`, but an existing profile is never externally rewritten.
-This exception avoids racing a running browser and preserves browser edits.
-Changing a baseline does not update an existing profile; use Brave's UI for those
-edits. Do not change its policy to `merge` while Brave could be running.
-`sync.enable = false` retains packaged policy/extension delivery and disables
-preference seeding; snapshot export remains independent.
+The adjacent checks launch actual headless Brave. The isolation check compares
+simultaneous wrappers with different profile paths, homepage and search settings.
+Only its contrast wrapper adds Stylus and an inert prebuilt CRX fixture; neither
+is added to the personal feature. The CRX fixture is a packed Manifest V3
+extension with no permissions, scripts or network access, version 1.0.0 and name
+`Wrapper prebuilt extension fixture`. Its signing key is disposable and not
+included. The check asserts actual local CRX installation, not only the manifest.
 
-Close Brave normally before capturing. `snapshot-mybrave` reads only the selected
-profile's `Preferences` and writes `snapshot/mybrave/Preferences.json` in this repo.
-It does not launch or sync Brave first. The next build embeds the baseline for
-fresh-profile seeding. Snapshot capture is manual; nothing is staged or committed.
+`BRAVE_TEST_NETWORK=1` enables the additional manual Web Store lifecycle check:
+simulate Bitwarden's saved UI-removal blocklist in a disposable browser profile,
+verify external installation respects it,
+then relaunch under the required policy and verify Bitwarden and
+Stylus are installed, enabled and required. Offline flake checks do not claim
+Web Store download validation. These checks do not exercise interactive GUI
+rendering, Bitwarden sign-in, or its default-manager permission prompt.
 
-The adapter's snapshot allowlist retains only scalar homepage URL/type, Home and
-bookmark-bar visibility, and built-in password-saving/automatic-sign-in settings.
-It validates their value types and excludes file/store paths. All other fields,
-including account information, history/session data, extension storage, paths,
-device state, and protected search-engine/integrity data, are dropped. Cookies,
-login databases, `Local State`, and `Secure Preferences` are never sources.
-No arrays are retained. Review exported homepage URLs before saving a baseline;
-personal URLs can themselves contain private information. Extend the allowlist
-only after reviewing the field's schema and portability.
+Snapshot capture uses the actual selected profile's Preferences and retains only
+six typed settings: homepage, whether it is the new-tab page, home-button and
+bookmark-bar visibility, password saving and password auto sign-in. It drops all
+other fields, including accounts, extensions/storage, sessions, history and
+unknown future state; file URLs and store paths are also pruned. Checks capture
+and inspect isolated runtime exports, inject synthetic private/stateful fields,
+and verify the reviewed baseline in a fresh profile. Policies and extension
+manifests remain declarative inputs and are excluded from snapshots.
 
-The mapped recommended-policy and external-manifest directories hide other files
-at those locations only inside the wrapped process. Mandatory host policies and
-unrelated `/etc` files remain visible. Include any other externally managed
-extensions in `extensions`; hiding their manifests can cause their removal.
-Policies can make Brave display “Managed by your organization”. Linux user
-namespaces must be available. Inspect defaults at `brave://policy`.
+## Runtime settings and capture
 
-The check runs real headless Brave with extensions and background networking
-disabled. It verifies effective defaults and writable synced files, edits and
-restarts the browser, captures a filtered snapshot, checks synthetic private and
-future fields are excluded, and restores the export into a fresh profile. Explicit
-Nix preferences win conflicts. The isolated export was reviewed; no personal
-profile was exported. It does not test interactive rendering, Bitwarden sign-in,
-permission consent, or autofill. A separate isolated launch with networking
-enabled confirmed the Bitwarden extension download.
+Homepage, startup pages, and the new-tab page are distinct; this feature sets the
+Home button's destination and shows that button. Recommended settings remain
+editable, and an existing explicit preference or mandatory host policy takes
+precedence. Fresh profiles seed `credentials_enable_autosignin = false`.
+After signing in to Bitwarden, accept **Make Bitwarden your default password
+manager → Allow**, or choose it under **Settings → Autofill**. Installation cannot
+grant that optional permission, and saved browser passwords can still autofill.
+See [Bitwarden's instructions](https://bitwarden.com/help/disable-browser-autofill/).
 
-See the [configuration notes](../../../docs/brave-configuration.md) and
-[directory-mappings reference](../../../lib/directory-mappings/README.md).
+Native Preferences uses sync's **seed** policy: a missing file is initialized from
+the reviewed snapshot, then explicit Nix preferences. Existing files are never
+rewritten externally, avoiding races with the browser and preserving edits.
+Changing the baseline does not overwrite an existing profile. Policies/manifests
+use synchronization on launch. Recommended policies merge; extension wiring
+uses replacement so removed IDs and old CRX fields do not remain active. Only
+declared external manifests are presented to Brave, even when older synced files
+remain on disk. `sync.enable = false` retains
+packaged policy/extension delivery but disables preference seeding; snapshot
+export is independent.
+
+Close the wrapped browser normally, then run `nix run path:.#snapshot-mybrave` to
+capture into `snapshot/mybrave/Default/Preferences`. Capture does not launch/sync
+Brave or stage/commit anything. Review URLs for private information before
+retaining a baseline. No arrays, cookies, login databases, Local State, Secure
+Preferences or protected search-engine/integrity fields are retained.
+
+The adapter's `profileDirectory` selects a profile below `userDataDir` and defaults
+to `Default`. Linux user namespaces must be available for directory mappings.
+Inspect effective policies at `brave://policy`. The optional NixOS Brave feature
+installs the wrapper; it has not been enabled on any host/profile here.

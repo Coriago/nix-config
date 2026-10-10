@@ -86,3 +86,14 @@ and Playwright MCP. These checks do not assert interactive theme rendering.
 References: [Bubblewrap](https://github.com/containers/bubblewrap/tree/v0.12.0)
 and its [manual](https://github.com/containers/bubblewrap/blob/v0.12.0/bwrap.xml);
 [wrapper launch hook](https://github.com/nix-community/nix-wrapper-modules/blob/1db3c116a6aa61823f8d8f3c47c306846428fc54/modules/makeWrapper/module.nix).
+
+## Read-only application inputs stored as individual files
+
+Set an entry's `directory = false` to bind an existing source file. The addon
+checks that it exists rather than creating a directory. This is useful for a
+policy file in a shared directory: recreate its parent with
+`directoryMappingParentDirs` to retain sibling host policy files. The bind itself
+is writable when the source is writable, but applications must not atomically
+replace the mounted file. Replacing the source inode externally becomes visible
+on the next launch. Continue mapping whole directories for app-owned writable
+configuration and live atomic saves.

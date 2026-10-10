@@ -20,15 +20,15 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
     for stage in range(3):
         home = root_home if stage < 2 else str(Path(root_home) / "restore")
         config_home = Path(home) / "config"
-        data = config_home / "BraveSoftware/Brave-Browser"
+        data = config_home / "syncbrave/user-data"
         env = dict(os.environ, HOME=home, XDG_CONFIG_HOME=str(config_home),
                    XDG_CACHE_HOME=str(Path(home) / "cache"),
                    XDG_DATA_HOME=str(Path(home) / "data"),
                    XDG_STATE_HOME=str(Path(home) / "state"))
         if stage == 2:
-            (Path(home) / "snapshot").mkdir(parents=True)
-            (Path(home) / "snapshot/Preferences.json").write_bytes(
-                (Path(root_home) / "snapshot/Preferences.json").read_bytes()
+            (Path(home) / "snapshot/Default").mkdir(parents=True)
+            (Path(home) / "snapshot/Default/Preferences").write_bytes(
+                (Path(root_home) / "snapshot/Default/Preferences").read_bytes()
             )
         port_file = data / "DevToolsActivePort"
         port_file.unlink(missing_ok=True)
@@ -131,9 +131,9 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
                 time.sleep(0.1)
 
         if stage == 1:
-            assert os.access(config_home / "syncbrave/brave-policies/recommended/wrapper.json", os.W_OK)
-            manifest = config_home / "syncbrave/brave-extensions/nngceckbapebfimnlniiiahkandclblb.json"
-            assert json.loads(manifest.read_text()) == {"external_update_url": "https://clients2.google.com/service/update2/crx"}
+            assert os.access(data / "brave-policies/recommended/wrapper.json", os.W_OK)
+            manifest = data / "brave-policies/managed/nix-wrapper-extensions.json"
+            assert json.loads(manifest.read_text()) == {"ExtensionSettings": {"nngceckbapebfimnlniiiahkandclblb": {"installation_mode": "force_installed", "update_url": "https://clients2.google.com/service/update2/crx"}}}
             assert os.access(manifest, os.W_OK)
             # Synthetic private/stateful data must not survive snapshot filtering.
             preference_file = data / "Default/Preferences"
@@ -147,7 +147,7 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
             original["browser"]["window_placement"] = {"machine_id": "synthetic-machine"}
             preference_file.write_text(json.dumps(original))
             subprocess.run([sys.argv[2]], env=env, check=True)
-            exported = Path(home) / "snapshot/Preferences.json"
+            exported = Path(home) / "snapshot/Default/Preferences"
             captured = json.loads(exported.read_text())
             expected = {
                 "homepage": "https://homepage.backyard-host.com/",
@@ -158,7 +158,7 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
                 "credentials_enable_autosignin": False,
             }
             assert captured == expected, "Snapshot retained unexpected fields or lost preferences"
-            assert sorted(p.name for p in exported.parent.iterdir()) == ["Preferences.json"]
+            assert sorted(p.name for p in exported.parent.iterdir()) == ["Preferences"]
             # Reject malformed values and nonportable generated/local homepage paths.
             malformed = dict(original, homepage="file:///nix/store/synthetic-path",
                              credentials_enable_service={"secret": "synthetic-private"})
