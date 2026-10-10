@@ -56,7 +56,11 @@ and file delivery aligned.
    The sync addon already imports `wlib.modules.default`. No Home Manager
    evaluation or custom extension of `wlib` is needed.
 4. Use `constructFiles` for generated config. The sync addon derives file mappings
-   from those entries. Point the app's config flags/environment at
+   from those entries. Prefer one entry per actual application configuration file,
+   with `relPath` matching its native relative path. Let `sync.files` and
+   `snapshot.files` inherit that layout instead of introducing intermediate names
+   and overriding destinations. Use explicit formats for extensionless files;
+   document any necessary layout exceptions. Point the app's config flags/environment at
    `config.sync.files.<entry>.path`, rather than the immutable generated file.
    Exclude helper executables or other non-config entries from sync.
 5. Put missing app options and path exceptions in this adapter. Prefer native
