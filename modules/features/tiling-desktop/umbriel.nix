@@ -28,6 +28,7 @@ in {
         include.optional.files = ["$XDG_CONFIG_HOME/umbriel/noctalia.toml"];
         keybinds = {
           "Mod+G" = "spawn:${lib.getExe self'.packages.myghostty}";
+          "Mod+B" = "spawn:${lib.getExe self'.packages.mybrave}";
           "Mod+S" = "spawn:${noctalia} msg panel-toggle launcher";
         };
         environment = {
@@ -50,10 +51,6 @@ in {
     programs.umbriel = {
       enable = true;
       package = self.packages.${pkgs.stdenv.hostPlatform.system}.myumbriel.wrap {
-        settings.keybinds."Mod+G" =
-          lib.mkIf
-          (lib.attrByPath ["wrappers" "myghostty" "enable"] false config)
-          (lib.mkForce "spawn:${lib.getExe config.wrappers.myghostty.wrapper}");
         # Session startup remains owned by the existing Noctalia service.
         settings.general.autostart = lib.mkForce [];
       };

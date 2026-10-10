@@ -14,8 +14,8 @@
 
 - Do not modify profiles or enable features on hosts unless explicitly requested. The user decides when to enable modules.
 - Preserve unrelated working-tree changes and Git staging. Do not stage or reset files merely to run checks.
-- Put reusable wrapper behavior checks beside the adapter in `wrapperModules/<app>/checks/`, using independent fixtures built from the generic wrapper. Feature checks belong in `modules/features/<feature>/` and cover basic launch/config validation plus feature-specific integrations (such as bundled GTK in Umbriel or chosen Vim plugins). Shared addon checks stay beside the addon.
-- Do not create a repository-root `tests/` directory. Keep tests beside the module or application they cover: use `check.nix` for a single-file check, or a local `checks/` directory when multiple files are needed.
+- Put reusable wrapper behavior checks beside the adapter in `wrapperModules/<app>/checks/`, using independent fixtures built from the generic wrapper. Feature checks belong in `modules/features/<feature>/checks/` and cover basic launch/config validation plus feature-specific integrations (such as bundled GTK in Umbriel or chosen Vim plugins). Shared addon checks stay beside the addon.
+- Do not create a repository-root `tests/` directory. A self-contained single-file check may use an adjacent `check.nix`. When multiple files are needed, put the Nix check definition, test-only wrapper variants, scripts, probes, and fixtures together in the local `checks/` directory; do not leave check helpers or definitions in the feature's main module.
 
 ## Documentation references
 

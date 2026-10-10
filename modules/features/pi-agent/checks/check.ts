@@ -6,7 +6,7 @@ export default function (pi) {
       const deadline = Date.now() + 30000;
       while (Date.now() < deadline) {
         const tools = pi.getAllTools().map((tool) => tool.name);
-        if (tools.includes("mcp__chrome-devtools__list_pages")) break;
+        if (tools.includes("mcp__chrome_devtools__list_pages")) break;
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
       ctx.ui.setStatus("mypi-check", JSON.stringify({

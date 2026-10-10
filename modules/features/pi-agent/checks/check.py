@@ -124,7 +124,9 @@ with tempfile.TemporaryDirectory() as tmp:
             if errors:
                 print(errors, file=sys.stderr)
 
-    assert not errors, errors
+    unexpected_errors = [line for line in errors.splitlines()
+                         if not (line.startswith("sync-snap: pi:") and line.endswith("failed=0"))]
+    assert not unexpected_errors, errors
     response = next(event for event in events if event.get("id") == "check")
     assert response["success"], response
     commands = {cmd["name"] for cmd in response["data"]["commands"]}
@@ -136,12 +138,12 @@ with tempfile.TemporaryDirectory() as tmp:
     state = json.loads(statuses["mypi-check"])
     tools = set(state["tools"])
     assert {"web_search", "fetch_content", "ask_user_question"} <= tools, tools
-    assert {"mcp__chrome-devtools__list_pages", "mcp__chrome-devtools__evaluate_script", "codemode"} <= tools, tools
+    assert {"mcp__chrome_devtools__list_pages", "mcp__chrome_devtools__evaluate_script", "codemode"} <= tools, tools
     sandbox = next(event for event in events
                    if event.get("type") == "tool_execution_end"
                    and event.get("toolName") == "codemode")
     assert not sandbox["isError"], sandbox
     assert "codemode-worker-ok" in json.dumps(sandbox["result"]), sandbox
     nested = {call["name"]: call["status"] for call in sandbox["result"]["details"]["calls"]}
-    assert nested == {"bash": "ok", "mcp__chrome-devtools__list_pages": "ok"}, nested
+    assert nested == {"bash": "ok", "mcp__chrome_devtools__list_pages": "ok"}, nested
     print("Pi loaded plugins and executed codemode with nested bash and Chrome DevTools calls.")

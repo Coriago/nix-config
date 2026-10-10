@@ -1,0 +1,6 @@
+{
+  "headless": true,
+  "isolated": true,
+  "performanceCrux": false,
+  "usageStatistics": false
+}

@@ -1,13 +1,9 @@
 # Pi agent
 
-`mypi` uses nix-wrapper-modules to wrap
-`inputs.llm-agents.packages.${system}.pi` and provides the `pi` executable.
-Pi is pinned to 0.99.1, which includes native MCP support. A local package override
-adds the codemode worker to Bun's compiled entrypoints, matching upstream's
-`build:binary` script; the pinned llm-agents package embeds only the image worker.
-Remove the override once the input package includes both workers.
-The `pi-agent` NixOS
-feature is enabled by the workstation profile.
+`mypi` consumes the generic [Pi adapter](../../../wrapperModules/pi/README.md)
+and provides the `pi` executable. Pi is currently pinned to 1.0.4; the input
+package already includes the codemode worker and needs no local build override.
+The `pi-agent` NixOS feature is enabled by the workstation profile.
 
 ```sh
 nix run .#mypi
@@ -17,8 +13,24 @@ pi
 ```
 
 Authenticate with Pi's `/login` or your provider's usual environment variables.
-Settings, credentials, and sessions use Pi's normal `~/.pi/agent` directory
-(or an explicit `PI_CODING_AGENT_DIR`).
+Settings, credentials, and sessions use Pi's normal `~/.pi/agent` directory.
+The wrapper's `agentDir` option selects another location; it sets
+`PI_CODING_AGENT_DIR` to keep config discovery and sync aligned.
+
+`settings` and `keybindings` in `pi-agent.nix` declare preferences delivered as
+writable `settings.json` and `keybindings.json`. Runtime-only preferences survive
+launches; explicit declarations reapply. Use `/settings`, edit these runtime
+files, and use Pi's `/reload` as appropriate.
+
+Capture the reviewed preference baseline with:
+
+```sh
+nix run path:.#snapshot-mypi
+```
+
+Snapshots go to `snapshot/mypi/` and become baseline inputs on the next build.
+Authentication, sessions, model endpoints, and MCP credentials are not exported.
+See the adapter's snapshot review for the exact pruning rules.
 
 ## Bundled plugins
 
@@ -47,22 +59,23 @@ Open `/mcp` **inside Pi** to see `chrome-devtools`. Its tools are available
 through Pi's built-in `codemode` support. For example, ask Pi to open a page,
 inspect its console, or take a screenshot.
 
-The bundled `config/chrome-devtools.ts` extension registers the server through
+The adapter's bundled `chrome-devtools.ts` extension registers the server through
 Pi's native `registerMcpServer` API. The wrapper supplies the server executable
 path automatically. Pi's shell-level `pi mcp list` only lists file-configured
 servers; it does not load extensions. User/project `mcp.json` entries named
 `chrome-devtools` override this registration.
 
-Browser settings live in `config/chrome-devtools.json`. Defaults are headless
-mode and a temporary isolated profile, with usage statistics and CrUX requests
-disabled. The browser sandbox stays enabled. The MCP wrapper pins the browser
-executable and disables npm update checks.
+Browser defaults are declared in `config/chrome-devtools.json`: headless mode,
+a temporary isolated profile, and disabled usage statistics and CrUX requests.
+They sync to `~/.pi/agent/chrome-devtools.json`, which the MCP server reads through
+its native `--config` option. The browser sandbox stays enabled. The MCP wrapper
+pins Chromium and disables npm update checks.
 
-The files in `config/` use `liveConfig.link`. With live config enabled, edit
-them and restart Pi or use `/reload` without rebuilding. For example, change
-`headless` to `false` to show the browser in a graphical session. With live config
-disabled, they are bundled as a store snapshot. Package/browser updates and
-Nix-generated executable paths still require a build.
+Edit the runtime JSON and restart Pi to use changed browser settings. Explicit
+feature values reapply at the next launch; choose a different sync trigger in
+`pi-agent.nix` when needed. Extension source files are packaged in the store;
+changes to TypeScript, dependencies, or Nix configuration require a rebuild.
+This replaces the old `liveConfig.link` integration.
 
 ## Context7 MCP
 
@@ -92,20 +105,22 @@ nix shell --inputs-from . nixpkgs#nodejs -c npm install \
   --package-lock-only --ignore-scripts --legacy-peer-deps --no-audit --no-fund
 ```
 
-Update `npmDepsHash` in `default.nix` (set it to `lib.fakeHash`, build, then
+Update `npmDepsHash` in `pi-agent.nix` (set it to `lib.fakeHash`, build, then
 use the reported actual hash). Plugin updates require a rebuild.
 
 ```sh
-nix build .#checks.x86_64-linux.mypi --no-link -L
+nix build path:.#mypi path:.#checks.x86_64-linux.mypi path:.#checks.x86_64-linux.pi-wrapper --no-link -L
 ```
 
-The offline check verifies Context7 registration with and without a runtime key;
+The feature's `checks/` directory contains the Nix check definition, test-only
+wrapper variants, scripts, and extension probe. The offline check verifies
+Context7 registration with and without a runtime key;
 it disables the remote connection via a test-only `mcp.json` override. It also
 verifies both plugins, Pi's native MCP connection, browser
 startup, JavaScript execution, snapshots, and screenshots. A local simulated
 OpenAI-compatible model emits a codemode call; the real Pi sandbox executes
 parallel nested bash and Chrome DevTools calls, catching missing worker assets
-without provider credentials or external model requests. It uses a config
-snapshot even when live config is enabled. Only the build-sandbox test variant
+without provider credentials or external model requests. It uses isolated writable
+configuration. Only the build-sandbox test variant
 passes `--no-sandbox` to Chromium, because nested browser namespaces are not
 available there.

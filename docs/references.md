@@ -71,3 +71,5 @@ references here with a short description and avoid duplicate entries.
 - The pinned `noctalia-shell` wrapper targets legacy JSON configuration. This repo's `mynoctalia` uses Noctalia v5 TOML layers; assess version compatibility before reusing the legacy options.
 - Chromium user data directory: https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md — profile paths, `--user-data-dir`, cache derivation, and concurrent-instance limitations.
 - Chrome Linux extension packaging: https://developer.chrome.com/docs/extensions/how-to/distribute/host-on-linux — packing CRX files, update-manifest protocol, signing and version requirements.
+
+- Chrome DevTools MCP: https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/chrome-devtools-mcp-v1.10.1/docs/configuration.md — pinned server JSON configuration, native `--config`, browser options, and aliases.

@@ -168,14 +168,18 @@ already-running external services do not inherit them.
 
 ## Validate the result
 
-Keep checks with the layer that owns the behavior, in `check.nix` or `checks/`
-when multiple files are needed. There is no root `tests/` directory.
+Keep checks with the layer that owns the behavior. A self-contained, single-file
+check may use `check.nix` beside its module. When a check needs multiple files,
+put its Nix definition, test-only wrapper variants, scripts, probes, and fixtures
+together in a local `checks/` directory. Do not leave test helpers or check
+definitions in the feature's main module. There is no root `tests/` directory.
 
 - Adapter checks belong in `wrapperModules/<app>/checks/`: config discovery,
   runtime locations, extension/plugin interfaces, sync and snapshot behavior.
   Build independent test fixtures from the generic wrapper rather than the
   configured feature. See [Brave's adapter checks](../wrapperModules/brave/checks/check.nix).
-- Feature checks belong in `modules/features/<feature>/`: basic launch and config
+- Feature checks belong in `modules/features/<feature>/checks/` (or an adjacent
+  `check.nix` for a self-contained single-file check): basic launch and config
   validation of the assembled package, plus feature-specific integrations such
   as bundled GTK in Umbriel or the selected Vim plugins. Avoid repeating adapter
   coverage. See [Brave's launch check](../modules/features/brave/checks/check.nix).
