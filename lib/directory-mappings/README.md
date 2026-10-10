@@ -39,6 +39,20 @@ write to the original location. Linux user namespaces must be available. The
 addon requires `wrapperImplementation = "nix"` and owns its `argv0type` hook;
 wrappers with another custom launch function require explicit composition.
 
+For a missing target beneath a root-owned directory, bind mounts alone cannot
+create the target. Set `directoryMappingParentDirs` to recreate the necessary
+parents in temporary filesystems, in parent-before-child order. For example,
+Brave uses `["/etc" "/etc/brave" "/etc/brave/policies"]` before mapping its
+recommended policy directory. Existing immediate children of each parent are
+bound back from the host; child paths listed as another parent or a mapping
+target are replaced instead. Symlinks, including dangling ones, are preserved.
+Unrelated `/etc` entries and mandatory Brave policies remain visible. New entries
+in these temporary parents disappear when the process tree exits; writes inside
+bound children still reach the host. Do not use this for application data that
+needs persistent creation/renaming of entries in the parent itself. Paths must
+be absolute, cannot be `/`, and support the same environment expansion as mappings.
+The default empty list preserves the ordinary bind-only launch.
+
 Map directories rather than individual writable files: atomic temporary-file
 renames work inside the mapped directory. Writes persist in the source after
 exit, and external edits reach the same files. Actual hot reload still depends
@@ -64,7 +78,9 @@ nix run path:.#myopencode
 Check the addon with `nix build path:.#checks.x86_64-linux.directory-mappings`.
 The adjacent `check.nix` exercises actual bind mounts, atomic writeback, child
 process inheritance, spaces in paths/arguments, exit status, and preservation of
-the host target. The separate `myopencode` check exercises the real wrapped CLI
+the host target. It also checks missing targets under `/etc`, temporary parents,
+hidden files, dangling symlinks, sibling directories, and absence of host writes.
+The separate `myopencode` check exercises the real wrapped CLI
 and Playwright MCP. These checks do not assert interactive theme rendering.
 
 References: [Bubblewrap](https://github.com/containers/bubblewrap/tree/v0.12.0)

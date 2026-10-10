@@ -14,7 +14,15 @@ Older wrappers may use different conventions; the original proposal is historica
 | `lib/` | Reusable addons and flake integration, independent of any application. |
 | `snapshot/<package-name>/` | Reviewed, generated baseline captured from runtime settings. Keep handwritten preferences in the feature. |
 
-An adapter may enable sync to deliver writable settings. It should not choose a
+Include sync/snapshot support in new adapters by default. Enable sync by default
+when delivering configuration, and enable snapshot export in configured features.
+Keep export disabled in generic adapters. If an application is a poor fit,
+document the limitation and constrain or omit the affected part; for example,
+Brave syncs policy files normally but only seeds browser-owned Preferences on
+fresh profiles and exports an allowlist. Do not migrate unrelated older wrappers
+automatically.
+
+An adapter should not choose a
 personal theme or runtime directory, or enable snapshot export. Sensible pruning
 of known application state and credentials belongs in the adapter. Expose reusable
 plugin configuration options there when doing so keeps features declarative and
@@ -29,7 +37,8 @@ readable; plugin selection and preferences remain feature choices.
 2. Add a flake-parts module under `wrapperModules/` declaring
    `flake.wrappers.<app>`. `flake.nix` imports this directory automatically.
    Extend `wlib.wrapperModules.<app>` when suitable. For a new wrapper, use
-   `wlib.modules.default`, select its package, and expose the needed options.
+   `locallib.sync-snap` (which imports `wlib.modules.default`), select its package,
+   and expose the needed options unless the application needs a documented exception.
 3. Import shared addons through the outer flake-parts `locallib` argument.
    `locallib.sync-snap` provides writable config and optional export;
    `locallib.directory-mappings` handles fixed native directories when needed.

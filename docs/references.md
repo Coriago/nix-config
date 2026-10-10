@@ -60,6 +60,7 @@ references here with a short description and avoid duplicate entries.
 - hm-wrapper-modules: https://github.com/sini/hm-wrapper-modules — Home Manager output extraction and bubblewrap presentation; generated config is read-only by default, and compatibility with the pinned HM/wrapper libraries must be checked.
 
 - Brave policies: https://support.brave.app/hc/en-us/articles/360039248271-Group-Policy — fixed Linux policy directories and versioned templates. Chromium preferences: https://www.chromium.org/administrators/configuring-other-preferences/ — recommended policies versus one-time initial preferences.
+- Chromium policy definitions: https://github.com/chromium/chromium/tree/main/components/policy/resources/templates/policy_definitions — complete policy descriptions, supported versions, schemas, and whether a policy can be recommended; homepage uses `HomepageLocation`, `HomepageIsNewTabPage`, and `ShowHomeButton`.
 - Bitwarden browser setup: https://bitwarden.com/help/browserext-deploy/ — extension deployment; https://bitwarden.com/help/disable-browser-autofill/ — default-manager permission and built-in autofill limitations.
 - Chrome extension policies: https://support.google.com/chrome/a/answer/9867568 — `ExtensionSettings`, automatic installation modes, and toolbar pinning.
 - Chrome external extensions: https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions — generated JSON manifests, update URLs, and uninstall behavior; Home Manager's Brave module uses user-level manifests.

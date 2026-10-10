@@ -26,7 +26,8 @@ prove that its value is safe to retain.
 
 1. Identify the preference files and known state/credential fields from the pinned
    app's documentation. Put generally useful pruning defaults in the adapter's
-   `snapshot.files.<entry>` options. Keep export opt-in in the feature and put
+   `snapshot.files.<entry>` options. Enable export in configured features by
+   default when suitable, keep generic adapters disabled, and put
    personal exceptions there.
 2. Launch with isolated HOME/XDG directories first. Exercise representative
    settings and plugin configuration; use synthetic private values to check
