@@ -33,7 +33,7 @@ The [myopencode feature](../modules/features/opencode-agent/opencode.nix) select
 v2, personal settings and tools, `syncopencode/`, and manual snapshot export.
 See [snapshot review](../docs/snapshot-review.md) when adding pruning rules.
 
-[Brave](brave/default.nix) is a Linux adapter for recommended policies and external
+[Brave](brave/brave.nix) is a Linux adapter for recommended policies and external
 extension manifests. It uses process-local directory mappings for Brave's fixed
 discovery paths, with temporary parent directories for missing root-owned policy
 paths. Profiles remain writable. Browser-owned Preferences are seeded only when
@@ -46,3 +46,9 @@ Preferences path for launch, sync, and snapshot.
 Keep reusable adapter checks beside their module, as in
 [Brave](brave/checks/check.nix), and instantiate the generic wrapper with test
 settings. Feature checks cover the assembled package and chosen integrations.
+
+[Noctalia v5](noctalia/README.md) uses one baseline for its replace-synced config
+and merge-synced GUI settings. Capture combines the two files with settings last.
+[Umbriel](umbriel/README.md) syncs its native writable TOML and relies on native
+reload. Both derive sync paths from public location options and skip automatic
+sync for IPC/inspection commands; snapshots are manual and feature-enabled.

@@ -241,6 +241,12 @@ expansion happens in Rust; ordinary file contents never become command arguments
 There is no generated manifest, jq argument adapter, or runtime temporary file.
 Very large numbers of file declarations are subject to the OS argument-size limit.
 
+`sync.startupCondition` is a shell predicate evaluated with the original application
+arguments. It defaults to `true`. Adapters for long-running applications can skip
+sync for IPC, inspection, help and other client commands, so using a keybinding
+does not reset live edits. It gates only automatic sync; the manual sync command
+still works. Keep application-specific argument classification in the adapter.
+
 The supported `runShell` hook adds `sync --startup` before application execution,
 logging failure and continuing to launch. It composes with application flags and
 `argv0type`; it does not replace the launcher. This initial addon requires the

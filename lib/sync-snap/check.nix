@@ -39,6 +39,7 @@
     snapshot.defaultDir = "\${HOME}/snapshots";
     snapshot.files.preferences.pruneKeyContains = ["^secret$"];
   });
+  guarded = app.wrap {sync.startupCondition = ''test "''${1-}" != inspect'';};
   disabled = app.wrap {
     sync.enable = pkgs.lib.mkForce false;
     snapshot.enable = pkgs.lib.mkForce false;
@@ -129,6 +130,14 @@ in
       jq -e '.declared' "$XDG_CONFIG_HOME/fixture/custom/settings.json"
       test -f "$XDG_CONFIG_HOME/fixture/other.toml"
       test ! -e "$XDG_CONFIG_HOME/fixture/helper.txt"
+      # A client/inspection invocation must not reset runtime edits.
+      printf '{"declared":false}' > "$XDG_CONFIG_HOME/fixture/custom/settings.json"
+      status=0
+      ${guarded}/bin/fixture inspect || status=$?
+      test "$status" = 23
+      jq -e '.declared == false' "$XDG_CONFIG_HOME/fixture/custom/settings.json"
+      ${guarded}/bin/fixture-sync
+      jq -e '.declared' "$XDG_CONFIG_HOME/fixture/custom/settings.json"
       ${app}/bin/fixture-snapshot
       jq -e '.declared and (has("secret") | not)' "$HOME/snapshots/custom/settings.json"
       test -f "$HOME/snapshots/other.toml"

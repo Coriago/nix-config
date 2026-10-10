@@ -241,6 +241,11 @@ in {
         default = false;
         description = "Enable sync for this wrapper. Importing the addon alone does not enable it.";
       };
+      startupCondition = mkOption {
+        type = types.lines;
+        default = "true";
+        description = "Shell predicate evaluated with the original application arguments. Automatic sync runs only on success; manual sync is unaffected. Adapters can exclude IPC and inspection commands.";
+      };
       defaultDir = mkOption {
         type = types.str;
         default = "\${XDG_CONFIG_HOME}/${config.binName}";
@@ -334,7 +339,11 @@ in {
           data =
             if config.wrapperImplementation != "nix"
             then throw "sync-snap addon requires wrapperImplementation = nix for its startup hook"
-            else ''${syncCommand} --startup || echo 'sync-snap: sync failed; launching anyway' >&2'';
+            else ''
+              if ( ${config.sync.startupCondition} ); then
+                ${syncCommand} --startup || echo 'sync-snap: sync failed; launching anyway' >&2
+              fi
+            '';
         }
       ];
     })

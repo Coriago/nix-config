@@ -27,7 +27,8 @@ env = {key: os.environ[key] for key in (
 # Only the wrapper supplies hook programs, schemas, theme assets and GIO modules.
 env.update(PATH="", XDG_DATA_DIRS=str(Path("empty-data").absolute()))
 wallpaper = assets.parent / "noctalia-wallpaper.png"
-subprocess.run([umbriel, "validate"], env=env, check=True)  # Missing optional theme.
+subprocess.run([str(Path(umbriel).parent / "umbriel-sync")], env=env, check=True)
+subprocess.run([umbriel, "config", "validate"], env=env, check=True)  # Missing optional theme.
 for mode, theme in (("dark", "adw-gtk3-dark"), ("light", "adw-gtk3")):
     subprocess.run([
         noctalia, "theme", str(wallpaper),
@@ -35,7 +36,7 @@ for mode, theme in (("dark", "adw-gtk3-dark"), ("light", "adw-gtk3")):
     ], env=env, check=True)
     theme_file = Path(env["XDG_CONFIG_HOME"]) / "umbriel/noctalia.toml"
     assert tomllib.loads(theme_file.read_text())["colors"]["border"]["focused"].startswith("#")
-    subprocess.run([umbriel, "validate"], env=env, check=True)
+    subprocess.run([umbriel, "config", "validate"], env=env, check=True)
     for key, value in (("gtk-theme", theme), ("color-scheme", f"prefer-{mode}")):
         result = subprocess.check_output([
             dconf, "read", f"/org/gnome/desktop/interface/{key}"
@@ -50,6 +51,6 @@ for mode, theme in (("dark", "adw-gtk3-dark"), ("light", "adw-gtk3")):
 
 # Prove the compositor reads that exact file, rather than only validating its root.
 theme_file.write_text("[broken")
-result = subprocess.run([umbriel, "validate"], env=env, capture_output=True, text=True)
+result = subprocess.run([umbriel, "config", "validate"], env=env, capture_output=True, text=True)
 assert result.returncode != 0
 assert str(theme_file) in result.stdout + result.stderr

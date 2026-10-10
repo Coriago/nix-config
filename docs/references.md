@@ -11,7 +11,7 @@ references here with a short description and avoid duplicate entries.
 - Pi: https://github.com/earendil-works/pi/tree/main/packages/coding-agent/docs — agent configuration, extensions, and native MCP.
 - Bun: https://bun.sh/docs/bundler/executables — standalone executable builds, worker entrypoints, and embedded assets.
 
-- Umbriel: https://docs.noctalia.dev/umbriel/ — compositor configuration, keybinds, and session startup.
+- Umbriel: https://docs.noctalia.dev/umbriel/ — overview; https://docs.noctalia.dev/umbriel/configuration/ — config discovery, includes, precedence, native validation and reload. Prefer the pinned source's `docs/user/configuration.md` and `docs/design/configuration-reload.md` for the installed version.
 - Niri: https://niri-wm.github.io/niri/ — compositor configuration, window management, screencasting, and application compatibility.
 - Noctalia v5: https://docs.noctalia.dev/noctalia/configuration/ — TOML layers, GUI settings versus runtime state, includes, and hot reload. Hooks: https://docs.noctalia.dev/noctalia/automation/hooks/
 - Tomli-W: https://github.com/hukkin/tomli-w — TOML serialization for filtered preference exports.

@@ -16,6 +16,5 @@
     ];
 
     liveConfig.enable = true;
-    programs.noctalia.resetOverridesOnStart = true;
   };
 }

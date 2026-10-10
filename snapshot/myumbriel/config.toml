@@ -1,0 +1,96 @@
+[keybinds]
+"Mod+1" = "workspace-switch:1"
+"Mod+2" = "workspace-switch:2"
+"Mod+3" = "workspace-switch:3"
+"Mod+4" = "workspace-switch:4"
+"Mod+5" = "workspace-switch:5"
+"Mod+6" = "workspace-switch:6"
+"Mod+7" = "workspace-switch:7"
+"Mod+8" = "workspace-switch:8"
+"Mod+9" = "workspace-switch:9"
+"Mod+C" = "cheatsheet-toggle"
+"Mod+Comma" = "window-consume-left"
+"Mod+Down" = "window-focus-down"
+"Mod+Escape" = "session-quit"
+"Mod+H" = "window-focus-left"
+"Mod+J" = "window-focus-down"
+"Mod+K" = "window-focus-up"
+"Mod+L" = "window-focus-right"
+"Mod+Left" = "window-focus-left"
+"Mod+Period" = "window-consume-right"
+"Mod+R" = "window-cycle-primary-extent"
+"Mod+Right" = "window-focus-right"
+"Mod+Shift+1" = "window-move-to-workspace:1"
+"Mod+Shift+2" = "window-move-to-workspace:2"
+"Mod+Shift+3" = "window-move-to-workspace:3"
+"Mod+Shift+4" = "window-move-to-workspace:4"
+"Mod+Shift+5" = "window-move-to-workspace:5"
+"Mod+Shift+6" = "window-move-to-workspace:6"
+"Mod+Shift+7" = "window-move-to-workspace:7"
+"Mod+Shift+8" = "window-move-to-workspace:8"
+"Mod+Shift+9" = "window-move-to-workspace:9"
+"Mod+Shift+Down" = "window-move-down"
+"Mod+Shift+H" = "column-move-left"
+"Mod+Shift+J" = "window-move-down"
+"Mod+Shift+K" = "window-move-up"
+"Mod+Shift+L" = "column-move-right"
+"Mod+Shift+Left" = "column-move-left"
+"Mod+Shift+R" = "window-cycle-primary-extent-back"
+"Mod+Shift+Right" = "column-move-right"
+"Mod+Shift+Up" = "window-move-up"
+"Mod+Space" = "scratchpad-toggle"
+"Mod+Tab" = "scratchpad-focus-next"
+"Mod+Up" = "window-focus-up"
+"Mod+WheelDown" = "window-focus-right"
+"Mod+WheelUp" = "window-focus-left"
+
+[keybinds."Mod+Ctrl+F"]
+action = "window-toggle-maximize"
+repeat = false
+
+[keybinds."Mod+Ctrl+Space"]
+action = "window-restore-from-scratchpad"
+repeat = false
+
+[keybinds."Mod+F"]
+action = "window-toggle-fullscreen"
+repeat = false
+
+[keybinds."Mod+M"]
+action = "window-toggle-maximize-to-edges"
+repeat = false
+
+[keybinds."Mod+O"]
+action = "overview-toggle"
+repeat = false
+
+[keybinds."Mod+P"]
+action = "window-toggle-pinned"
+repeat = false
+
+[keybinds."Mod+Q"]
+action = "window-close"
+repeat = false
+
+[keybinds."Mod+Shift+Escape"]
+action = "shortcuts-inhibit-toggle"
+allow_when_inhibited = true
+repeat = false
+
+[keybinds."Mod+Shift+Space"]
+action = "window-move-to-scratchpad"
+repeat = false
+
+[keybinds."Mod+Shift+T"]
+action = "window-focus-switch-floating"
+repeat = false
+
+[keybinds."Mod+T"]
+action = "window-toggle-floating"
+repeat = false
+
+[layout]
+mode = "scrolling"
+
+[layout.scrolling]
+default_extent_fraction = 0.6666666666666666
