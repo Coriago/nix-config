@@ -20,7 +20,7 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
     for stage in range(3):
         home = root_home if stage < 2 else str(Path(root_home) / "restore")
         config_home = Path(home) / "config"
-        data = config_home / "syncbrave/user-data"
+        data = config_home / "wrapper-test/user-data"
         env = dict(os.environ, HOME=home, XDG_CONFIG_HOME=str(config_home),
                    XDG_CACHE_HOME=str(Path(home) / "cache"),
                    XDG_DATA_HOME=str(Path(home) / "data"),
@@ -83,7 +83,7 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
                     "new Promise(resolve => chrome.settingsPrivate.getAllPrefs(resolve))"
                 )}
                 expected = {
-                    "homepage": ["https://homepage.backyard-host.com/", "https://example.invalid/", "https://explicit.invalid/"][stage],
+                    "homepage": ["https://wrapper.invalid/", "https://example.invalid/", "https://explicit.invalid/"][stage],
                     "homepage_is_newtabpage": False,
                     "browser.show_home_button": True,
                     "credentials_enable_service": False,
@@ -99,14 +99,14 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
                     "import('chrome://resources/js/cr.js')"
                     ".then(m => m.sendWithPromise('getSearchEnginesList'))"
                 )
-                google = next(e for e in engines["defaults"] if e["default"])
-                assert google["name"] == "Google", google
-                assert google["url"] == "https://www.google.com/search?q=%s", google
-                assert google["isRecommendedFromPolicy"], google
+                selected = next(e for e in engines["defaults"] if e["default"])
+                assert selected["name"] == "Fixture Search", selected
+                assert selected["url"] == "https://search.invalid/?q=%s", selected
+                assert selected["isRecommendedFromPolicy"], selected
                 edits = {"homepage": "https://example.invalid/", "bookmark_bar.show_on_all_tabs": False} if stage == 0 else {}
                 if stage == 1:
                     edits = {
-                        "homepage": "https://homepage.backyard-host.com/",
+                        "homepage": "https://wrapper.invalid/",
                         "homepage_is_newtabpage": False,
                         "browser.show_home_button": True,
                         "credentials_enable_service": False,
@@ -150,7 +150,7 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
             exported = Path(home) / "snapshot/Default/Preferences"
             captured = json.loads(exported.read_text())
             expected = {
-                "homepage": "https://homepage.backyard-host.com/",
+                "homepage": "https://wrapper.invalid/",
                 "homepage_is_newtabpage": False,
                 "browser": {"show_home_button": True},
                 "bookmark_bar": {"show_on_all_tabs": False},

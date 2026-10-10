@@ -2,107 +2,18 @@
 import json
 import os
 from pathlib import Path
-import signal
 import shutil
-import subprocess
 import sys
 import tempfile
 import time
-from urllib.request import urlopen
-import websocket
+from functools import partial
+from browser import Browser
 
 BITWARDEN = 'nngceckbapebfimnlniiiahkandclblb'
 PREBUILT = 'pbfopnphnepmbmdpifenjcibgnknlbnj'
 STYLUS = 'clngdbkpkpeebahjckkjfobafhncgmne'
 ONLINE = os.environ.get('BRAVE_TEST_NETWORK') == '1'
-
-class Browser:
-    def __init__(self, exe, env, data, explicit_data=False):
-        self.data = data
-        self.sock = None
-        self.request_id = 0
-        data.mkdir(parents=True, exist_ok=True)
-        port_file = data / 'DevToolsActivePort'
-        port_file.unlink(missing_ok=True)
-        self.log = (data / 'test-browser.log').open('w+')
-        args = ['--headless=new', '--disable-gpu', '--no-first-run',
-                '--no-default-browser-check', '--disable-component-update',
-                '--remote-debugging-port=0', '--remote-allow-origins=http://localhost',
-                'about:blank']
-        if explicit_data:
-            args += [f"--user-data-dir={data}"]
-        if not ONLINE:
-            args += ['--disable-background-networking']
-        self.process = subprocess.Popen([exe, *args], env=env, stdout=self.log,
-                                        stderr=self.log, start_new_session=True)
-        try:
-            deadline = time.monotonic() + 30
-            while not port_file.exists():
-                if self.process.poll() is not None or time.monotonic() > deadline:
-                    self.log.seek(0)
-                    raise AssertionError('No independent browser started: ' + self.log.read())
-                time.sleep(.1)
-            self.port = port_file.read_text().splitlines()[0]
-            with urlopen(f'http://127.0.0.1:{self.port}/json', timeout=10) as response:
-                page = next(p for p in json.load(response) if p['type'] == 'page')
-            self.sock = websocket.create_connection(page['webSocketDebuggerUrl'],
-                                                    origin='http://localhost', timeout=15)
-        except BaseException:
-            self.close()
-            raise
-
-    def call(self, method, **params):
-        self.request_id += 1
-        self.sock.send(json.dumps(dict(id=self.request_id, method=method, params=params)))
-        while True:
-            message = json.loads(self.sock.recv())
-            if message.get('id') == self.request_id:
-                assert 'error' not in message, message
-                return message['result']
-
-    def evaluate(self, expression):
-        result = self.call('Runtime.evaluate', expression=expression,
-                           awaitPromise=True, returnByValue=True, userGesture=True)
-        assert 'exceptionDetails' not in result, result
-        return result['result'].get('value')
-
-    def navigate(self, url, ready):
-        self.call('Page.navigate', url=url)
-        deadline = time.monotonic() + 20
-        while not self.evaluate(ready):
-            assert time.monotonic() < deadline, f'{url} failed to load'
-            time.sleep(.1)
-
-    def settings(self):
-        self.navigate('brave://settings/', "typeof chrome.settingsPrivate !== 'undefined'")
-        return {p['key']: p for p in self.evaluate(
-            'new Promise(resolve => chrome.settingsPrivate.getAllPrefs(resolve))')}
-
-    def extensions(self, required):
-        self.navigate('brave://extensions/', "typeof chrome.developerPrivate !== 'undefined'")
-        deadline = time.monotonic() + 150
-        while True:
-            installed = {e['id']: e for e in self.evaluate(
-                'chrome.developerPrivate.getExtensionsInfo({includeDisabled:true, includeTerminated:true})')}
-            if set(required) <= installed.keys():
-                return installed
-            assert time.monotonic() < deadline, ('Extension download timed out', list(installed))
-            time.sleep(1)
-
-    def close(self):
-        if self.sock:
-            try:
-                self.sock.send(json.dumps(dict(id=99999, method='Browser.close')))
-                self.process.wait(timeout=10)
-            except (OSError, websocket.WebSocketException, subprocess.TimeoutExpired):
-                pass
-            self.sock.close()
-        try:
-            os.killpg(self.process.pid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-        self.process.wait()
-        self.log.close()
+Browser = partial(Browser, online=ONLINE)
 
 with tempfile.TemporaryDirectory(prefix='brave isolation ') as temporary:
     home = Path(temporary)
@@ -145,13 +56,13 @@ with tempfile.TemporaryDirectory(prefix='brave isolation ') as temporary:
         for key, value in [('homepage', 'https://ordinary.invalid/'), ('credentials_enable_service', True)]:
             assert ordinary.evaluate('new Promise(resolve => chrome.settingsPrivate.setPref('
                                      f'{json.dumps(key)}, {json.dumps(value)}, "", resolve))')
-        main = Browser(sys.argv[1], env, config/'syncbrave/user-data')
+        main = Browser(sys.argv[1], env, config/'wrapper-test/user-data')
         managed_file = contrast_data/'brave-policies/managed/nix-wrapper-extensions.json'
         managed_file.parent.mkdir(parents=True, exist_ok=True)
         managed_file.write_text(json.dumps({'ExtensionSettings': {'a'*32: {'installation_mode': 'blocked'}}}))
         contrast = Browser(sys.argv[2], env, contrast_data)
         assert len({ordinary.port, main.port, contrast.port}) == 3, 'The browsers shared a session'
-        for browser, homepage, search in [(main, 'https://homepage.backyard-host.com/', 'Google'),
+        for browser, homepage, search in [(main, 'https://wrapper.invalid/', 'Fixture Search'),
                                           (contrast, 'https://contrast.invalid/', 'Contrast Search')]:
             assert browser.settings()['homepage']['value'] == homepage
             engines = browser.evaluate("import('chrome://resources/js/cr.js').then(m => m.sendWithPromise('getSearchEnginesList'))")
@@ -165,7 +76,7 @@ with tempfile.TemporaryDirectory(prefix='brave isolation ') as temporary:
         assert local['name'] == 'Wrapper prebuilt extension fixture' and local['version'] == '1.0.0', local['name']
         print('Prebuilt CRX installed by the actual browser from a local file.', flush=True)
         # The first browser must still have its original settings after the second starts.
-        assert main.settings()['homepage']['value'] == 'https://homepage.backyard-host.com/'
+        assert main.settings()['homepage']['value'] == 'https://wrapper.invalid/'
         ordinary_prefs = ordinary.settings()
         assert ordinary_prefs['homepage']['value'] == 'https://ordinary.invalid/'
         assert ordinary_prefs['credentials_enable_service']['value'] is True

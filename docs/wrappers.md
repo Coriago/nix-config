@@ -168,10 +168,18 @@ already-running external services do not inherit them.
 
 ## Validate the result
 
-Keep checks beside the adapter, addon, or feature in `check.nix`, or `checks/` for
-multiple files. There is no root `tests/` directory. Follow the existing
-[OpenCode check](../modules/features/opencode-agent/checks/check.nix) for flake
-registration and isolated runtime directories.
+Keep checks with the layer that owns the behavior, in `check.nix` or `checks/`
+when multiple files are needed. There is no root `tests/` directory.
+
+- Adapter checks belong in `wrapperModules/<app>/checks/`: config discovery,
+  runtime locations, extension/plugin interfaces, sync and snapshot behavior.
+  Build independent test fixtures from the generic wrapper rather than the
+  configured feature. See [Brave's adapter checks](../wrapperModules/brave/checks/check.nix).
+- Feature checks belong in `modules/features/<feature>/`: basic launch and config
+  validation of the assembled package, plus feature-specific integrations such
+  as bundled GTK in Umbriel or the selected Vim plugins. Avoid repeating adapter
+  coverage. See [Brave's launch check](../modules/features/brave/checks/check.nix).
+- Shared addon checks stay beside their implementation in `lib/` or `packages/`.
 
 Build the package and relevant checks. Test config discovery, preference delivery,
 runtime edits across launches, and any claimed plugin/path behavior. With snapshots

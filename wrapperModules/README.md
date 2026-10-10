@@ -33,7 +33,7 @@ The [myopencode feature](../modules/features/opencode-agent/opencode.nix) select
 v2, personal settings and tools, `syncopencode/`, and manual snapshot export.
 See [snapshot review](../docs/snapshot-review.md) when adding pruning rules.
 
-[Brave](brave.nix) is a Linux adapter for recommended policies and external
+[Brave](brave/default.nix) is a Linux adapter for recommended policies and external
 extension manifests. It uses process-local directory mappings for Brave's fixed
 discovery paths, with temporary parent directories for missing root-owned policy
 paths. Profiles remain writable. Browser-owned Preferences are seeded only when
@@ -42,3 +42,7 @@ state. The [mybrave feature](../modules/features/brave/README.md) chooses Bitwar
 Google, the homepage, `userDataDir`, and snapshot export. The adapter derives
 its sync directory from `userDataDir`; `profileDirectory` controls the relative
 Preferences path for launch, sync, and snapshot.
+
+Keep reusable adapter checks beside their module, as in
+[Brave](brave/checks/check.nix), and instantiate the generic wrapper with test
+settings. Feature checks cover the assembled package and chosen integrations.

@@ -1,7 +1,7 @@
 # Brave wrapper
 
 Run `nix run path:.#mybrave`. Browser data lives in
-`$XDG_CONFIG_HOME/syncbrave/user-data`, separate from ordinary Brave. Sync's
+`$XDG_CONFIG_HOME/syncbrave`, separate from ordinary Brave. Sync's
 configuration directory alone does not isolate browser sessions; `userDataDir`
 controls the actual profile, singleton lock, extension storage and snapshots.
 The adapter derives `sync.defaultDir` from `userDataDir`; the feature only sets
@@ -54,21 +54,12 @@ packaged extension, serve its CRX through the documented update-manifest protoco
 
 ## Validation and snapshot review
 
-The adjacent checks launch actual headless Brave. The isolation check compares
-simultaneous wrappers with different profile paths, homepage and search settings.
-Only its contrast wrapper adds Stylus and an inert prebuilt CRX fixture; neither
-is added to the personal feature. The CRX fixture is a packed Manifest V3
-extension with no permissions, scripts or network access, version 1.0.0 and name
-`Wrapper prebuilt extension fixture`. Its signing key is disposable and not
-included. The check asserts actual local CRX installation, not only the manifest.
-
-`BRAVE_TEST_NETWORK=1` enables the additional manual Web Store lifecycle check:
-simulate Bitwarden's saved UI-removal blocklist in a disposable browser profile,
-verify external installation respects it,
-then relaunch under the required policy and verify Bitwarden and
-Stylus are installed, enabled and required. Offline flake checks do not claim
-Web Store download validation. These checks do not exercise interactive GUI
-rendering, Bitwarden sign-in, or its default-manager permission prompt.
+The [feature check](checks/check.nix) launches the assembled `mybrave` package
+headlessly and verifies it can render a page. Reusable extension, policy, profile
+isolation, sync, snapshot and restoration checks live beside the
+[Brave adapter](../../../wrapperModules/brave/README.md), using independent test
+configurations. Neither suite exercises interactive Bitwarden sign-in or its
+permission prompt.
 
 Snapshot capture uses the actual selected profile's Preferences and retains only
 six typed settings: homepage, whether it is the new-tab page, home-button and
