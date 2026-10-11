@@ -9,7 +9,6 @@ in {
   }: {
     packages.mybrave = local.flake.wrappers.brave.wrap {
       inherit pkgs;
-      userDataDir = "\${XDG_CONFIG_HOME}/syncbrave";
       snapshot.enable = true;
       preferences.credentials_enable_autosignin = false;
       extensions = [
