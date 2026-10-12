@@ -23,6 +23,9 @@ in {
         {
           id = "mnjggcdmjocbbbhaepdhchncahnbgone";
         }
+        # {
+        #   id = "";
+        # }
       ];
       recommendedPolicies = {
         # Bitwarden's default-manager permission still needs user confirmation.
@@ -45,5 +48,11 @@ in {
   flake.modules.nixos.brave = {pkgs, ...}: {
     environment.systemPackages = [self.packages.${pkgs.stdenv.hostPlatform.system}.mybrave];
     environment.sessionVariables.BROWSER = "brave";
+    xdg.mime.defaultApplications = {
+      "x-scheme-handler/http" = "brave-browser.desktop";
+      "x-scheme-handler/https" = "brave-browser.desktop";
+      "text/html" = "brave-browser.desktop";
+      "application/xhtml+xml" = "brave-browser.desktop";
+    };
   };
 }

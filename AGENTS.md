@@ -19,7 +19,10 @@
 
 ## Documentation references
 
-- Consult [docs/references.md](docs/references.md) for relevant official websites. Add useful sites there, rather than expanding this file.
+- Exercise discretion and favor brevity in documentation, comments, references, and responses. Include only what materially helps the reader; use judgment rather than documenting everything.
+- Keep documentation minimal and important. Do not add docs for every change, repeat what the code clearly expresses, or copy upstream documentation into the repository. Reading documentation does not require adding documentation.
+- Let code speak for itself. Add concise comments only for obscure or complicated behavior, non-obvious constraints, or decisions whose rationale would otherwise be lost.
+- Consult and maintain [docs/references.md](docs/references.md), using discretion when adding links. Favor useful, recurring references and canonical entry points; do not record every source consulted.
 - Use Context7 for library/API documentation when available: resolve the library ID, then query the relevant version. Fetch full official pages as needed; snippets do not replace complete documentation reads.
 
 ## Wrapper standard

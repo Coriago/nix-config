@@ -14,7 +14,25 @@ in {
     pkgs,
     ...
   }: {
-    environment.sessionVariables.EDITOR = "nvim";
+    environment.sessionVariables = {
+      EDITOR = "nvim";
+      VISUAL = "nvim";
+    };
+    xdg.mime = let
+      associations = lib.genAttrs [
+        "text/plain"
+        "text/markdown"
+        "text/x-nix"
+        "application/json"
+        "application/toml"
+        "application/yaml"
+        "text/yaml"
+        "application/x-shellscript"
+      ] (_: "nvim.desktop");
+    in {
+      defaultApplications = associations;
+      addedAssociations = associations;
+    };
     environment.systemPackages = [
       (self.packages.${pkgs.stdenv.hostPlatform.system}.myneovim.wrap {
         settings.config_directory = lib.mkIf config.liveConfig.enable (lib.mkForce (liveConfig.link ./neovim));

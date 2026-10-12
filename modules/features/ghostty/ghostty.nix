@@ -77,5 +77,10 @@
 
   flake.modules.nixos.ghostty = {pkgs, ...}: {
     environment.systemPackages = [self.packages.${pkgs.stdenv.hostPlatform.system}.myghostty];
+    environment.sessionVariables.TERMINAL = "ghostty";
+    xdg.terminal-exec = {
+      enable = true;
+      settings.default = ["com.mitchellh.ghostty.desktop"];
+    };
   };
 }
