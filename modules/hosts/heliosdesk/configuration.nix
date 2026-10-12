@@ -13,6 +13,7 @@
       local-llm
       cachyos-kernel
       gaming
+      nixmox
     ];
 
     liveConfig.enable = true;
