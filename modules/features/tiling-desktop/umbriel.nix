@@ -19,13 +19,21 @@ in {
       };
     };
   in {
-    packages.myumbriel = local.flake.wrappers.umbriel.wrap {
+    apps.myumbriel = {
+      type = "app";
+      program = lib.getExe self'.packages.myumbriel;
+    };
+    packages.myumbriel = local.flake.wrappers.umbriel.wrap ({config, ...}: {
       inherit pkgs;
       configDir = "\${XDG_CONFIG_HOME}/syncumbriel";
       snapshot.enable = true;
-      settings = lib.recursiveUpdate (builtins.fromTOML (builtins.readFile ./umbriel/config.toml)) {
+      settings = {
         general.autostart = [noctalia];
-        include.optional.files = ["$XDG_CONFIG_HOME/umbriel/noctalia.toml"];
+        include.optional.files = [
+          "$XDG_CONFIG_HOME/umbriel/noctalia.toml" # automatic noctalia theming
+          "$XDG_CONFIG_HOME/umbriel/outputs.toml" # display plugin
+        ];
+        include.files = [config.constructFiles.umbrielExtraConfig.path];
         keybinds = {
           "Mod+G" = "spawn:${lib.getExe self'.packages.myghostty}";
           "Mod+B" = "spawn:${lib.getExe self'.packages.mybrave}";
@@ -39,12 +47,22 @@ in {
         };
       };
       passthru.generatedQtengineConfig = qtengineConfig;
-    };
+
+      # Read the include directly so a NixOS liveConfig link stays live.
+      constructFiles.umbrielExtraConfig = {
+        relPath = "configExtras.toml";
+        content = builtins.readFile ./umbriel/configExtras.toml;
+      };
+      sync.files.umbrielExtraConfig.enable = false;
+      # Old merged preferences in the main file would override the include.
+      sync.files.umbrielConfig.policy = "replace";
+    });
   };
 
   flake.modules.nixos.umbriel = {
     config,
     lib,
+    liveConfig,
     pkgs,
     ...
   }: {
@@ -53,6 +71,10 @@ in {
       package = self.packages.${pkgs.stdenv.hostPlatform.system}.myumbriel.wrap {
         # Session startup remains owned by the existing Noctalia service.
         settings.general.autostart = lib.mkForce [];
+        constructFiles.umbrielExtraConfig = lib.mkIf config.liveConfig.enable {
+          content = lib.mkForce "";
+          builder = ''ln -s ${lib.escapeShellArg (liveConfig.link ./umbriel/configExtras.toml)} "$2"'';
+        };
       };
     };
     # The upstream session unit embeds its original package path.

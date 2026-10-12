@@ -10,7 +10,7 @@
       boot
       nvidia
       keyboard
-      local-llm
+      # local-llm
       cachyos-kernel
       gaming
       nixmox

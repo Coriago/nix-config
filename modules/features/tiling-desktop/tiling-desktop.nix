@@ -19,13 +19,14 @@ in {
       ...
     }: {
       environment.systemPackages = with pkgs; [
-        wdisplays
+        # wdisplays
         ddcutil
         ddcui
       ];
       hardware.i2c.enable = true;
       users.users.${config.hostmeta.username}.extraGroups = ["i2c"];
-      services.kanshi.enable = true;
+      # Use noctalia display plugin instead of kanshi/wdisplays
+      # services.kanshi.enable = true;
     };
 
     file-manager = {pkgs, ...}: {

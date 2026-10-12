@@ -57,25 +57,37 @@ Reference: [Greeter sync and authorization](https://docs.noctalia.dev/greeter/sy
 
 ## Umbriel
 
-`umbriel/config.toml` holds the declarative layout defaults, read by
-the feature when Nix generates its TOML. The default layout is scrolling;
+`umbriel/configExtras.toml` holds layout defaults and keybindings. The generated main
+configuration includes it as the package's `configExtras.toml`, rather than
+merging its contents during Nix evaluation. The default layout is scrolling;
 new columns use two-thirds of the available scrolling extent (width with the
 default workspace axis). Existing columns keep their current sizes.
 
 Both standalone and NixOS packages use writable
 `$XDG_CONFIG_HOME/syncumbriel/config.toml`, through the
-[generic adapter](../../../wrapperModules/umbriel/README.md). Sync merges captured
-preferences and explicit Nix settings into this file before compositor launch.
+[generic adapter](../../../wrapperModules/umbriel/README.md). Sync replaces this
+main file before compositor launch, removing old merged preferences that would
+otherwise override the include. Keep handwritten preferences in the included
+file; the main file contains generated integration settings, which take precedence.
+The extra file is read directly from the package and excluded from sync/snapshot.
 There is no root-owned `/etc/umbriel/config.toml` deployment or sync service.
 
-Umbriel watches the runtime file and reloads valid edits. After a rebuild, invoke
+With `liveConfig.enable`, the NixOS package's `configExtras.toml` is a symlink via
+`liveConfig.link` to `modules/features/tiling-desktop/umbriel/configExtras.toml` in the
+checkout. Umbriel watches the symlink target, so valid saves (including atomic
+editor saves) reload without rebuilding. Standalone packages and hosts without
+live config retain the packaged copy. Keep the checkout at `liveConfig.root`.
+
+Umbriel watches the main file and its includes. After the initial rebuild, invoke
 the newly built package's `umbriel-sync` or start a new session to apply its
 baseline; switching alone no longer copies compositor preferences into place.
 Environment, autostart, DRM and binary changes require a new session.
 `umbriel config validate` reads the runtime file without syncing it first.
 
-Capture preferences with `nix run path:.#snapshot-myumbriel`. The export is
+`nix run path:.#snapshot-myumbriel` still exports the main runtime file to
 `snapshot/myumbriel/config.toml`; store paths and host/session wiring are pruned.
+It does not flatten the includes or capture checkout edits. The old merged
+snapshot was removed so it cannot mask the included preferences.
 The adapter's `configDir` option keeps application discovery, sync and snapshot
 aligned. GTK/Qt packages and application launch commands remain feature choices.
 
@@ -83,7 +95,9 @@ The generated config optionally includes
 `$XDG_CONFIG_HOME/umbriel/noctalia.toml`, where Noctalia's enabled Umbriel template
 writes its colors. The wrapper defaults `XDG_CONFIG_HOME` to `~/.config` when unset.
 Umbriel watches the included file and reloads theme changes natively; a missing
-file is allowed. Explicit Nix settings take precedence over included colors.
+file is allowed. `$XDG_CONFIG_HOME/umbriel/outputs.toml` is also an optional
+include for the monitor plugin; configure the plugin to write that file.
+Explicit Nix settings take precedence over included colors and output settings.
 
 ## Application theming
 

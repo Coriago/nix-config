@@ -399,8 +399,10 @@ for files or directories. Consumers must read the link at runtime:
 into reloadable configuration. This is existing Neovim/Pi behavior; see the
 [wrapper guide](docs/wrappers.md) for the current standard for new adapters.
 
-The toggle currently affects Neovim and Pi. Noctalia's repo snapshot,
-Umbriel's generated baseline, and OpenCode's generated JSON still require builds.
+Umbriel also uses the toggle for its included
+`modules/features/tiling-desktop/umbriel/configExtras.toml`, with native hot reload on
+save. Its generated Nix integration settings still require a build.
+Noctalia's repo snapshot and OpenCode's generated JSON still require builds.
 Their native writable layers have separate reload behavior; consult each
 feature's documentation.
 
