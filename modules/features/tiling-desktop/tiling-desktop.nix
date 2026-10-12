@@ -10,6 +10,7 @@ in {
         local.flake.modules.nixos.noctalia-greeter
         local.flake.modules.nixos.display-management
         local.flake.modules.nixos.file-manager
+        local.flake.modules.nixos.keyring
       ];
     };
 
@@ -27,6 +28,15 @@ in {
       users.users.${config.hostmeta.username}.extraGroups = ["i2c"];
       # Use noctalia display plugin instead of kanshi/wdisplays
       # services.kanshi.enable = true;
+    };
+
+    keyring = {pkgs, ...}: {
+      # Registers Secret Service and enables login PAM unlock. Greetd inherits
+      # the login stack, so Noctalia Greeter needs no separate PAM wiring.
+      services.gnome.gnome-keyring.enable = true;
+      # Keep the existing OpenSSH agent; enabling keyring otherwise enables GCR.
+      services.gnome.gcr-ssh-agent.enable = false;
+      environment.systemPackages = [pkgs.seahorse];
     };
 
     file-manager = {pkgs, ...}: {
