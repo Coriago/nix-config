@@ -1,0 +1,5 @@
+[theme]
+mode = "dark"
+source = "builtin"
+[bar.default]
+start = ["clock"]

@@ -1,0 +1,17 @@
+{
+  "name": "mypi-plugins",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pinned extensions for the Nix Pi wrapper",
+  "dependencies": {
+    "@juicesharp/rpiv-ask-user-question": "2.12.0",
+    "chrome-devtools-mcp": "1.10.1",
+    "pi-web-access": "0.34.0"
+  },
+  "pi": {
+    "extensions": [
+      "./node_modules/pi-web-access/dist",
+      "./node_modules/@juicesharp/rpiv-ask-user-question/index.ts"
+    ]
+  }
+}

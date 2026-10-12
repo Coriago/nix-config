@@ -1,0 +1,112 @@
+[audio]
+enable_overdrive = true
+
+[bar.default]
+smart_auto_hide = false
+start = [
+    "launcher",
+    "bar",
+    "bar_2",
+    "workspaces",
+]
+
+[control_center]
+width = 750
+
+[idle]
+behavior_order = [
+    "lock",
+    "screen-off",
+    "lock-and-suspend",
+]
+
+[idle.behavior.lock]
+action = "lock"
+enabled = false
+timeout = 600.0
+
+[idle.behavior.lock-and-suspend]
+action = "lock_and_suspend"
+enabled = true
+timeout = 7200.0
+
+[idle.behavior.screen-off]
+action = "screen_off"
+enabled = true
+timeout = 660.0
+
+[location]
+auto_locate = true
+
+[notification]
+background_opacity = 0.7999999821186066
+follow_focused_output = true
+history_retention_hours = 2
+max_visible = 3
+
+[osd]
+background_opacity = 0.7999999821186066
+
+[plugin_settings."mindnbytes/nix-status"]
+details_placement = "floating"
+
+[plugin_settings."noctalia/umbriel-companion"]
+panel_placement = "floating"
+
+[plugins]
+enabled = [
+    "noctalia/bitwarden",
+    "noctalia/umbriel-companion",
+    "prponkshe/umbriel-displays",
+]
+
+[shell]
+external_ip_enabled = true
+launch_apps_as_systemd_services = true
+polkit_agent = true
+settings_expand_all_groups = true
+telemetry_enabled = false
+umbriel_overview_type_to_launch_enabled = true
+
+[shell.greeter_sync]
+auto_sync = true
+
+[shell.launcher.providers.emoji]
+global = false
+
+[shell.panel]
+control_center_placement = "floating"
+open_near_click_control_center = true
+transparency_mode = "soft"
+
+[theme]
+builtin = "Gruvbox"
+community_palette = "Oxocarbon"
+mode = "dark"
+source = "builtin"
+wallpaper_scheme = "m3-rainbow"
+
+[theme.templates]
+builtin_ids = [
+    "gtk3",
+    "gtk4",
+    "ghostty",
+    "kcolorscheme",
+    "umbriel",
+]
+community_ids = [
+    "codex",
+    "pi-agent",
+    "brave",
+    "discord",
+    "neovim",
+    "steam",
+    "herdr",
+    "lazygit",
+]
+
+[widget.bar]
+type = "noctalia/umbriel-companion:bar"
+
+[widget.bar_2]
+type = "prponkshe/umbriel-displays:bar"

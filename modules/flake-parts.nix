@@ -1,9 +1,30 @@
 # This is config for flake-parts.
-{inputs, ...}: {
+{
+  inputs,
+  lib,
+  ...
+}: {
+  _module.args.locallib = {
+    sync-snap = ../lib/sync-snap;
+    directory-mappings = ../lib/directory-mappings;
+  };
+
+  perSystem = {pkgs, ...}: {
+    checks.sync-snap-addon = import ../lib/sync-snap/check.nix {
+      inherit pkgs;
+      wlib = inputs.wrapper-modules.lib;
+    };
+    checks.directory-mappings = import ../lib/directory-mappings/check.nix {
+      inherit pkgs;
+      wlib = inputs.wrapper-modules.lib;
+    };
+  };
+
   # Flake parts addon modules
   imports = [
+    ../lib/sync-snap/flake-module.nix
     inputs.flake-parts.flakeModules.modules
-    inputs.flake-parts.flakeModules.easyOverlay
+    inputs.wrapper-modules.flakeModules.wrappers
     inputs.home-manager.flakeModules.home-manager
   ];
 
@@ -15,15 +36,4 @@
     "x86_64-linux"
     "aarch64-linux"
   ];
-
-  perSystem = {pkgs, ...}: {
-    # Devshells
-    devShells.default = pkgs.mkShell {
-      nativeBuildInputs = with pkgs; [
-        age
-        disko
-        sops
-      ];
-    };
-  };
 }
