@@ -13,11 +13,18 @@ in {
       ];
     };
 
-    display-management = {pkgs, ...}: {
+    display-management = {
+      pkgs,
+      config,
+      ...
+    }: {
       environment.systemPackages = with pkgs; [
         wdisplays
         ddcutil
+        ddcui
       ];
+      hardware.i2c.enable = true;
+      users.users.${config.hostmeta.username}.extraGroups = ["i2c"];
       services.kanshi.enable = true;
     };
 
