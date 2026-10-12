@@ -16,6 +16,7 @@ in {
     display-management = {pkgs, ...}: {
       environment.systemPackages = with pkgs; [
         wdisplays
+        ddcutil
       ];
       services.kanshi.enable = true;
     };

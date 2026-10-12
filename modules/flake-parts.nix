@@ -10,6 +10,12 @@
   };
 
   perSystem = {pkgs, ...}: {
+    # Adapters remain available; features export their configured packages explicitly.
+    wrappers = {
+      control_type = "build";
+      packages = {};
+    };
+
     checks.sync-snap-addon = import ../lib/sync-snap/check.nix {
       inherit pkgs;
       wlib = inputs.wrapper-modules.lib;

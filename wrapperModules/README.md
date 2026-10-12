@@ -3,7 +3,13 @@
 Follow [Creating and using wrappers](../docs/wrappers.md). Files here are
 flake-parts modules declaring `flake.wrappers.<app>`, automatically imported by
 `flake.nix`. Capture the shared `locallib` argument in the outer module to import
-addons into a wrapper.
+addons into a wrapper. Automatic package exports are disabled; configured
+features explicitly create `perSystem.packages.my<app>` with `.wrap`. Checks
+instantiate these adapters directly and do not depend on automatic exports.
+
+Do not create an adapter when no additional options are needed and sync-snap is
+explicitly not requested. Such features (currently Ghostty and Neovim) call the
+upstream wrapper's `.wrap` directly inside `perSystem`.
 
 Include `locallib.sync-snap` in new adapters by default and enable configuration
 sync when suitable. Enable snapshot export in their configured features, with

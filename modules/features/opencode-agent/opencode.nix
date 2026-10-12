@@ -4,7 +4,8 @@
   self,
   ...
 }: let
-  inherit (config.meta) localLLM;
+  local = config;
+  inherit (local.meta) localLLM;
 in {
   flake.modules.nixos.opencode = {pkgs, ...}: {
     environment.systemPackages = [self.packages.${pkgs.stdenv.hostPlatform.system}.myopencode];
@@ -17,7 +18,7 @@ in {
     self',
     ...
   }: {
-    packages.myopencode = config.flake.wrappers.opencode.wrap {
+    packages.myopencode = local.flake.wrappers.opencode.wrap {
       inherit pkgs;
       package = inputs.llm-agents.packages.${system}.opencode2;
       exePath = "bin/opencode2";

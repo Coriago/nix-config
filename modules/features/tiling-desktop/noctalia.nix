@@ -5,7 +5,16 @@
 }: let
   local = config;
 in {
-  perSystem = {pkgs, ...}: {
+  perSystem = {
+    pkgs,
+    lib,
+    self',
+    ...
+  }: {
+    apps.mynoctalia = {
+      type = "app";
+      program = lib.getExe self'.packages.mynoctalia;
+    };
     packages.mynoctalia = local.flake.wrappers.noctalia.wrap {
       inherit pkgs;
       configHome = "\${XDG_CONFIG_HOME}/syncnoctalia";

@@ -1,4 +1,8 @@
-{config, ...}: let
+{
+  config,
+  self,
+  ...
+}: let
   local = config;
 in {
   perSystem = {
@@ -39,7 +43,7 @@ in {
   };
 
   flake.modules.nixos.brave = {pkgs, ...}: {
-    environment.systemPackages = [local.flake.packages.${pkgs.stdenv.hostPlatform.system}.mybrave];
+    environment.systemPackages = [self.packages.${pkgs.stdenv.hostPlatform.system}.mybrave];
     environment.sessionVariables.BROWSER = "brave";
   };
 }

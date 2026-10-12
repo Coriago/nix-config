@@ -3,7 +3,8 @@
 Use this pattern for new wrappers and deliberate migrations. The working reference
 is [OpenCode's adapter](../wrapperModules/opencode.nix) and its
 [configured feature](../modules/features/opencode-agent/opencode.nix).
-Older wrappers may use different conventions; the original proposal is historical.
+All configured features use explicit `perSystem.packages` declarations and `.wrap`.
+`flake.wrappers` is reserved for generic adapters; the original proposal is historical.
 
 ## Where things belong
 
@@ -38,6 +39,19 @@ snapshot inherit that relative path. Reserve direct `sync.defaultDir` settings
 for wrappers without a clear application location interface or documented
 implementation exceptions. Low-level overrides must keep application discovery
 and file delivery aligned.
+
+## Decide whether an adapter is needed
+
+When a wrapper needs no additional options and sync-snap is explicitly not
+requested, do not create a generic adapter. Consume the upstream wrapper directly
+from the feature with `inputs.wrapper-modules.wrappers.<app>.wrap`. Ghostty and
+Neovim follow this pattern: their preferences and repository-owned configuration
+use upstream options, with no sync-snap addon. Ghostty still permits the existing
+Noctalia theme file through native config discovery; that does not require sync.
+Neovim's optional live checkout link is a NixOS-only package customization.
+
+Create an adapter when reusable application behavior/options or sync-snap wiring
+is needed. Both choices produce the same feature package interface below.
 
 ## Create an adapter
 
@@ -95,13 +109,30 @@ The sync addon supplies the XDG config home fallback centrally.
 
 ## Configure a feature
 
-Consume the adapter with `.wrap`; keep preferences and dependencies here. This
-minimal OpenCode v2 example shows the shape of the existing feature:
+Declare every configured app as `perSystem.packages.my<app>` using `.wrap`;
+keep preferences and dependencies here. Use `local.flake.wrappers.<app>.wrap`
+(with `local = config` in the outer flake-parts module) for local adapters, or
+`inputs.wrapper-modules.wrappers.<app>.wrap` when no adapter is needed. Do not
+declare configured `flake.wrappers.my<app>` entries.
+
+Automatic package exports from `flake.wrappers` are disabled centrally in
+`modules/flake-parts.nix` with `wrappers.control_type = "build"` and
+`wrappers.packages = {}`. This only disables automatic package outputs: adapters
+remain available through `flake.wrappers` and `flake.wrapperModules`, and adapter
+checks continue instantiating independent fixtures with `.wrap { inherit pkgs; ... }`.
+
+Provide an explicit `apps.my<app>` entry using the configured package. Reference
+packages through `self'.packages` inside `perSystem` and
+`self.packages.${pkgs.stdenv.hostPlatform.system}` inside NixOS features.
+
+This minimal OpenCode v2 example shows the shape of the existing feature:
 
 ```nix
-{config, inputs, ...}: {
+{config, inputs, ...}: let
+  local = config;
+in {
   perSystem = {pkgs, lib, system, self', ...}: {
-    packages.myopencode = config.flake.wrappers.opencode.wrap {
+    packages.myopencode = local.flake.wrappers.opencode.wrap {
       inherit pkgs;
       package = inputs.llm-agents.packages.${system}.opencode2;
       exePath = "bin/opencode2";
@@ -124,8 +155,35 @@ through the appropriate PATH/library options; keep generated integration paths
 separate from captured preferences. If plugin setup needs reusable translation
 or file generation, expose an adapter option instead of adding feature scripts.
 
-A thin NixOS feature may install `self.packages.${system}.myopencode`. Do not enable
-that feature on hosts or edit profiles without a request. The package remains
+A thin NixOS feature consumes the configured package. Importing the feature
+selects its integration; do not use wrapper `.install` modules or a second
+`wrappers.<app>.enable` interface. Host-specific changes use `package.wrap`, with
+normal module merging (`mkForce` where replacement is needed). Keep portable
+preferences in the feature package; secret paths, live checkout links, and
+session-specific changes belong in the NixOS customization.
+
+Install ordinary apps through `environment.systemPackages`. For apps needing
+native NixOS service/session integration, set `programs.<app>.enable` and pass the
+configured package to `programs.<app>.package`. That enable option controls system
+integration, not a separate wrapper configuration interface. Ensure service
+commands also use the final customized package.
+
+For example, a NixOS feature can customize Neovim without importing `.install`:
+
+```nix
+flake.modules.nixos.neovim = {config, lib, liveConfig, pkgs, ...}: {
+  environment.systemPackages = [
+    (self.packages.${pkgs.stdenv.hostPlatform.system}.myneovim.wrap {
+      settings.config_directory = lib.mkIf config.liveConfig.enable
+        (lib.mkForce (liveConfig.link ./neovim));
+    })
+  ];
+};
+```
+
+NixOS customizations do not alter the standalone flake package or its snapshot
+app; validate both the portable package and affected host configurations. Do not
+enable features on hosts or edit profiles without a request. The package remains
 buildable and runnable without installing it into NixOS.
 
 ## Run, edit, and capture
