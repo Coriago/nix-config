@@ -19,8 +19,9 @@ Include sync/snapshot support in new adapters by default. Enable sync by default
 when delivering configuration, and enable snapshot export in configured features.
 Keep export disabled in generic adapters. If an application is a poor fit,
 document the limitation and constrain or omit the affected part; for example,
-Brave syncs policy files normally but only seeds browser-owned Preferences on
-fresh profiles and exports an allowlist. Do not migrate unrelated older wrappers
+Brave exports reviewed settings-screen controls and guards mutable preference
+sync against an already-running browser; its adapter defaults to merge with
+`onEveryBoot` triggers. Do not migrate unrelated older wrappers
 automatically.
 
 An adapter should not choose a
@@ -201,7 +202,7 @@ Choose sync triggers in the feature when edits should survive multiple launches.
 A sync error is logged and does not prevent the application from launching.
 
 Snapshot export is manual. Setting `snapshot.enable = true` on a feature package
-automatically registers `snapshot-<package-name>` and includes it in `snapshot-all`.
+automatically registers `snapshot-<package-name>` and makes it eligible for `snapshot-all` when its executable is on `PATH`.
 No separate registration or app-close hook is needed. The command captures runtime
 files without first launching or syncing the app. For `myopencode`, the default
 export destination is `/home/helios/.config/nix-config/snapshot/myopencode/`.

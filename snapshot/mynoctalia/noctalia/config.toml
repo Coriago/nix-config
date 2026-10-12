@@ -10,6 +10,10 @@ start = [
     "workspaces",
 ]
 
+[brightness]
+enable_ddcutil = true
+sync_all_monitors = true
+
 [control_center]
 width = 750
 
@@ -83,6 +87,7 @@ transparency_mode = "soft"
 builtin = "Gruvbox"
 community_palette = "Oxocarbon"
 mode = "dark"
+shell_mode = "dark"
 source = "builtin"
 wallpaper_scheme = "m3-rainbow"
 

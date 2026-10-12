@@ -17,10 +17,14 @@
     all = pkgs.writeShellScript "snapshot-all" ''
       status=0
       ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: command: ''
-          echo ${lib.escapeShellArg "snapshot-${name}"} >&2
-          if ! ${lib.escapeShellArg command} "$@"; then
-            echo ${lib.escapeShellArg "snapshot-${name}: failed"} >&2
-            status=1
+          if command -v ${lib.escapeShellArg registered.${name}.configuration.binName} >/dev/null 2>&1; then
+            echo ${lib.escapeShellArg "snapshot-${name}"} >&2
+            if ! ${lib.escapeShellArg command} "$@"; then
+              echo ${lib.escapeShellArg "snapshot-${name}: failed"} >&2
+              status=1
+            fi
+          else
+            echo ${lib.escapeShellArg "snapshot-${name}: skipped (program not on PATH)"} >&2
           fi
         '')
         commands)}
@@ -46,7 +50,7 @@
         snapshot-all = {
           type = "app";
           program = toString all;
-          meta.description = "Snapshot every enabled package, continuing after failures";
+          meta.description = "Snapshot installed enabled programs on PATH, continuing after failures";
         };
       };
   };

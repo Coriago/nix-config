@@ -63,6 +63,12 @@ in {
     restoreCheck = package.wrap ({config, ...}: {
       profileDirectory = "Profile 1";
       preferences.homepage = "https://explicit.invalid/";
+      sync.files.braveLocalState.sources = [
+        {
+          path = "\${HOME}/snapshot/Local State";
+          format = "json";
+        }
+      ];
       sync.files.bravePreferences.sources = [
         {
           path = "\${HOME}/snapshot/Default/Preferences";
@@ -74,7 +80,27 @@ in {
         }
       ];
     });
+    mergePackage = package.wrap {
+      preferences = {
+        bookmark_bar.show_on_all_tabs = true;
+        extensions.theme.system_theme = 1;
+        brave.brave_ads.sponsored.enabled = false;
+      };
+      localState = {
+        brave.p3a.enabled = false;
+        brave.stats.reporting_enabled = false;
+        user_experience_metrics.reporting_enabled = false;
+      };
+    };
   in {
+    checks.brave-wrapper-merge =
+      pkgs.runCommand "brave-merge-check" {
+        PYTHONPATH = "${./.}";
+        nativeBuildInputs = [(pkgs.python3.withPackages (p: [p.websocket-client]))];
+      } ''
+        python3 ${./merge.py} ${lib.getExe mergePackage} ${mergePackage}/bin/brave-sync
+        touch "$out"
+      '';
     checks.brave-wrapper-isolation =
       pkgs.runCommand "brave-isolation-check" {
         PYTHONPATH = "${./.}";

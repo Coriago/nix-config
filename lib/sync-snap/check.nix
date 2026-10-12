@@ -40,6 +40,7 @@
     snapshot.files.preferences.pruneKeyContains = ["^secret$"];
   });
   guarded = app.wrap {sync.startupCondition = ''test "''${1-}" != inspect'';};
+  blocked = app.wrap {sync.condition = "false";};
   disabled = app.wrap {
     sync.enable = pkgs.lib.mkForce false;
     snapshot.enable = pkgs.lib.mkForce false;
@@ -82,6 +83,7 @@
               snapshot.files.preferences.sources = ["\${HOME}/missing.json"];
             };
             last = app;
+            absent = app.wrap {binName = "not-installed-fixture";};
             disabled = disabled;
             unrelated = pkgs.hello;
           };
@@ -136,6 +138,13 @@ in
       ${guarded}/bin/fixture inspect || status=$?
       test "$status" = 23
       jq -e '.declared == false' "$XDG_CONFIG_HOME/fixture/custom/settings.json"
+      if ${blocked}/bin/fixture-sync; then exit 1; fi
+      status=0
+      ${blocked}/bin/fixture inspect || status=$?
+      test "$status" = 23
+      jq -e '.declared == false' "$XDG_CONFIG_HOME/fixture/custom/settings.json"
+      ${blocked}/bin/fixture-snapshot
+      jq -e '.declared == false' "$HOME/snapshots/custom/settings.json"
       ${guarded}/bin/fixture-sync
       jq -e '.declared' "$XDG_CONFIG_HOME/fixture/custom/settings.json"
       ${app}/bin/fixture-snapshot
@@ -147,7 +156,12 @@ in
       jq -e '.declared == false and (has("secret") | not)' "$HOME/snapshots/custom/settings.json"
       # 'all' must report failure but still run the next registered package.
       printf '{"declared":true}' > "$XDG_CONFIG_HOME/fixture/custom/settings.json"
+      ${registry.snapshot-all.program} > absent.log 2>&1
+      grep -q 'snapshot-first: skipped' absent.log
+      grep -q 'snapshot-last: skipped' absent.log
+      PATH=${app}/bin:$PATH
       if ${registry.snapshot-all.program} > registry.log 2>&1; then exit 1; fi
+      grep -q 'snapshot-absent: skipped' registry.log
       grep -q 'snapshot-first: failed' registry.log
       grep -q 'snapshot-last' registry.log
       jq -e '.declared' "$HOME/snapshots/custom/settings.json"

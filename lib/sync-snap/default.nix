@@ -228,6 +228,12 @@
     relPath = "bin/${config.binName}-${operation}";
     content = ''
       #!${pkgs.bash}/bin/bash
+      ${lib.optionalString (operation == "sync") ''
+        if ! ( ${config.sync.condition} ); then
+          echo 'sync-snap: sync deferred by application guard' >&2
+          exit 1
+        fi
+      ''}
       exec ${command} "$@"
     '';
     builder = ''cp "$1" "$2" && chmod +x "$2"'';
@@ -245,6 +251,11 @@ in {
         type = types.lines;
         default = "true";
         description = "Shell predicate evaluated with the original application arguments. Automatic sync runs only on success; manual sync is unaffected. Adapters can exclude IPC and inspection commands.";
+      };
+      condition = mkOption {
+        type = types.lines;
+        default = "true";
+        description = "Application safety predicate for both automatic and manual sync. False defers automatic sync without blocking launch, and makes manual sync fail. Snapshot is unaffected.";
       };
       defaultDir = mkOption {
         type = types.str;
@@ -341,7 +352,11 @@ in {
             then throw "sync-snap addon requires wrapperImplementation = nix for its startup hook"
             else ''
               if ( ${config.sync.startupCondition} ); then
-                ${syncCommand} --startup || echo 'sync-snap: sync failed; launching anyway' >&2
+                if ( ${config.sync.condition} ); then
+                  ${syncCommand} --startup || echo 'sync-snap: sync failed; launching anyway' >&2
+                else
+                  echo 'sync-snap: sync deferred by application guard; launching anyway' >&2
+                fi
               fi
             '';
         }

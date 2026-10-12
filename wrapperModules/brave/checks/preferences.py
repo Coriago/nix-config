@@ -30,6 +30,9 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
             (Path(home) / "snapshot/Default/Preferences").write_bytes(
                 (Path(root_home) / "snapshot/Default/Preferences").read_bytes()
             )
+            (Path(home) / "snapshot/Local State").write_bytes(
+                (Path(root_home) / "snapshot/Local State").read_bytes()
+            )
         port_file = data / "DevToolsActivePort"
         port_file.unlink(missing_ok=True)
         with (Path(home) / "browser.log").open("w+") as log:
@@ -95,6 +98,10 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
                         assert prefs[key]["enforcement"] == "RECOMMENDED", (key, prefs[key])
                 if stage > 0:
                     assert prefs["bookmark_bar.show_on_all_tabs"]["value"] is False
+                    assert prefs["brave.tabs.vertical_tabs_enabled"]["value"] is True
+                    assert prefs["brave.location_bar_is_wide"]["value"] is True
+                    assert prefs["extensions.theme.system_theme"]["value"] == 1
+                    assert prefs["brave.brave_ads.sponsored.enabled"]["value"] is False
                 engines = evaluate(
                     "import('chrome://resources/js/cr.js')"
                     ".then(m => m.sendWithPromise('getSearchEnginesList'))"
@@ -103,7 +110,7 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
                 assert selected["name"] == "Fixture Search", selected
                 assert selected["url"] == "https://search.invalid/?q=%s", selected
                 assert selected["isRecommendedFromPolicy"], selected
-                edits = {"homepage": "https://example.invalid/", "bookmark_bar.show_on_all_tabs": False} if stage == 0 else {}
+                edits = {"homepage": "https://example.invalid/", "bookmark_bar.show_on_all_tabs": False, "brave.tabs.vertical_tabs_enabled": True, "brave.location_bar_is_wide": True, "extensions.theme.system_theme": 1, "brave.brave_ads.sponsored.enabled": False} if stage == 0 else {}
                 if stage == 1:
                     edits = {
                         "homepage": "https://wrapper.invalid/",
@@ -140,10 +147,25 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
             original = json.loads(preference_file.read_text())
             original.update({
                 "account_info": [{"email": "private@example.invalid"}],
-                "extensions": {"settings": {"example": {"token": "synthetic-private"}}},
-                "session": {"startup_urls": ["https://private.invalid/"]},
+                "session": {"startup_urls": ["https://startup.invalid/"], "restore_on_startup": 4, "last_session": "synthetic-private"},
                 "unknown_future_state": {"credentials": ["synthetic-private"]},
             })
+            original.setdefault("extensions", {})["settings"] = {"example": {"token": "synthetic-private"}}
+            original["browser"].setdefault("clear_data", {})["cookies_on_exit"] = True
+            original["brave"]["accelerators"] = {"34000": ["Control+t"], "34001": []}
+            original["brave"]["default_accelerators"] = {"34000": ["Control+t"]}
+            original["brave"]["rewards"] = {"token": "synthetic-private"}
+            original["brave"]["unknown_future_state"] = True
+            original["intl"] = {"selected_languages": "en-US,fr"}
+            state_file = data / "Local State"
+            state = json.loads(state_file.read_text())
+            state.setdefault("brave", {})["dark_mode"] = 2
+            state["brave"].setdefault("tabs", {})["compact_horizontal_tabs"] = True
+            state["brave"]["p3a"] = {"enabled": False, "notice_acknowledged": True, "private_state": "synthetic-private"}
+            state["brave"]["stats"] = {"reporting_enabled": False, "ads_blocked": "999"}
+            state["user_experience_metrics"] = {"reporting_enabled": False, "client_id": "synthetic-private"}
+            state["os_crypt"] = {"encrypted_key": "synthetic-private"}
+            state_file.write_text(json.dumps(state))
             original["browser"]["window_placement"] = {"machine_id": "synthetic-machine"}
             preference_file.write_text(json.dumps(original))
             subprocess.run([sys.argv[2]], env=env, check=True)
@@ -157,16 +179,56 @@ with (nullcontext(review_home) if review_home else tempfile.TemporaryDirectory(p
                 "credentials_enable_service": False,
                 "credentials_enable_autosignin": False,
             }
-            assert captured == expected, "Snapshot retained unexpected fields or lost preferences"
+            def assert_subset(expected, actual):
+                for key, value in expected.items():
+                    assert key in actual, key
+                    if isinstance(value, dict):
+                        assert_subset(value, actual[key])
+                    else:
+                        assert actual[key] == value, key
+            assert_subset(expected, captured)
+            assert captured["brave"]["tabs"]["vertical_tabs_enabled"] is True
+            assert captured["brave"]["location_bar_is_wide"] is True
+            assert "accelerators" not in captured["brave"]
+            assert captured["extensions"] == {"theme": {"system_theme": 1}}
+            assert captured["brave"]["brave_ads"]["sponsored"]["enabled"] is False
+            assert captured["browser"]["clear_data"]["cookies_on_exit"] is True
+            assert "window_placement" not in captured["browser"]
+            assert captured["session"] == {"startup_urls": ["https://startup.invalid/"], "restore_on_startup": 4}
+            assert captured["intl"]["selected_languages"] == "en-US,fr"
+            assert not ({"rewards", "default_accelerators", "unknown_future_state"} & captured["brave"].keys())
+            assert not ({"account_info", "unknown_future_state"} & captured.keys())
+            assert "synthetic-private" not in exported.read_text()
+            local_capture = json.loads((Path(home) / "snapshot/Local State").read_text())
+            assert_subset({
+                "brave": {"dark_mode": 2, "tabs": {"compact_horizontal_tabs": True},
+                          "p3a": {"enabled": False}, "stats": {"reporting_enabled": False}},
+                "user_experience_metrics": {"reporting_enabled": False},
+            }, local_capture)
+            assert local_capture["brave"]["p3a"] == {"enabled": False}
+            assert local_capture["brave"]["stats"] == {"reporting_enabled": False}
+            assert local_capture["user_experience_metrics"] == {"reporting_enabled": False}
+            assert "os_crypt" not in local_capture
+            assert "synthetic-private" not in json.dumps(local_capture)
             assert sorted(p.name for p in exported.parent.iterdir()) == ["Preferences"]
             # Reject malformed values and nonportable generated/local homepage paths.
             malformed = dict(original, homepage="file:///nix/store/synthetic-path",
-                             credentials_enable_service={"secret": "synthetic-private"})
+                             credentials_enable_service={"secret": "synthetic-private"},
+                             session={"startup_urls": ["file:///private"]})
             preference_file.write_text(json.dumps(malformed))
             subprocess.run([sys.argv[2]], env=env, check=True)
             filtered = json.loads(exported.read_text())
             assert "homepage" not in filtered and "credentials_enable_service" not in filtered
+            assert "startup_urls" not in filtered.get("session", {})
             preference_file.write_text(json.dumps(original))
             subprocess.run([sys.argv[2]], env=env, check=True)
+
+        if stage == 2:
+            state = json.loads((data / "Local State").read_text())
+            assert state["brave"]["dark_mode"] == 2
+            assert state["brave"]["tabs"]["compact_horizontal_tabs"] is True
+            assert state["brave"]["p3a"]["enabled"] is False
+            assert state["brave"]["stats"]["reporting_enabled"] is False
+            assert state["user_experience_metrics"]["reporting_enabled"] is False
 
 print("Real headless Brave: policy delivery, writable sync, edit persistence, snapshot pruning, fresh-profile restore, and explicit preference precedence passed.")

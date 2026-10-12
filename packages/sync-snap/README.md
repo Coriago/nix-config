@@ -270,6 +270,15 @@ or filtering. Runtime-only files and files removed from the source are retained;
 empty source directories are not recreated. Source/destination trees must not
 overlap. Snapshot directory entries use the same traversal and copy each file.
 
+## Timing logs
+
+Each selected program emits a stderr summary with counts, `operation=sync` or
+`operation=snapshot`, and `elapsed_ms` to three decimal places. Elapsed time uses
+a monotonic clock around the engine operation, including lock acquisition, I/O,
+filtering, publication and state updates. Failed, empty and skipped operations
+are timed too. Manifest parsing, process startup and application runtime are not
+included; the measurement is per program, not per file or CPU time.
+
 ## Failures, locking, and cache
 
 A missing required source fails; a missing explicitly optional source is skipped.

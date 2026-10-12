@@ -1,11 +1,11 @@
 # Brave wrapper
 
 Run `nix run path:.#mybrave`. Browser data lives in
-`$XDG_CONFIG_HOME/syncbrave`, separate from ordinary Brave. Sync's
+`$XDG_CONFIG_HOME/BraveSoftware/Brave-Browser`, the ordinary Brave location. Sync's
 configuration directory alone does not isolate browser sessions; `userDataDir`
 controls the actual profile, singleton lock, extension storage and snapshots.
-The adapter derives `sync.defaultDir` from `userDataDir`; the feature only sets
-`userDataDir` and, optionally, `profileDirectory`. Preferences is synced beneath
+The adapter derives `sync.defaultDir` from `userDataDir`; the feature currently
+uses its default directory and profile. Preferences is synced beneath
 `<userDataDir>/<profileDirectory>/Preferences`, while generated policy and
 extension manifests are stored in `brave-policies/` and `brave-extensions/` below
 `userDataDir`. Changing the public directory option moves their destinations
@@ -61,44 +61,60 @@ isolation, sync, snapshot and restoration checks live beside the
 configurations. Neither suite exercises interactive Bitwarden sign-in or its
 permission prompt.
 
-Snapshot capture uses the actual selected profile's Preferences and retains only
-six typed settings: homepage, whether it is the new-tab page, home-button and
-bookmark-bar visibility, password saving and password auto sign-in. It drops all
-other fields, including accounts, extensions/storage, sessions, history and
-unknown future state; file URLs and store paths are also pruned. Checks capture
-and inspect isolated runtime exports, inject synthetic private/stateful fields,
-and verify the reviewed baseline in a fresh profile. Policies and extension
-manifests remain declarative inputs and are excluded from snapshots.
+Snapshot capture keeps ordinary settings-screen toggles, checkboxes and selections
+from both Preferences and Local State: GTK appearance, bookmark visibility,
+sponsored ads, privacy/data-collection switches, toolbar/tabs, autofill,
+accessibility and other controls. See the adapter's
+[review notes](../../../wrapperModules/brave/README.md). It excludes keybindings,
+accounts, credentials, browsing history, extension storage and unknown state.
+Policies and extension manifests remain declarative inputs.
 
 ## Runtime settings and capture
 
 Homepage, startup pages, and the new-tab page are distinct; this feature sets the
 Home button's destination and shows that button. Recommended settings remain
 editable, and an existing explicit preference or mandatory host policy takes
-precedence. Fresh profiles seed `credentials_enable_autosignin = false`.
+precedence. The declared `credentials_enable_autosignin = false` is applied on
+eligible syncs.
 After signing in to Bitwarden, accept **Make Bitwarden your default password
 manager → Allow**, or choose it under **Settings → Autofill**. Installation cannot
 grant that optional permission, and saved browser passwords can still autofill.
 See [Bitwarden's instructions](https://bitwarden.com/help/disable-browser-autofill/).
 
-Native Preferences uses sync's **seed** policy: a missing file is initialized from
-the reviewed snapshot, then explicit Nix preferences. Existing files are never
-rewritten externally, avoiding races with the browser and preserving edits.
-Changing the baseline does not overwrite an existing profile. Policies/manifests
-use synchronization on launch. Recommended policies merge; extension wiring
+The wrapper supplies **merge** and `onEveryBoot` defaults; this feature inherits
+them for Preferences and Local State: reviewed snapshot
+settings update existing profiles as well as initializing new ones. Explicit Nix
+values take precedence, while runtime-only keys survive. This lets a rebuild on
+another machine apply the captured settings to its existing profile.
+
+Automatic sync runs before Brave starts, on the first eligible launch each boot.
+A changed baseline is eligible immediately, even within the same boot. The
+adapter checks Chromium's native profile lock before mutable preference sync;
+if Brave is already running, it defers sync and lets the launch reach that browser.
+Close all windows using this data directory and relaunch to apply pending changes.
+Manual `brave-sync` also refuses a live/foreign-host lock. A dead local PID is
+allowed after a crash/reboot; the wrapper never removes Brave's locks. The guard
+is a preflight check, not atomic coordination with independently launched browsers.
+
+Policies/manifests use synchronization on the first launch each boot (`onEveryBoot`); changed inputs
+or missing destinations also make them eligible immediately. Manual `brave-sync`
+bypasses the trigger. Recommended policies merge; extension wiring
 uses replacement so removed IDs and old CRX fields do not remain active. Only
 declared external manifests are presented to Brave, even when older synced files
 remain on disk. `sync.enable = false` retains
-packaged policy/extension delivery but disables preference seeding; snapshot
+packaged policy/extension delivery but disables preference synchronization; snapshot
 export is independent.
 
-Close the wrapped browser normally, then run `nix run path:.#snapshot-mybrave` to
+For the freshest capture, close the wrapped browser normally, then run `nix run path:.#snapshot-mybrave` to
 capture into `snapshot/mybrave/Default/Preferences`. Capture does not launch/sync
 Brave or stage/commit anything. Review URLs for private information before
-retaining a baseline. No arrays, cookies, login databases, Local State, Secure
-Preferences or protected search-engine/integrity fields are retained.
+retaining a baseline. Startup URL and dictionary arrays retain their order and empty values.
+Cookies, login databases, Secure Preferences and protected search-engine/integrity
+fields are excluded. Local State exports reviewed settings controls, including appearance and telemetry.
+Capture may run while Brave is open, but reads only what Brave has already
+flushed to disk. Closing is recommended for freshness, not required by snapshot.
 
 The adapter's `profileDirectory` selects a profile below `userDataDir` and defaults
 to `Default`. Linux user namespaces must be available for directory mappings.
 Inspect effective policies at `brave://policy`. The optional NixOS Brave feature
-installs the wrapper; it has not been enabled on any host/profile here.
+installs the wrapper.

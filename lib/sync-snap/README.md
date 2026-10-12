@@ -180,7 +180,14 @@ the actual package attribute name to the addon, even if its binary is named
 `opencode`. Explicit destination settings still take precedence. Package names
 use letters, digits, hyphens and underscores; `all` is reserved.
 
-`snapshot-all` processes registered names alphabetically, continues on failure,
+`snapshot-all` checks each registered application's `binName` on the caller's
+`PATH` and skips programs that are not installed there. Store presence or an old
+runtime directory does not count as installation. A plain/unwrapped installation
+with the same executable name also counts; capture still uses this checkout's
+configured snapshot command and runtime paths. Explicit `snapshot-<name>` apps
+remain available regardless of installation.
+
+`snapshot-all` processes eligible names alphabetically, continues on failure,
 and exits nonzero if any snapshot fails. With no registrations it succeeds
 without doing anything. CLI arguments are forwarded to each command, such as
 `--lock-timeout-ms 5000`. No application-close hooks or Git commits are added.
@@ -246,6 +253,14 @@ arguments. It defaults to `true`. Adapters for long-running applications can ski
 sync for IPC, inspection, help and other client commands, so using a keybinding
 does not reset live edits. It gates only automatic sync; the manual sync command
 still works. Keep application-specific argument classification in the adapter.
+
+`sync.condition` is a separate application safety predicate, defaulting to `true`.
+It runs before both automatic and manual sync. A false result defers automatic
+sync while still launching the app; manual `<app>-sync` returns nonzero. Neither
+path runs the engine or advances trigger state when blocked. Snapshot remains
+read-only and does not use this guard. The predicate must print its own
+application-specific reason; the addon also emits a generic deferral message.
+This is a preflight check, not an atomic lock against external application starts.
 
 The supported `runShell` hook adds `sync --startup` before application execution,
 logging failure and continuing to launch. It composes with application flags and

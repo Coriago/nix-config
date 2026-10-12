@@ -10,7 +10,15 @@ TODO
 
 ## Deploy
 
-`nixos apply`
+`just apply` captures settings for installed programs, then runs
+`nixos apply` with this checkout's absolute `path:` reference. A failed snapshot
+stops the apply. `just snapshot` captures without applying; plain `just` lists
+recipes. Closing Brave normally first ensures its latest settings are flushed;
+capture itself can run while Brave is open. Both commands run from this checkout, and `path:.` includes
+new snapshot files without staging them. Review generated snapshots before committing.
+
+If `just` is not installed, run `nix shell nixpkgs#just -c just apply`.
+`nixos apply` remains available for applying without a snapshot.
 
 # Overview
 
@@ -20,8 +28,8 @@ The [wrapper guide](docs/wrappers.md) describes the current OpenCode-based patte
 generic app adapters in `wrapperModules/`, personal configuration in features, and
 shared addons in `lib/`. It covers creating, running, and validating wrappers.
 Use the [snapshot review guide](docs/snapshot-review.md) when enabling preference
-capture. The [Brave feature](modules/features/brave/brave.nix) uses a separate
-browser profile, writable policies, and required Bitwarden installation.
+capture. The [Brave feature](modules/features/brave/brave.nix) uses writable
+browser preferences and policies, and required Bitwarden installation.
 
 ## Umbriel desktop
 

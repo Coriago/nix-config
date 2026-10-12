@@ -7,7 +7,7 @@ use std::{
     os::unix::process::CommandExt,
     path::PathBuf,
     process::{Command, ExitCode},
-    time::Duration,
+    time::{Duration, Instant},
 };
 use sync_snap::{
     config::{Manifest, Program, resolve, variable},
@@ -137,10 +137,16 @@ fn perform(
         if selection.program.as_ref().is_some_and(|n| n != name) {
             continue;
         }
+        let started = Instant::now();
         let stats = engine::execute(name, program, op, &options);
         eprintln!(
-            "sync-snap: {name}: written={}, skipped={}, cache_hits={}, failed={}",
-            stats.written, stats.skipped, stats.cached, stats.failed
+            "sync-snap: {name}: written={}, skipped={}, cache_hits={}, failed={}, operation={}, elapsed_ms={:.3}",
+            stats.written,
+            stats.skipped,
+            stats.cached,
+            stats.failed,
+            op.name(),
+            started.elapsed().as_secs_f64() * 1000.0
         );
         success &= stats.failed == 0;
     }

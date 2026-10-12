@@ -1,0 +1,21 @@
+{
+  "brave": {
+    "p3a": {
+      "enabled": false
+    },
+    "stats": {
+      "reporting_enabled": false
+    },
+    "tabs": {
+      "compact_horizontal_tabs": false
+    }
+  },
+  "performance_tuning": {
+    "high_efficiency_mode": {
+      "state": 2
+    }
+  },
+  "user_experience_metrics": {
+    "reporting_enabled": false
+  }
+}

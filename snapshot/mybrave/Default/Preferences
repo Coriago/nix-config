@@ -1,3 +1,59 @@
 {
-  "credentials_enable_autosignin": false
+  "bookmark_bar": {
+    "show_on_all_tabs": true
+  },
+  "brave": {
+    "ai_chat": {
+      "autocomplete_provider_enabled": false
+    },
+    "always_show_bookmark_bar_on_ntp": false,
+    "brave_ads": {
+      "sponsored": {
+        "enabled": false
+      }
+    },
+    "enable_media_router_on_restart": true,
+    "enable_window_closing_confirm": false,
+    "location_bar_is_wide": true,
+    "new_tab_page": {
+      "shows_options": 1
+    },
+    "tabs": {
+      "vertical_tabs_enabled": false
+    }
+  },
+  "browser": {
+    "clear_data": {
+      "brave_leo": true,
+      "browsing_history": false,
+      "cookies": false,
+      "form_data": true,
+      "site_settings": true,
+      "time_period": 2
+    },
+    "show_home_button": true
+  },
+  "credentials_enable_autosignin": false,
+  "credentials_enable_service": false,
+  "extensions": {
+    "theme": {
+      "system_theme": 1
+    }
+  },
+  "homepage": "https://homepage.backyard-host.com/",
+  "homepage_is_newtabpage": false,
+  "intl": {
+    "selected_languages": "en-US,en"
+  },
+  "privacy_sandbox": {
+    "first_party_sets_enabled": false
+  },
+  "spellcheck": {
+    "dictionaries": [
+      "en-US"
+    ]
+  },
+  "tab_search": {
+    "pinned_to_tabstrip": true
+  }
 }

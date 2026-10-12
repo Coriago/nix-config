@@ -481,6 +481,11 @@ fn concurrent_startups_serialize_and_release_locks() {
         String::from_utf8_lossy(&b.stderr)
     );
     assert!(logs.contains("cache_hits=1"), "{logs}");
+    for log in logs.lines().filter(|line| line.contains("cache_hits=")) {
+        assert!(log.contains("operation=sync"), "{log}");
+        let elapsed: f64 = log.split("elapsed_ms=").nth(1).unwrap().parse().unwrap();
+        assert!(elapsed.is_finite() && elapsed >= 0.0, "{log}");
+    }
     assert_eq!(read(p, "runtime.json"), json!({"a":[1,2,3],"b":true}));
     assert!(files::lock(&p.join("state"), "test-app", Duration::ZERO).is_ok());
 }

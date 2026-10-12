@@ -6,6 +6,10 @@
     wlib,
     ...
   }: let
+    profileIdle = pkgs.writeShellScript "brave-profile-idle" ''
+      export PATH=${lib.makeBinPath [pkgs.coreutils]}
+      ${builtins.readFile ./profile-idle.sh}
+    '';
     externalExtensions = builtins.filter (extension: extension.installationMode == "external") config.extensions;
     managedExtensions = builtins.filter (extension: extension.installationMode != "external") config.extensions;
     extensionPolicies = lib.listToAttrs (map (extension: {
@@ -37,18 +41,23 @@
         type = lib.types.strMatching "[A-Za-z0-9 _-]+";
         default = "Default";
         example = "Profile 1";
-        description = "Selected profile directory beneath userDataDir; used for launch, preference seeding, and snapshots.";
+        description = "Selected profile directory beneath userDataDir; used for launch, preference synchronization, and snapshots.";
       };
       preferences = lib.mkOption {
         type = wlib.types.structuredValueWith {typeName = "JSON";};
         default = {};
         description = ''
-          Native profile preferences, seeded together with a reviewed snapshot
-          only when Preferences is missing. Existing profiles are never rewritten
-          by default. Prefer recommendedPolicies for ongoing editable defaults.
+          Native profile preferences, merged with a reviewed snapshot into the
+          existing profile on the first eligible launch each boot. Sync is
+          deferred while the browser owns the profile.
           Protected preferences, including search-engine integrity data, are not
-          portable; snapshots retain only a small allowlist of documented settings.
+          portable; snapshots retain reviewed, typed preference paths.
         '';
+      };
+      localState = lib.mkOption {
+        type = wlib.types.structuredValueWith {typeName = "JSON";};
+        default = {};
+        description = "Native browser-wide preferences, merged on the first eligible launch each boot while the profile is idle. Snapshots retain reviewed settings-screen controls, including appearance and telemetry switches.";
       };
       recommendedPolicies = lib.mkOption {
         type = wlib.types.structuredValueWith {typeName = "JSON";};
@@ -109,6 +118,14 @@
       package = lib.mkDefault pkgs.brave;
       sync.enable = lib.mkDefault true;
       sync.defaultDir = lib.mkDefault config.userDataDir;
+      sync.condition = lib.mkDefault (
+        if config.sync.files.bravePreferences.policy == "seed" && config.sync.files.braveLocalState.policy == "seed"
+        then "true"
+        else ''
+          export XDG_CONFIG_HOME="''${XDG_CONFIG_HOME:-$HOME/.config}"
+          ${profileIdle} ${wlib.escapeShellArgWithEnv config.userDataDir}
+        ''
+      );
       flags."--profile-directory" = {
         data = config.profileDirectory;
         sep = "=";
@@ -132,6 +149,10 @@
           bravePreferences = {
             relPath = "${config.profileDirectory}/Preferences";
             content = builtins.toJSON config.preferences;
+          };
+          braveLocalState = {
+            relPath = "Local State";
+            content = builtins.toJSON config.localState;
           };
         }
         // lib.optionalAttrs (config.recommendedPolicies != {}) {
@@ -170,39 +191,43 @@
           bravePreferences = {
             format = lib.mkDefault "json";
             # Browser-owned files must not be merged while a profile is running.
-            policy = lib.mkDefault "seed";
+            policy = lib.mkDefault "merge";
+            trigger = lib.mkDefault "onEveryBoot";
+          };
+          braveLocalState = {
+            format = lib.mkDefault "json";
+            policy = lib.mkDefault "merge";
+            trigger = lib.mkDefault "onEveryBoot";
+          };
+        }
+        // lib.optionalAttrs (config.recommendedPolicies != {}) {
+          braveRecommendedPolicies = {
+            policy = lib.mkDefault "merge";
+            trigger = lib.mkDefault "onEveryBoot";
           };
         }
         // lib.optionalAttrs (managedExtensions != []) {
           # Do not retain removed required IDs. Omit the sync entry without its source.
           braveManagedExtensions.policy = lib.mkDefault "replace";
+          braveManagedExtensions.trigger = lib.mkDefault "onEveryBoot";
         }
         // lib.listToAttrs (map (extension: {
             name = "braveExtension-${extension.id}";
-            value.policy = lib.mkDefault "replace";
+            value = {
+              policy = lib.mkDefault "replace";
+              trigger = lib.mkDefault "onEveryBoot";
+            };
           })
           externalExtensions);
       snapshot.files =
         {
+          braveLocalState = {
+            transform = lib.mkDefault [(builtins.readFile ./preferences.jq)];
+            pruneValueContains = lib.mkDefault ["/nix/store/" "^file:"];
+          };
           bravePreferences = {
-            # A whitelist drops private/stateful objects even as new keys appear.
-            # Only retain documented scalar UI and password-manager preferences.
-            transform = lib.mkDefault [
-              ''
-                . as $input |
-                reduce [
-                  {path: ["homepage"], type: "string"},
-                  {path: ["homepage_is_newtabpage"], type: "boolean"},
-                  {path: ["browser", "show_home_button"], type: "boolean"},
-                  {path: ["bookmark_bar", "show_on_all_tabs"], type: "boolean"},
-                  {path: ["credentials_enable_service"], type: "boolean"},
-                  {path: ["credentials_enable_autosignin"], type: "boolean"}
-                ][] as $field ({};
-                  ($input | getpath($field.path)) as $value |
-                  if ($value | type) == $field.type
-                  then setpath($field.path; $value) else . end)
-              ''
-            ];
+            # Exact, typed preference paths; unknown state remains excluded.
+            transform = lib.mkDefault [(builtins.readFile ./preferences.jq)];
             pruneValueContains = lib.mkDefault ["/nix/store/" "^file:"];
           };
           # These are declared wiring, not browser-owned preferences.
