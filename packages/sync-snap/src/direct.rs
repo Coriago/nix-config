@@ -24,7 +24,7 @@ pub struct Direct {
     /// Current file's sync policy: seed (CLI default), fill-missing, merge, replace.
     #[arg(long, requires = "destination")]
     policy: Vec<String>,
-    /// Startup trigger: onEveryStart (default), onEveryBoot, onEveryLogin, onDuration.
+    /// Startup trigger: onInputsChanged (default), onEveryStart, onEveryBoot, onEveryLogin, onDuration.
     #[arg(long, requires = "destination")]
     trigger: Vec<String>,
     /// Interval for onDuration: positive integer plus s, m/min, h/hr, or d (e.g. 1h).

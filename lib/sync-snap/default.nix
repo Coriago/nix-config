@@ -79,9 +79,9 @@
         description = "How the baseline updates existing runtime contents. Raw files require seed or replace.";
       };
       trigger = mkOption {
-        type = types.enum ["onEveryStart" "onEveryBoot" "onEveryLogin" "onDuration"];
-        default = "onEveryStart";
-        description = "Automatic sync trigger; manual sync ignores it.";
+        type = types.enum ["onInputsChanged" "onEveryStart" "onEveryBoot" "onEveryLogin" "onDuration"];
+        default = "onInputsChanged";
+        description = "Automatic sync trigger; by default, preserve runtime edits until declarative inputs change. Manual sync ignores it.";
       };
       duration = mkOption {
         type = types.nullOr (types.strMatching "[1-9][0-9]*(s|m|min|h|hr|d)");

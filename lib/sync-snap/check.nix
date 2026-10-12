@@ -93,6 +93,7 @@
 in
   assert !(registry ? snapshot-disabled);
   assert !(registry ? snapshot-unrelated);
+  assert app.configuration.sync.files.preferences.trigger == "onInputsChanged";
   assert builtins.length missing.configuration.sync.files.preferences.sources == 1;
     pkgs.runCommand "sync-snap-addon-check" {nativeBuildInputs = [pkgs.jq];} ''
       export HOME="$TMPDIR/home" XDG_CONFIG_HOME="$TMPDIR/config with spaces" XDG_STATE_HOME="$TMPDIR/state"
@@ -134,6 +135,11 @@ in
       test ! -e "$XDG_CONFIG_HOME/fixture/helper.txt"
       # A client/inspection invocation must not reset runtime edits.
       printf '{"declared":false}' > "$XDG_CONFIG_HOME/fixture/custom/settings.json"
+      # The default startup trigger preserves edits on ordinary launches too.
+      status=0
+      ${app}/bin/fixture || status=$?
+      test "$status" = 23
+      jq -e '.declared == false' "$XDG_CONFIG_HOME/fixture/custom/settings.json"
       status=0
       ${guarded}/bin/fixture inspect || status=$?
       test "$status" = 23

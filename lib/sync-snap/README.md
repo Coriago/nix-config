@@ -97,8 +97,11 @@ literal, while `wlib.escapeShellArgWithEnv` expands HOME/XDG at launch and quote
 paths containing spaces. Fixed store paths do not need expansion. Keep this
 setting on runtime path values rather than changing escaping globally.
 
-Sync entries have `trigger` (`onEveryStart`, `onEveryBoot`, `onEveryLogin`,
-`onDuration`), defaulting to `onEveryStart`. For example:
+Sync entries have `trigger` (`onInputsChanged`, `onEveryStart`, `onEveryBoot`,
+`onEveryLogin`, `onDuration`), defaulting to `onInputsChanged`. This default
+preserves runtime edits across launches, logins and reboots until declarative
+inputs change. First use, missing destinations and absent/corrupt trigger state
+also make sync eligible. For example:
 
 ```nix
 sync.files.opencodeCliConfig.trigger = "onEveryLogin";
@@ -239,7 +242,7 @@ The helper converts file declarations into safely quoted CLI arguments:
 ```sh
 sync-snap sync --program myapp \
   --destination '${XDG_CONFIG_HOME}/myapp/settings.json' \
-  --source /nix/store/…/settings.json --policy merge --trigger onEveryStart
+  --source /nix/store/…/settings.json --policy merge --trigger onInputsChanged
 ```
 
 Every `--destination` starts another entry. All sync files run in **one process**

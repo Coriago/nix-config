@@ -11,6 +11,7 @@
         disko
         sops
         nixd
+        just
       ];
     };
   };

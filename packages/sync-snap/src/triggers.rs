@@ -157,6 +157,7 @@ pub fn due(
         return true;
     }
     match trigger {
+        Trigger::OnInputsChanged => false,
         Trigger::OnEveryStart => true,
         Trigger::OnEveryBoot => now.boot_id.is_none() || now.boot_id != record.boot_id,
         Trigger::OnEveryLogin => {

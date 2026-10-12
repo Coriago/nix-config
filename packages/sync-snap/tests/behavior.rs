@@ -620,6 +620,95 @@ fn scheduled(trigger: &str) -> Entry {
 }
 
 #[test]
+fn inputs_changed_is_default_and_preserves_edits_until_inputs_change() {
+    for e in [standard("replace"), scheduled("onInputsChanged")] {
+        let t = TempDir::new().unwrap();
+        let p = t.path();
+        write(p, "source.json", r#"{"baseline":1}"#);
+        assert_eq!(
+            start_at(p, vec![e.clone()], "boot1", Some("a"), 100).written,
+            1
+        );
+        let state = fs::read(p.join("state/test-app.trigger")).unwrap();
+        write(p, "runtime.json", "user editing");
+        let skipped = start_at(p, vec![e.clone()], "boot2", Some("b"), 100_000);
+        assert_eq!(
+            (skipped.failed, skipped.written, skipped.skipped),
+            (0, 0, 1)
+        );
+        assert_eq!(
+            fs::read_to_string(p.join("runtime.json")).unwrap(),
+            "user editing"
+        );
+        assert_eq!(fs::read(p.join("state/test-app.trigger")).unwrap(), state);
+        write(p, "source.json", r#"{"baseline":2}"#);
+        assert_eq!(
+            start_at(p, vec![e.clone()], "boot2", None, 100_001).written,
+            1
+        );
+        assert_eq!(read(p, "runtime.json"), json!({"baseline":2}));
+        write(p, "runtime.json", "{}");
+        assert_eq!(sync(p, vec![e.clone()]).written, 1);
+        fs::remove_file(p.join("runtime.json")).unwrap();
+        assert_eq!(
+            start_at(p, vec![e.clone()], "boot2", None, 100_002).written,
+            1
+        );
+        write(p, "runtime.json", "{}");
+        write(p, "state/test-app.trigger", "corrupt");
+        assert_eq!(
+            start_at(p, vec![e.clone()], "boot2", None, 100_003).written,
+            1
+        );
+        // Explicit every-start behavior remains available.
+        let every_start = scheduled("onEveryStart");
+        start_at(p, vec![every_start.clone()], "boot2", None, 100_004);
+        write(p, "runtime.json", "{}");
+        assert_eq!(
+            start_at(p, vec![every_start], "boot2", None, 100_005).written,
+            1
+        );
+    }
+}
+
+#[test]
+fn direct_cli_defaults_to_inputs_changed_and_accepts_explicit_trigger() {
+    let t = TempDir::new().unwrap();
+    let p = t.path();
+    write(p, "source.json", r#"{"baseline":1}"#);
+    let run = |explicit: bool| {
+        let mut command = Command::new(env!("CARGO_BIN_EXE_sync-snap"));
+        command.current_dir(p).args([
+            "sync",
+            "--program",
+            "cli-app",
+            "--state-dir",
+            "state",
+            "--startup",
+            "--destination",
+            "runtime.json",
+            "--source",
+            "source.json",
+            "--policy",
+            "replace",
+        ]);
+        if explicit {
+            command.args(["--trigger", "onInputsChanged"]);
+        }
+        command.output().unwrap()
+    };
+    assert!(run(false).status.success());
+    write(p, "runtime.json", "{}");
+    assert!(run(false).status.success());
+    assert_eq!(read(p, "runtime.json"), json!({}));
+    assert!(run(true).status.success());
+    assert_eq!(read(p, "runtime.json"), json!({}));
+    write(p, "source.json", r#"{"baseline":2}"#);
+    assert!(run(true).status.success());
+    assert_eq!(read(p, "runtime.json"), json!({"baseline":2}));
+}
+
+#[test]
 fn boot_gate_preserves_edits_but_inputs_missing_destinations_and_lost_state_override_it() {
     let t = TempDir::new().unwrap();
     let p = t.path();

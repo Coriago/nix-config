@@ -119,7 +119,7 @@ snapshotting does not commit changes, rebuild packages, or reload applications.
 | Source `optional` | `false`; only absence is optional, not invalid contents |
 | `format` | Destination format: `json`, `toml`, or `raw`; inferred if absent |
 | `policy` | `seed`; used by sync |
-| `trigger` | `onEveryStart`; used by automatic sync |
+| `trigger` | `onInputsChanged`; used by automatic sync |
 | `duration` | Required only for `onDuration`: positive integer plus `s`, `m`/`min`, `h`/`hr`, or `d` |
 | `directory` | `false`; raw directory overlay when enabled |
 | `prune_key_contains` | Empty list of regexes; snapshot only |
@@ -157,6 +157,8 @@ There is no array appending, index matching, inferred identity, or deletion mark
 
 `run` and `sync --startup` honor triggers:
 
+- `onInputsChanged` (default): eligible when declarative input fingerprints change;
+  runtime edits survive launches, new logins, reboots and elapsed time.
 - `onEveryStart`: eligible on every launch, subject to policy and cache skipping.
 - `onEveryBoot`: eligible once per input fingerprint and Linux boot ID.
 - `onEveryLogin`: eligible once per input fingerprint and login session within a
@@ -167,8 +169,9 @@ There is no array appending, index matching, inferred identity, or deletion mark
   the last successful sync. Uses Unix epoch seconds, including time across
   reboots. There is no background timer or special wall-clock correction logic.
 
-These replace the former `on-start`, `on-init`, and `never` values. The default
-remains sync eligibility on every launch. Use `seed` for create-only behavior.
+These replace the former `on-start`, `on-init`, and `never` values. Use
+`onEveryStart` to reapply declared values on every launch, or `seed` for
+create-only behavior.
 
 Missing destinations, absent/corrupt trigger state, or changed input fingerprints
 make entries eligible immediately. Ordinary destination edits do not affect

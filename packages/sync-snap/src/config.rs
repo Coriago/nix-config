@@ -83,6 +83,7 @@ pub enum Policy {
 #[serde(rename_all = "camelCase")]
 pub enum Trigger {
     #[default]
+    OnInputsChanged,
     OnEveryStart,
     OnEveryBoot,
     OnEveryLogin,
