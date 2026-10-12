@@ -188,6 +188,26 @@
         "type": "github"
       }
     },
+    "nixmox": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791765909,
+        "narHash": "sha256-hlhsrreupnHtTTbj8FGOOpee6ihCev7VcKKD+X5OaFU=",
+        "owner": "Coriago",
+        "repo": "nixmox",
+        "rev": "e725f672c79b2474c3f6c3103626df8cd3c8bb75",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Coriago",
+        "repo": "nixmox",
+        "type": "github"
+      }
+    },
     "nixos-cli": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -296,6 +316,7 @@
         "import-tree": "import-tree",
         "llm-agents": "llm-agents",
         "nix-cachyos-kernel": "nix-cachyos-kernel",
+        "nixmox": "nixmox",
         "nixos-cli": "nixos-cli",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
