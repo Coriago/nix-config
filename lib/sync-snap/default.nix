@@ -364,6 +364,14 @@ in {
     })
     (lib.mkIf config.snapshot.enable {
       constructFiles._syncSnapSnapshot = commandFile "snapshot" snapshotCommand;
+      constructFiles._syncSnapRegistration =
+        (commandFile "snapshot" snapshotCommand)
+        // {
+          relPath =
+            if builtins.match "[A-Za-z0-9][A-Za-z0-9._+-]*" config.binName == null
+            then throw "snapshot registration requires a simple executable binName"
+            else "share/sync-snap/snapshots/${config.binName}";
+        };
     })
   ];
 }

@@ -20,6 +20,11 @@ new snapshot files without staging them. Review generated snapshots before commi
 If `just` is not installed, run `nix shell nixpkgs#just -c just apply`.
 `nixos apply` remains available for applying without a snapshot.
 
+For the initial snapshot-runner migration, run `nixos apply "path:$PWD"` once
+to install the new commands. Afterward `snapshot-all --list` shows registrations
+from active profiles. Snapshot commands update or disappear with their wrapped
+packages; edited snapshot rules take effect after installing the rebuilt package.
+
 # Overview
 
 ## Wrapper package standard
@@ -73,7 +78,7 @@ The wrapper syncs its packaged configuration into
 `${XDG_CONFIG_HOME:-$HOME/.config}/syncopencode/` before launch and supplies the
 writable files through `OPENCODE_CONFIG` and `OPENCODE_TUI_CONFIG`. Declared values
 are reapplied on eligible launches; runtime-only settings are retained. Capture
-preferences manually with `nix run .#snapshot-myopencode`, then review
+preferences manually with `opencode-snapshot`, then review
 `snapshot/myopencode/`. The next build embeds that baseline, with explicit Nix
 settings taking precedence. CLI settings use the wrapper's directory mapping
 to read and write `syncopencode/cli.json` at OpenCode's native path.

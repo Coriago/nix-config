@@ -19,7 +19,7 @@ The standard HOME-based XDG fallbacks apply when these variables are unset.
 Capture current overrides before relaunching if you want them saved:
 
 ```sh
-nix run path:.#snapshot-mynoctalia
+noctalia-snapshot
 ```
 
 Snapshot combines config first, then settings, prunes nonportable/private fields,
@@ -84,7 +84,7 @@ baseline; switching alone no longer copies compositor preferences into place.
 Environment, autostart, DRM and binary changes require a new session.
 `umbriel config validate` reads the runtime file without syncing it first.
 
-`nix run path:.#snapshot-myumbriel` still exports the main runtime file to
+`umbriel-snapshot` still exports the main runtime file to
 `snapshot/myumbriel/config.toml`; store paths and host/session wiring are pruned.
 It does not flatten the includes or capture checkout edits. The old merged
 snapshot was removed so it cannot mask the included preferences.

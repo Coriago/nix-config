@@ -163,39 +163,44 @@ Enable snapshot export inside the configured package in its feature:
 snapshot.enable = true;
 ```
 
-`snapshot.enable` defaults to `false`. The imported `flake-module.nix` discovers
-enabled packages in `perSystem.packages` and exposes conventional Nix apps:
+`snapshot.enable` defaults to `false`. Enabling it puts `<binName>-snapshot`
+in the wrapper's `bin/` and an executable registration at
+`share/sync-snap/snapshots/<binName>`. Both belong to the same immutable package
+version. Installing, upgrading, removing, or rolling back that package in a
+profile updates both through the profile's normal generation switch. No mutable
+registration hooks or flake snapshot apps are used.
 
 ```sh
-nix run .#snapshot-myopencode
-nix run .#snapshot-all
+opencode-snapshot
+snapshot-all
+snapshot-all --list
+snapshot-all -- --lock-timeout-ms 5000
 ```
 
-Use `path:.#...` while testing new untracked files. There is no separate
-registration list or export variant. The feature's enabled package supplies the
-generated snapshot executable directly, without starting the application,
-running sync, or entering directory mappings. Snapshot sources already point
-at the actual writable files.
+The base NixOS module installs the shared runner through
+`environment.systemPackages` and links `/share/sync-snap` with
+`environment.pathsToLink`. This also covers `users.users.<name>.packages`.
+Ordinary `nix profile` installations link the package's registration too; install
+`sync-snap` in that profile when the runner is not already available system-wide.
 
-The default export directory for this registration is
-`/home/helios/.config/nix-config/snapshot/myopencode`. Flake integration supplies
-the actual package attribute name to the addon, even if its binary is named
-`opencode`. Explicit destination settings still take precedence. Package names
-use letters, digits, hyphens and underscores; `all` is reserved.
+The runner searches current user and system profiles, never PATH, the flake's
+package list, store closures, or old generations. Plain/unwrapped packages and
+snapshot-disabled wrappers have no registration. An application still installed
+in another active profile remains eligible. See the [runner documentation](../../packages/sync-snap/README.md#installed-snapshot-runner)
+for profile precedence and custom profiles.
 
-`snapshot-all` checks each registered application's `binName` on the caller's
-`PATH` and skips programs that are not installed there. Store presence or an old
-runtime directory does not count as installation. A plain/unwrapped installation
-with the same executable name also counts; capture still uses this checkout's
-configured snapshot command and runtime paths. Explicit `snapshot-<name>` apps
-remain available regardless of installation.
+Each registration executes its installed version's snapshot rules, including host
+customizations. Changes in the checkout take effect after installing the rebuilt
+wrapper. Capture does not evaluate/build Nix, launch the app, run sync, enter
+directory mappings, or commit files. The flake integration only assigns export
+names: `myopencode` defaults to
+`/home/helios/.config/nix-config/snapshot/myopencode`, even though its executable
+is `opencode`. Explicit destinations still take precedence.
 
-`snapshot-all` processes eligible names alphabetically, continues on failure,
-and exits nonzero if any snapshot fails. With no registrations it succeeds
-without doing anything. CLI arguments are forwarded to each command, such as
-`--lock-timeout-ms 5000`. No application-close hooks or Git commits are added.
-Existing Rust validation, pruning,
-sidecar logging and unchanged-output skipping apply.
+The runner processes registrations alphabetically, continues after command
+failures, and returns failure if any command fails. No registrations is a
+successful no-op. Existing filtering, sidecar logging, and unchanged-output
+skipping apply.
 
 ## Automatically importing snapshots
 

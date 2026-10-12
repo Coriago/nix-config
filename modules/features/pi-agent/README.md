@@ -25,7 +25,7 @@ files, and use Pi's `/reload` as appropriate.
 Capture the reviewed preference baseline with:
 
 ```sh
-nix run path:.#snapshot-mypi
+pi-snapshot
 ```
 
 Snapshots go to `snapshot/mypi/` and become baseline inputs on the next build.

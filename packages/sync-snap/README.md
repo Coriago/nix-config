@@ -34,6 +34,50 @@ arguments, signals, and exit status. Even a missing or malformed manifest does
 not prevent execution. An invalid CLI invocation or a missing application
 executable still fails normally.
 
+## Installed snapshot runner
+
+This package also installs `snapshot-all`. Wrappers register executable commands
+under `share/sync-snap/snapshots/<binName>` in their own output. Registrations
+contain absolute references to that package version's engine and settings.
+
+```sh
+snapshot-all --list
+snapshot-all
+snapshot-all -- --lock-timeout-ms 5000
+snapshot-all --profile /path/to/custom/profile
+```
+
+Default profile priority, highest first:
+
+1. `$HOME/.nix-profile`
+2. `$XDG_STATE_HOME/nix/profile` (default `$HOME/.local/state/nix/profile`)
+3. `/etc/profiles/per-user/$USER`
+4. `/nix/profile`
+5. `/nix/var/nix/profiles/default`
+6. `/run/current-system/sw`
+
+Missing profiles are ignored. Each profile link is resolved once per invocation;
+old generations are never searched. Repeated `--profile` replaces discovery and
+uses the supplied order. For duplicate executable names, the highest-priority
+registration wins. Commands run alphabetically and failures do not stop later
+commands; any failure produces a nonzero exit status. Discovery errors abort
+before executing anything. `--list` only prints selected names and paths. An
+empty registry is a successful no-op. Arguments after `--` pass to each command.
+Per-command elapsed time includes process startup and execution.
+
+NixOS must include `/share/sync-snap` in `environment.pathsToLink`; this repo's
+base module does so and installs the runner. User profiles created by `nix profile`
+also expose registrations. Upgrading/removing a wrapper updates/removes its
+command and registration with the profile generation; retained store outputs and
+old generations do not count as installed. If another active profile still
+contains the application, its registration remains eligible. Running wrappers
+from temporary shells or `nix run` does not register them.
+
+Snapshot rules come from the installed wrapper, so install a rebuilt wrapper to
+use edited rules. The runner itself never invokes Nix. For the initial migration,
+apply the configuration once with `nixos apply "path:$PWD"`; afterward `just apply`
+runs installed snapshots before applying the next configuration.
+
 ## Direct arguments (no manifest required)
 
 ```sh

@@ -32,7 +32,7 @@ prove that its value is safe to retain.
 2. Launch with isolated HOME/XDG directories first. Exercise representative
    settings and plugin configuration; use synthetic private values to check
    exclusions. Let the app finish saving before capture.
-3. At the end of implementation, run `nix run path:.#snapshot-<package-name>` with
+3. At the end of implementation, run `<binName>-snapshot` with
    the same runtime environment. Override `snapshot.defaultDir` in a test package
    for disposable exports. Snapshot commands do not launch or sync the app first.
    If representative real runtime data is available, review that output too;

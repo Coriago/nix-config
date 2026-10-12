@@ -70,29 +70,23 @@
       duration = "1hr";
     };
   };
-  registry =
-    (pkgs.lib.evalModules {
-      modules = [
-        (import ./flake-module.nix {lib = pkgs.lib;}).perSystem
-        {
-          config._module.args = {inherit pkgs;};
-          options.apps = pkgs.lib.mkOption {type = pkgs.lib.types.attrsOf pkgs.lib.types.raw;};
-          options.packages = pkgs.lib.mkOption {type = pkgs.lib.types.lazyAttrsOf pkgs.lib.types.package;};
-          config.packages = {
-            first = app.wrap {
-              snapshot.files.preferences.sources = ["\${HOME}/missing.json"];
-            };
-            last = app;
-            absent = app.wrap {binName = "not-installed-fixture";};
-            disabled = disabled;
-            unrelated = pkgs.hello;
-          };
-        }
-      ];
-    }).config.apps;
+  runner = pkgs.callPackage ../../packages/sync-snap {};
+  upgraded = app.wrap {snapshot.files.preferences.pruneKeyContains = ["^declared$"];};
+  first = app.wrap {
+    package = pkgs.lib.mkForce (pkgs.writeShellScriptBin "first" "exit 0");
+    binName = "first";
+    snapshot.files.preferences.sources = ["\${HOME}/missing.json"];
+  };
+  profile = name: paths:
+    pkgs.buildEnv {
+      inherit name paths;
+      pathsToLink = ["/bin" "/share/sync-snap"];
+    };
+  installed = profile "snapshot-installed" [app pkgs.hello];
+  updated = profile "snapshot-updated" [upgraded];
+  removed = profile "snapshot-removed" [pkgs.hello];
+  failures = profile "snapshot-failures" [first app];
 in
-  assert !(registry ? snapshot-disabled);
-  assert !(registry ? snapshot-unrelated);
   assert app.configuration.sync.files.preferences.trigger == "onInputsChanged";
   assert builtins.length missing.configuration.sync.files.preferences.sources == 1;
     pkgs.runCommand "sync-snap-addon-check" {nativeBuildInputs = [pkgs.jq];} ''
@@ -121,7 +115,8 @@ in
       test ! -e ${disabled}/bin/fixture-snapshot
       test ! -e ${snapshotOnly}/bin/fixture-sync
       test -x ${snapshotOnly}/bin/fixture-snapshot
-      test ! -e ${app}/share/sync-snap
+      test -x ${app}/share/sync-snap/snapshots/fixture
+      test ! -e ${disabled}/share/sync-snap
       fallback_status=0
       env -u XDG_CONFIG_HOME ${app}/bin/fixture || fallback_status=$?
       test "$fallback_status" = 23
@@ -158,18 +153,30 @@ in
       test -f "$HOME/snapshots/other.toml"
       # Snapshot registration must export edits without first running startup sync.
       printf '{"declared":false,"secret":"remove"}' > "$XDG_CONFIG_HOME/fixture/custom/settings.json"
-      ${registry.snapshot-last.program}
+      ln -s ${installed} "$HOME/profile"
+      ${runner}/bin/snapshot-all --profile "$HOME/profile" -- --lock-timeout-ms 5000
       jq -e '.declared == false and (has("secret") | not)' "$HOME/snapshots/custom/settings.json"
-      # 'all' must report failure but still run the next registered package.
+      # Switching a profile selects the new executable and its new pruning rules.
+      old_command=$(readlink -f "$HOME/profile/bin/fixture-snapshot")
+      ln -sfn ${updated} "$HOME/profile"
+      test "$(readlink -f "$HOME/profile/bin/fixture-snapshot")" != "$old_command"
+      ${runner}/bin/snapshot-all --profile "$HOME/profile"
+      jq -e 'has("declared") | not' "$HOME/snapshots/custom/settings.json"
+      # User profile registration wins over a lower-priority system version.
+      ${runner}/bin/snapshot-all --profile ${installed} --profile ${updated}
+      jq -e 'has("declared")' "$HOME/snapshots/custom/settings.json"
+      # Removal stops selection even while the old package is on PATH/in the store.
+      ln -sfn ${removed} "$HOME/profile"
+      test ! -e "$HOME/profile/bin/fixture-snapshot"
+      PATH=${app}/bin:$PATH ${runner}/bin/snapshot-all --profile "$HOME/profile" --list > removed.list
+      test ! -s removed.list
+      ${runner}/bin/snapshot-all --profile ${disabled} --list > disabled.list
+      test ! -s disabled.list
+      # A failed registration does not prevent subsequent captures.
       printf '{"declared":true}' > "$XDG_CONFIG_HOME/fixture/custom/settings.json"
-      ${registry.snapshot-all.program} > absent.log 2>&1
-      grep -q 'snapshot-first: skipped' absent.log
-      grep -q 'snapshot-last: skipped' absent.log
-      PATH=${app}/bin:$PATH
-      if ${registry.snapshot-all.program} > registry.log 2>&1; then exit 1; fi
-      grep -q 'snapshot-absent: skipped' registry.log
-      grep -q 'snapshot-first: failed' registry.log
-      grep -q 'snapshot-last' registry.log
+      if ${runner}/bin/snapshot-all --profile ${failures} > registry.log 2>&1; then exit 1; fi
+      grep -q 'first failed' registry.log
+      grep -q 'fixture completed' registry.log
       jq -e '.declared' "$HOME/snapshots/custom/settings.json"
       # One malformed output must prevent publication of the other output too.
       printf 'enabled = false\n' > "$XDG_CONFIG_HOME/fixture/other.toml"

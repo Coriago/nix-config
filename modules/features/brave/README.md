@@ -105,7 +105,7 @@ remain on disk. `sync.enable = false` retains
 packaged policy/extension delivery but disables preference synchronization; snapshot
 export is independent.
 
-For the freshest capture, close the wrapped browser normally, then run `nix run path:.#snapshot-mybrave` to
+For the freshest capture, close the wrapped browser normally, then run `brave-snapshot` to
 capture into `snapshot/mybrave/Default/Preferences`. Capture does not launch/sync
 Brave or stage/commit anything. Review URLs for private information before
 retaining a baseline. Startup URL and dictionary arrays retain their order and empty values.

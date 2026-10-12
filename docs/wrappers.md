@@ -182,8 +182,9 @@ flake.modules.nixos.neovim = {config, lib, liveConfig, pkgs, ...}: {
 };
 ```
 
-NixOS customizations do not alter the standalone flake package or its snapshot
-app; validate both the portable package and affected host configurations. Do not
+NixOS customizations do not alter the standalone flake package. Installed snapshot
+commands use the installed wrapper, including host customizations. Validate both
+the portable package and affected host configurations. Do not
 enable features on hosts or edit profiles without a request. The package remains
 buildable and runnable without installing it into NixOS.
 
@@ -191,8 +192,8 @@ buildable and runnable without installing it into NixOS.
 
 ```sh
 nix run path:.#myopencode
-nix run path:.#snapshot-myopencode
-nix run path:.#snapshot-all
+opencode-snapshot
+snapshot-all
 ```
 
 Sync runs before app launch, materializing writable config from packaged inputs.
@@ -202,7 +203,7 @@ Choose sync triggers in the feature when edits should survive multiple launches.
 A sync error is logged and does not prevent the application from launching.
 
 Snapshot export is manual. Setting `snapshot.enable = true` on a feature package
-automatically registers `snapshot-<package-name>` and makes it eligible for `snapshot-all` when its executable is on `PATH`.
+installs `<binName>-snapshot` and a package-owned registration for `snapshot-all`.
 No separate registration or app-close hook is needed. The command captures runtime
 files without first launching or syncing the app. For `myopencode`, the default
 export destination is `/home/helios/.config/nix-config/snapshot/myopencode/`.
