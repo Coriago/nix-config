@@ -3,13 +3,28 @@
     pkgs,
     config,
     ...
-  }: {
+  }: let 
+    keepGenerations = 8; 
+  in {
     nixpkgs.config.allowUnfree = true;
+
+    # Signing Packages
     sops.secrets.nix_signing_key = {};
     nix.extraOptions = ''
       builders-use-substitutes = true
       secret-key-files = ${config.sops.secrets.nix_signing_key.path}
     '';
+
+    # Garbage Collection
+    boot.loader.systemd-boot.configurationLimit = keepGenerations;
+    programs.nh = {
+      enable = true;
+      clean = {
+        enable = true;
+        extraArgs = "--keep ${toString keepGenerations} --keep-since 3d";
+      };
+    };
+
     nix.settings = {
       nix-path = ["nixpkgs=${inputs.nixpkgs}"];
       auto-optimise-store = true;

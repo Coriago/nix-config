@@ -5,7 +5,6 @@
       systemd-boot.consoleMode = "auto";
       efi.canTouchEfiVariables = true;
       grub.enable = lib.mkForce false;
-      systemd-boot.configurationLimit = 10;
     };
   };
 }
