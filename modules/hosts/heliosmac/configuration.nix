@@ -10,6 +10,7 @@
     imports = with config.flake.modules.nixos; [
       workstation
       boot
+      power-usage
     ];
   };
 }

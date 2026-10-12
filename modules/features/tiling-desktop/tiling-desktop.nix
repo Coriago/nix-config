@@ -25,6 +25,7 @@ in {
         kdePackages.dolphin
         kdePackages.kio-extras
       ];
+      services.udisks2.enable = true;
     };
   };
 }

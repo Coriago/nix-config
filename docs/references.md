@@ -6,6 +6,7 @@ references here with a short description and avoid duplicate entries.
 
 
 - nix-wrapper-modules: https://nix-community.github.io/nix-wrapper-modules/ — wrapper options, integration, and examples.
+- PowerTOP: https://github.com/fenrus75/powertop/blob/v2.15/README.md — pinned version's diagnostics, reports, calibration, and kernel requirements; https://github.com/fenrus75/powertop/blob/v2.15/doc/powertop.8 — CLI options and interactive controls.
 - flake-parts: https://flake.parts/options/flake-parts.html — `perSystem` options and conventional `apps` outputs; prefer the pinned modules' option documentation.
 - Context7: https://context7.com/docs/ — documentation lookup and MCP setup; Pi integration: https://context7.com/docs/clients/pi
 - Pi: https://github.com/earendil-works/pi/tree/main/packages/coding-agent/docs — agent configuration, extensions, and native MCP.
