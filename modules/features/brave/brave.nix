@@ -23,9 +23,9 @@ in {
         {
           id = "mnjggcdmjocbbbhaepdhchncahnbgone";
         }
-        # {
-        #   id = "";
-        # }
+        {
+          id = "neebplgakaahbhdphmkckjjcegoiijjo";
+        }
       ];
       recommendedPolicies = {
         # Bitwarden's default-manager permission still needs user confirmation.
