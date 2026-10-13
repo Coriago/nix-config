@@ -1,3 +1,8 @@
+# This is a global helper module that provides personalized metadata variables about the whole flake and each host.
+# meta is included at global scope and contains information generic to all hosts.
+# hosts can reference other hosts using 'meta.hosts' or reference their own metadata at 'metahost' under nixos module scope.
+# There is no restrictions on where metadata is defined at, but the preference is to put host specific metadata next to the configuration
+# and central configuration here
 {
   lib,
   config,
@@ -33,6 +38,9 @@ in {
         default = {};
         type = types.lazyAttrsOf hostMetaType;
       };
+
+      # These are optional option definitions. 
+      # Any value can be inserted here to reference without defining the option
       options.email = mkOption {
         type = types.str;
         description = "Email address used for the primary user's Git identity.";

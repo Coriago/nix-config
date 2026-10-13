@@ -1,3 +1,6 @@
+# This global helper module allows for an easy method to symlink configuration files into the nix store.
+# By using symlinks, nixos rebuilds are not required for every update for faster iteration.
+# The trade off is that this must be configured on the desired host with an absolute path to files in this repo.
 {
   lib,
   self,
@@ -16,7 +19,7 @@
     in
       assert lib.assertMsg (lib.hasPrefix "/" root) "liveConfig.root must be an absolute checkout path";
       assert lib.assertMsg (lib.hasPrefix sourceRoot source) "liveConfig.link requires a path inside this flake";
-        pkgs.runCommand "live-config-${builtins.baseNameOf path}" {} ''
+        pkgs.runCommand "live-config-${baseNameOf path}" {} ''
           ln -s ${lib.escapeShellArg target} "$out"
         '';
     link = path:
@@ -37,7 +40,6 @@ in {
       enable = lib.mkEnableOption "runtime config symlinks into the local checkout";
       root = lib.mkOption {
         type = lib.types.str;
-        default = "/home/helios/.config/nix-config";
         description = "Absolute checkout path on the machine running the wrappers.";
       };
     };

@@ -1,3 +1,5 @@
+# This provides the configurations.nixos option used to define nixos configs for hosts
+# It also gives a centralized place to import modules that all configurations will use such as meta and liveconfig
 {
   config,
   inputs,

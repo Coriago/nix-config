@@ -1,7 +1,7 @@
+# Devshell for repo tools
 {
   perSystem = {
     pkgs,
-    system,
     ...
   }: {
     # Devshells

@@ -1,3 +1,4 @@
+# Custom packages for the repo
 {
   perSystem = {
     pkgs,
