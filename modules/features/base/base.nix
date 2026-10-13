@@ -1,31 +1,30 @@
-local: let
-  inherit (local.config) meta;
-in {
+{meta, ...}:
+{
   flake.modules.nixos.base = {
-    config,
-    lib,
     pkgs,
+    hostmeta,
     ...
   }: {
-    system.stateVersion = config.hostmeta.stateVersion;
-    networking.hostName = config.hostmeta.hostname;
+    system.stateVersion = hostmeta.stateVersion;
+    networking.hostName = hostmeta.hostname;
 
     # Time and Locale
     time.timeZone = "America/New_York";
     i18n.defaultLocale = "en_US.UTF-8";
 
     # User setup
-    users.users.${config.hostmeta.username} = {
+    users.users.${hostmeta.username} = {
       isNormalUser = true;
-      description = "${config.hostmeta.username} account";
+      description = "${hostmeta.username} account";
       extraGroups = ["wheel" "networkmanager" "video" "dialout"];
       openssh.authorizedKeys.keys = [
         meta.sshPublicKey
       ];
     };
+    liveConfig.root = "/home/${hostmeta.username}/${meta.repoPath}";
 
     security.sudo.wheelNeedsPassword = false; # Passwordless sudo for wheel group
-    services.getty.autologinUser = config.hostmeta.username; # Autologin
+    services.getty.autologinUser = hostmeta.username; # Autologin
     security.polkit.enable = true; # Don't require sudo for reboot or
 
     services.openssh = {

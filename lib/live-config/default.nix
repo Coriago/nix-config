@@ -1,9 +1,10 @@
 # This global helper module allows for an easy method to symlink configuration files into the nix store.
 # By using symlinks, nixos rebuilds are not required for every update for faster iteration.
 # The trade off is that this must be configured on the desired host with an absolute path to files in this repo.
-{
+{flakeRoot}: {
   lib,
-  self,
+  config,
+  pkgs,
   ...
 }: let
   mkLiveConfig = {
@@ -11,7 +12,7 @@
     pkgs,
     root,
   }: let
-    sourceRoot = toString self.outPath + "/";
+    sourceRoot = toString flakeRoot + "/";
     forceLink = path: let
       source = toString path;
       relative = builtins.unsafeDiscardStringContext (lib.removePrefix sourceRoot source);
@@ -30,23 +31,16 @@
     inherit link forceLink;
   };
 in {
-  config.flake.modules.nixos.live-config = {
-    config,
-    lib,
-    pkgs,
-    ...
-  }: {
-    options.liveConfig = {
-      enable = lib.mkEnableOption "runtime config symlinks into the local checkout";
-      root = lib.mkOption {
-        type = lib.types.str;
-        description = "Absolute checkout path on the machine running the wrappers.";
-      };
+  options.liveConfig = {
+    enable = lib.mkEnableOption "runtime config symlinks into the local checkout";
+    root = lib.mkOption {
+      type = lib.types.str;
+      description = "Absolute checkout path on the machine running the wrappers.";
     };
+  };
 
-    config._module.args.liveConfig = mkLiveConfig {
-      inherit pkgs;
-      inherit (config.liveConfig) enable root;
-    };
+  config._module.args.liveConfig = mkLiveConfig {
+    inherit pkgs;
+    inherit (config.liveConfig) enable root;
   };
 }

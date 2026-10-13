@@ -4,6 +4,8 @@
   config,
   inputs,
   lib,
+  locallib,
+  self,
   ...
 }: {
   options.configurations.nixos = lib.mkOption {
@@ -14,7 +16,9 @@
         # Automatically add hostmeta to configurations
         imports = [
           config.flake.modules.generic.meta
-          config.flake.modules.nixos.live-config
+          (import locallib.live-config { 
+            flakeRoot = self.outPath; 
+          })
           hostModule
         ];
 
@@ -23,6 +27,18 @@
     );
   };
   config.flake = {
+
+    # Output configurations for every configurations.nixos.${name} defined in the flake.
+    nixosConfigurations =
+      lib.mapAttrs (
+        _name: module:
+          inputs.nixpkgs.lib.nixosSystem {
+            modules = [module];
+          }
+      )
+      config.configurations.nixos;
+
+    # Checks that the nixosConfigurations above are valid
     checks = lib.mkMerge (
       lib.mapAttrsToList (
         name: nixos: let
@@ -35,15 +51,5 @@
       )
       config.flake.nixosConfigurations
     );
-
-    # Output configurations for every configurations.nixos.${name} defined in the flake.
-    nixosConfigurations =
-      lib.mapAttrs (
-        _name: module:
-          inputs.nixpkgs.lib.nixosSystem {
-            modules = [module];
-          }
-      )
-      config.configurations.nixos;
   };
 }

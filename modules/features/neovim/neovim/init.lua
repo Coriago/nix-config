@@ -84,16 +84,7 @@ require('oil').setup {
   },
 }
 require('oil-git-status').setup {}
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'OilEnter',
-  group = vim.api.nvim_create_augroup('oil-auto-preview', { clear = true }),
-  callback = function(event)
-    -- OilEnter fires after the directory entries are ready.
-    if vim.api.nvim_get_current_buf() == event.data.buf then
-      require('oil').open_preview()
-    end
-  end,
-})
+-- Keep previews manual (Ctrl-p): previewing a parent can reload pending Oil edits.
 vim.keymap.set('n', '-', '<cmd>Oil<CR>', { desc = 'Explore current file directory' })
 vim.keymap.set('n', '<leader>e', function() require('oil').open(vim.fn.getcwd()) end,
   { desc = '[E]xplore working directory' })
