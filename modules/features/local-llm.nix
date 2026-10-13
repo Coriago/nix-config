@@ -1,9 +1,9 @@
 local: let
-  inherit (local.config.meta) localLLM;
+  inherit (local.meta) localLLM;
 in {
   flake.modules.nixos.local-llm = {
     config,
-    lib,
+    hostmeta,
     pkgs,
     ...
   }: {
@@ -11,7 +11,7 @@ in {
 
     assertions = [
       {
-        assertion = config.hostmeta.hostname == localLLM.host.hostname;
+        assertion = hostmeta.hostname == localLLM.host.hostname;
         message = "The local-llm feature must run on meta.localLLM.host.";
       }
       {

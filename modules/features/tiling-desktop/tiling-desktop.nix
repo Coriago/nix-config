@@ -16,7 +16,7 @@ in {
 
     display-management = {
       pkgs,
-      config,
+      hostmeta,
       ...
     }: {
       environment.systemPackages = with pkgs; [
@@ -25,7 +25,7 @@ in {
         ddcui
       ];
       hardware.i2c.enable = true;
-      users.users.${config.hostmeta.username}.extraGroups = ["i2c"];
+      users.users.${hostmeta.username}.extraGroups = ["i2c"];
       # Use noctalia display plugin instead of kanshi/wdisplays
       # services.kanshi.enable = true;
     };

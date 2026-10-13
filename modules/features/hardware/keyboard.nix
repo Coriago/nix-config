@@ -1,6 +1,6 @@
 {
   flake.modules.nixos.keyboard = {
-    config,
+    hostmeta,
     pkgs,
     ...
   }: {
@@ -11,7 +11,7 @@
     ];
     hardware.keyboard.qmk.enable = true;
     services.udev.packages = [pkgs.vial];
-    users.users.${config.hostmeta.username}.extraGroups = ["plugdev"];
+    users.users.${hostmeta.username}.extraGroups = ["plugdev"];
 
   };
 }

@@ -25,9 +25,6 @@
     ################################
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixos-hardware.inputs.nixpkgs.follows = "nixpkgs";
-    nixos-cli.url = "github:nix-community/nixos-cli"; # Better cli for nixos
-    nixos-cli.inputs.nixpkgs.follows = "nixpkgs";
-    nixos-cli.inputs.flake-parts.follows = "flake-parts";
     import-tree.url = "github:vic/import-tree"; # Recursive import of nix files in a directory
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
     nix-cachyos-kernel.inputs.nixpkgs.follows = "nixpkgs";

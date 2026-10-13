@@ -1,6 +1,6 @@
 local: {
   flake.modules.nixos.desktop-apps = {
-    config,
+    hostmeta,
     pkgs,
     ...
   }: {
@@ -15,7 +15,7 @@ local: {
       ark
     ];
 
-    home-manager.users.${config.hostmeta.username} = {
+    home-manager.users.${hostmeta.username} = {
       imports = [
         local.config.flake.modules.homeManager.desktop-apps
       ];
