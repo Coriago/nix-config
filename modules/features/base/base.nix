@@ -21,7 +21,6 @@
         meta.sshPublicKey
       ];
     };
-    liveConfig.root = "/home/${hostmeta.username}/${meta.repoPath}";
 
     security.sudo.wheelNeedsPassword = false; # Passwordless sudo for wheel group
     services.getty.autologinUser = hostmeta.username; # Autologin

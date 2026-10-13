@@ -6,6 +6,7 @@
   lib,
   locallib,
   self,
+  meta,
   ...
 }: {
   options.configurations.nixos = lib.mkOption {
@@ -13,21 +14,18 @@
     default = {};
     apply = lib.mapAttrs (
       name: hostModule: {
-        # Automatically add hostmeta to configurations
         imports = [
+          # Automatically add hostmeta to configurations
           config.flake.modules.generic.meta
-          (import locallib.live-config { 
-            flakeRoot = self.outPath; 
-          })
+          (import locallib.live-config {flakeRoot = self.outPath;})
           hostModule
         ];
-
-        hostmeta = config.meta.hosts.${name};
+        hostmeta = meta.hosts.${name};
+        liveConfig.root = meta.hosts.${name}.flakePath;
       }
     );
   };
   config.flake = {
-
     # Output configurations for every configurations.nixos.${name} defined in the flake.
     nixosConfigurations =
       lib.mapAttrs (

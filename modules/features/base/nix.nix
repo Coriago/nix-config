@@ -1,7 +1,7 @@
 {inputs, ...}: {
   flake.modules.nixos.base = {
-    pkgs,
     config,
+    hostmeta,
     ...
   }: let 
     keepGenerations = 8; 
@@ -19,6 +19,7 @@
     boot.loader.systemd-boot.configurationLimit = keepGenerations;
     programs.nh = {
       enable = true;
+      flake = hostmeta.flakePath; 
       clean = {
         enable = true;
         extraArgs = "--keep ${toString keepGenerations} --keep-since 3d";
@@ -33,7 +34,7 @@
       experimental-features = ["nix-command" "flakes"];
 
       # Additional nix caches to fetch from
-      trusted-users = ["${config.hostmeta.username}" "@wheel"]; # Required to allow for more caches
+      trusted-users = ["${hostmeta.username}" "@wheel"]; # Required to allow for more caches
       substituters = [
         "https://cache.nixos.org?priority=10"
         "https://nix-community.cachix.org"
@@ -59,7 +60,7 @@
     # Allows nixos rebuild without password
     security.sudo.extraRules = [
       {
-        users = [config.hostmeta.username];
+        users = [hostmeta.username];
         commands = [
           {
             command = "/run/current-system/sw/bin/nixos-rebuild";

@@ -1,16 +1,20 @@
-{config, ...}: let
-  inherit (config) meta;
-in {
+{meta, ...}: {
   flake.modules.nixos.base = {...}: {
     programs.git.enable = true;
   };
 
-  flake.modules.homeManager.base = {config, lib, pkgs, ...}: {
+  flake.modules.homeManager.base = {
+    config,
+    lib,
+    pkgs,
+    hostmeta,
+    ...
+  }: {
     programs.git = {
       enable = true;
       settings = {
         user = {
-          name = config.hostmeta.username;
+          name = hostmeta.username;
           email = meta.email;
         };
         pull.rebase = true;
