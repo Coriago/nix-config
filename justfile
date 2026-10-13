@@ -8,4 +8,4 @@ snapshot:
 
 # Capture first; apply only if every selected snapshot succeeds.
 apply: snapshot
-    nixos apply "path:$PWD"
+    nh os switch --ask .
