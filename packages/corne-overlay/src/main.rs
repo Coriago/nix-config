@@ -1,8 +1,10 @@
+mod appearance;
 mod keyboard;
 mod layers;
 mod render;
 
 use anyhow::{ensure, Result};
+use appearance::Appearance;
 use clap::Parser;
 use keyboard::Snapshot;
 use layers::{Active, Layout};
@@ -15,7 +17,7 @@ use smithay_client_toolkit::{
     registry_handlers,
     shell::{
         wlr_layer::{
-            Anchor, KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface,
+            KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface,
             LayerSurfaceConfigure,
         },
         WaylandSurface,
@@ -26,6 +28,7 @@ use std::{
     os::fd::AsRawFd,
     path::PathBuf,
     sync::{Arc, Mutex},
+    time::{Duration, Instant},
 };
 use wayland_client::{
     globals::registry_queue_init,
@@ -53,6 +56,9 @@ struct Args {
     /// Check the read-only USB connection and print its tapping term
     #[arg(long)]
     probe: bool,
+    /// Live appearance JSON supplied by the Noctalia plugin
+    #[arg(long)]
+    appearance: Option<PathBuf>,
 }
 fn main() -> Result<()> {
     let args = Args::parse();
@@ -70,7 +76,16 @@ fn main() -> Result<()> {
         );
         return Ok(());
     }
-    let renderer = Renderer::new()?;
+    let appearance = args
+        .appearance
+        .as_deref()
+        .map(|p| Appearance::load(p, layout.layout.len()))
+        .transpose()?
+        .unwrap_or_default();
+    let mut renderer = Renderer::new()?;
+    if let Some(path) = &appearance.font_file {
+        renderer.set_font(path)?;
+    }
     let mut snapshot = Snapshot::default();
     if let Some(layer) = args.preview {
         snapshot.active.insert(layer);
@@ -79,9 +94,12 @@ fn main() -> Result<()> {
         let mut encoder = png::Encoder::new(std::fs::File::create(path)?, WIDTH, HEIGHT);
         encoder.set_color(png::ColorType::Rgba);
         encoder.set_depth(png::BitDepth::Eight);
-        encoder
-            .write_header()?
-            .write_image_data(&renderer.render(&layout, &snapshot, 1))?;
+        encoder.write_header()?.write_image_data(&renderer.render(
+            &layout,
+            &snapshot,
+            1,
+            &appearance,
+        ))?;
         return Ok(());
     }
     let shared = Arc::new(Mutex::new(snapshot.clone()));
@@ -110,18 +128,45 @@ fn main() -> Result<()> {
         layout,
         snapshot,
         exit: false,
+        appearance,
     };
+    // Receive output names before choosing a configured connector.
+    events.roundtrip(&mut app)?;
+    let mut appearance_checked = Instant::now();
+    let mut appearance_error = String::new();
     loop {
         events.dispatch_pending(&mut app)?;
         if app.exit {
             break;
+        }
+        if appearance_checked.elapsed() >= Duration::from_millis(250) {
+            if let Some(path) = &args.appearance {
+                match Appearance::load(path, app.layout.layout.len()) {
+                    Ok(next) => {
+                        appearance_error.clear();
+                        if next != app.appearance {
+                            app.apply_appearance(next);
+                        }
+                    }
+                    Err(error) => {
+                        let message = error.to_string();
+                        if message != appearance_error {
+                            eprintln!("Appearance: {message}");
+                            appearance_error = message;
+                        }
+                    }
+                }
+            }
+            appearance_checked = Instant::now();
         }
         let next = shared.lock().unwrap().clone();
         if next != app.snapshot {
             app.snapshot = next;
             app.dirty = true;
         }
-        let visible = args.preview.is_some() || app.snapshot.active != Active::from([0]);
+        let visible = args.preview.is_some()
+            || app.appearance.preview.is_some()
+            || app.snapshot.active != Active::from([0]);
         if visible && app.layer.is_none() {
             app.show(&qh)?;
         }
@@ -167,23 +212,51 @@ struct App {
     layout: Layout,
     snapshot: Snapshot,
     exit: bool,
+    appearance: Appearance,
 }
 impl App {
+    fn apply_appearance(&mut self, next: Appearance) {
+        if next.font_file != self.appearance.font_file {
+            if let Some(path) = &next.font_file {
+                if let Err(error) = self.renderer.set_font(path) {
+                    eprintln!("Font: {error}");
+                }
+            }
+        }
+        if next.output != self.appearance.output {
+            self.layer = None;
+            self.configured = false;
+        }
+        self.appearance = next;
+        if let Some(layer) = &self.layer {
+            layer.set_anchor(self.appearance.position.anchor());
+            let m = self.appearance.margin;
+            layer.set_margin(m, m, m, m);
+            layer.commit();
+        }
+        self.dirty = true;
+    }
     fn show(&mut self, qh: &QueueHandle<Self>) -> Result<()> {
         let surface = self.compositor.create_surface(qh);
         let region = self.compositor.wl_compositor().create_region(qh, ());
         surface.set_input_region(Some(&region));
         region.destroy();
+        let output = self.outputs.outputs().find(|o| {
+            self.outputs
+                .info(o)
+                .is_some_and(|i| i.name.as_deref() == Some(self.appearance.output.as_str()))
+        });
         let layer = self.shell.create_layer_surface(
             qh,
             surface,
             Layer::Overlay,
             Some("corne-overlay"),
-            None,
+            output.as_ref(),
         );
         layer.set_size(WIDTH, HEIGHT);
-        layer.set_anchor(Anchor::BOTTOM);
-        layer.set_margin(0, 0, 36, 0);
+        layer.set_anchor(self.appearance.position.anchor());
+        let m = self.appearance.margin;
+        layer.set_margin(m, m, m, m);
         layer.set_exclusive_zone(0);
         layer.set_keyboard_interactivity(KeyboardInteractivity::None);
         layer.commit();
@@ -198,7 +271,13 @@ impl App {
         let scale = self.scale.max(1) as usize;
         let width = WIDTH as usize * scale;
         let height = HEIGHT as usize * scale;
-        let pixels = self.renderer.render(&self.layout, &self.snapshot, scale);
+        let mut snapshot = self.snapshot.clone();
+        if let Some(preview) = self.appearance.preview {
+            snapshot.active = Active::from([0, preview]);
+        }
+        let pixels = self
+            .renderer
+            .render(&self.layout, &snapshot, scale, &self.appearance);
         let (buffer, canvas) = self.pool.create_buffer(
             width as i32,
             height as i32,
@@ -206,8 +285,10 @@ impl App {
             wl_shm::Format::Argb8888,
         )?;
         for (dest, src) in canvas.chunks_exact_mut(4).zip(pixels.chunks_exact(4)) {
+            let premul = |c: u8| (c as u16 * src[3] as u16 / 255) as u8;
             dest.copy_from_slice(
-                &u32::from_be_bytes([src[3], src[0], src[1], src[2]]).to_ne_bytes(),
+                &u32::from_be_bytes([src[3], premul(src[0]), premul(src[1]), premul(src[2])])
+                    .to_ne_bytes(),
             );
         }
         layer.wl_surface().set_buffer_scale(self.scale);
@@ -262,12 +343,30 @@ impl OutputHandler for App {
         &mut self.outputs
     }
     fn new_output(&mut self, _: &Connection, _: &QueueHandle<Self>, _: wl_output::WlOutput) {}
-    fn update_output(&mut self, _: &Connection, _: &QueueHandle<Self>, _: wl_output::WlOutput) {}
+    fn update_output(
+        &mut self,
+        _: &Connection,
+        _: &QueueHandle<Self>,
+        output: wl_output::WlOutput,
+    ) {
+        if self
+            .outputs
+            .info(&output)
+            .is_some_and(|i| i.name.as_deref() == Some(self.appearance.output.as_str()))
+        {
+            self.layer = None;
+            self.configured = false;
+        }
+    }
     fn output_destroyed(&mut self, _: &Connection, _: &QueueHandle<Self>, _: wl_output::WlOutput) {}
 }
 impl LayerShellHandler for App {
-    fn closed(&mut self, _: &Connection, _: &QueueHandle<Self>, _: &LayerSurface) {
-        self.exit = true;
+    fn closed(&mut self, _: &Connection, _: &QueueHandle<Self>, layer: &LayerSurface) {
+        // Output removal can close a surface; rebuild on an available output.
+        if self.layer.as_ref() == Some(layer) {
+            self.layer = None;
+            self.configured = false;
+        }
     }
     fn configure(
         &mut self,

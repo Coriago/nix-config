@@ -1,3 +1,4 @@
+use crate::appearance::{Appearance, Color};
 use crate::{
     keyboard::Snapshot,
     layers::{Layout, Position},
@@ -122,6 +123,11 @@ pub struct Renderer {
     font: Font,
 }
 impl Renderer {
+    pub fn set_font(&mut self, path: &str) -> Result<()> {
+        self.font = Font::from_bytes(std::fs::read(path)?, FontSettings::default())
+            .map_err(anyhow::Error::msg)?;
+        Ok(())
+    }
     pub fn new() -> Result<Self> {
         let bytes = std::fs::read(env!("CORNE_OVERLAY_FONT"))?;
         let font = Font::from_bytes(bytes, FontSettings::default()).map_err(anyhow::Error::msg)?;
@@ -136,6 +142,7 @@ impl Renderer {
         baseline: f32,
         size: f32,
         center: bool,
+        color: Color,
     ) {
         let size = size * scale as f32;
         let width: f32 = text
@@ -158,17 +165,39 @@ impl Renderer {
                     }
                     let index = (py as usize * stride + px as usize) * 4;
                     let a = bitmap[row * m.width + col] as u32;
-                    for (i, color) in [225, 235, 250].iter().enumerate() {
-                        pixels[index + i] =
-                            ((color * a + pixels[index + i] as u32 * (255 - a)) / 255) as u8;
+                    for (i, color) in color.0.iter().enumerate() {
+                        pixels[index + i] = ((*color as u32 * a
+                            + pixels[index + i] as u32 * (255 - a))
+                            / 255) as u8;
                     }
                 }
             }
             x += m.advance_width;
         }
     }
-    pub fn render(&self, layout: &Layout, state: &Snapshot, scale: usize) -> Vec<u8> {
-        let mut pixels = [15, 18, 25, 255].repeat(WIDTH as usize * HEIGHT as usize * scale * scale);
+    pub fn render(
+        &self,
+        layout: &Layout,
+        state: &Snapshot,
+        scale: usize,
+        appearance: &Appearance,
+    ) -> Vec<u8> {
+        let palette = &appearance.palette;
+        let mut pixels = vec![0; WIDTH as usize * HEIGHT as usize * scale * scale * 4];
+        rounded(
+            &mut pixels,
+            scale,
+            (0, 0, WIDTH as i32, HEIGHT as i32),
+            appearance.radius,
+            palette.outline,
+        );
+        rounded(
+            &mut pixels,
+            scale,
+            (1, 1, WIDTH as i32 - 2, HEIGHT as i32 - 2),
+            (appearance.radius - 1.0).max(0.0),
+            palette.surface,
+        );
         let layer = *state.active.last().unwrap_or(&0);
         let title = match layer {
             0 => "QWERTY".into(),
@@ -177,7 +206,16 @@ impl Renderer {
             3 => "Function".into(),
             n => format!("Layer {n}"),
         };
-        self.text(&mut pixels, scale, &title, 22.0, 32.0, 18.0, false);
+        self.text(
+            &mut pixels,
+            scale,
+            &title,
+            22.0,
+            32.0,
+            18.0,
+            false,
+            palette.primary,
+        );
         self.text(
             &mut pixels,
             scale,
@@ -186,19 +224,21 @@ impl Renderer {
             30.0,
             11.0,
             false,
+            palette.on_surface_variant,
         );
         for (pos, x, y) in positions() {
             let color = if state.pressed.contains(&pos) {
-                [45, 95, 130, 255]
+                palette.primary
             } else {
-                [31, 39, 51, 255]
+                palette.surface_variant
             };
-            for py in y as usize * scale..(y + 42) as usize * scale {
-                for px in x as usize * scale..(x + 44) as usize * scale {
-                    let i = (py * WIDTH as usize * scale + px) * 4;
-                    pixels[i..i + 4].copy_from_slice(&color);
-                }
-            }
+            rounded(
+                &mut pixels,
+                scale,
+                (x, y, 44, 42),
+                appearance.radius * 0.5,
+                color,
+            );
             let text = label(layout.key(pos, &state.active));
             let lines: Vec<_> = text.lines().collect();
             for (i, line) in lines.iter().enumerate() {
@@ -219,10 +259,44 @@ impl Renderer {
                     (y + baseline as i32) as f32,
                     size,
                     true,
+                    if state.pressed.contains(&pos) {
+                        palette.on_primary
+                    } else {
+                        palette.on_surface
+                    },
                 );
             }
         }
         pixels
+    }
+}
+fn rounded(pixels: &mut [u8], scale: usize, rect: (i32, i32, i32, i32), radius: f32, color: Color) {
+    let (x, y, w, h) = rect;
+    let radius = radius.min(w as f32 / 2.0).min(h as f32 / 2.0);
+    for py in y as usize * scale..(y + h) as usize * scale {
+        for px in x as usize * scale..(x + w) as usize * scale {
+            let lx = (px as f32 + 0.5) / scale as f32 - x as f32;
+            let ly = (py as f32 + 0.5) / scale as f32 - y as f32;
+            let dx = (radius - lx).max(lx - (w as f32 - radius)).max(0.0);
+            let dy = (radius - ly).max(ly - (h as f32 - radius)).max(0.0);
+            let alpha = if radius == 0.0 {
+                1.0
+            } else {
+                ((radius - (dx * dx + dy * dy).sqrt()) * scale as f32 + 0.5).clamp(0.0, 1.0)
+            };
+            let i = (py * WIDTH as usize * scale + px) * 4;
+            let old = pixels[i + 3] as f32 / 255.0;
+            let total = alpha + old * (1.0 - alpha);
+            if total > 0.0 {
+                for c in 0..3 {
+                    pixels[i + c] = ((color.0[c] as f32 * alpha
+                        + pixels[i + c] as f32 * old * (1.0 - alpha))
+                        / total)
+                        .round() as u8;
+                }
+                pixels[i + 3] = (total * 255.0).round() as u8;
+            }
+        }
     }
 }
 #[cfg(test)]

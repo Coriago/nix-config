@@ -1,0 +1,66 @@
+id = "helios/corne-overlay"
+name = "Corne Overlay"
+version = "0.2.0"
+plugin_api = 31
+author = "helios"
+icon = "keyboard"
+description = "Show estimated W-CORNE layers while holding their thumb keys, with the current Noctalia theme."
+tags = ["keyboard", "overlay", "vial"]
+
+[[setting]]
+key = "layout_file"
+type = "file"
+extensions = [".vil"]
+label_key = "layout.label"
+description_key = "layout.description"
+default = ""
+
+[[setting]]
+key = "position"
+type = "select"
+label_key = "position.label"
+default = "bottom_center"
+options = [
+  { value = "top_left", label_key = "position.top_left" },
+  { value = "top_center", label_key = "position.top_center" },
+  { value = "top_right", label_key = "position.top_right" },
+  { value = "center_left", label_key = "position.center_left" },
+  { value = "center", label_key = "position.center" },
+  { value = "center_right", label_key = "position.center_right" },
+  { value = "bottom_left", label_key = "position.bottom_left" },
+  { value = "bottom_center", label_key = "position.bottom_center" },
+  { value = "bottom_right", label_key = "position.bottom_right" },
+]
+
+[[setting]]
+key = "monitor"
+type = "string"
+label_key = "monitor.label"
+description_key = "monitor.description"
+default = "focused"
+
+[[setting]]
+key = "margin"
+type = "int"
+label_key = "margin.label"
+default = 36
+min = 0
+max = 500
+
+[[setting]]
+key = "preview"
+type = "select"
+label_key = "preview.label"
+description_key = "preview.description"
+default = "off"
+options = [
+  { value = "off", label_key = "preview.off" },
+  { value = "0", label_key = "preview.base" },
+  { value = "1", label_key = "preview.numbers" },
+  { value = "2", label_key = "preview.navigation" },
+  { value = "3", label_key = "preview.function" },
+]
+
+[[service]]
+id = "overlay"
+entry = "service.luau"
