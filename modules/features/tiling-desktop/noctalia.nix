@@ -24,6 +24,15 @@ in {
       snapshot.files.noctaliaConfig.pruneKeyContains = ["^plugin_settings\\..*\\.nixos_configuration$"];
       settings = {
         shell.launch_apps_as_systemd_services = true;
+        plugins = {
+          source = [{
+            name = "corne-overlay";
+            kind = "path";
+            location = "${self'.packages.corne-overlay}/share/noctalia/plugins";
+            enabled = true;
+          }];
+        };
+        plugin_settings."helios/corne-overlay".layout_file = "${../hardware/keyboard-markstos.vil}";
         plugin_settings."mindnbytes/nix-status".nixos_configuration = "heliosdesk";
         wallpaper.default.path = pkgs.fetchurl {
           name = "NixOS_Black.png";
