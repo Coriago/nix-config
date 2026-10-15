@@ -59,3 +59,18 @@ fn oneshot_is_intentionally_hold_only() {
     step(&mut s, &[], 10);
     assert_eq!(s.active, Active::from([0]));
 }
+
+#[test]
+fn held_non_layer_key_is_not_reinterpreted_after_layer_release() {
+    let mut s = state();
+    step(&mut s, &[(3, 6)], 0);
+    step(&mut s, &[(3, 6)], 210);
+    step(&mut s, &[(3, 5), (3, 6)], 220);
+    step(&mut s, &[(3, 5)], 230);
+    step(&mut s, &[(3, 5)], 500);
+    assert_eq!(s.active, Active::from([0]));
+    step(&mut s, &[], 510);
+    step(&mut s, &[(3, 5)], 520);
+    step(&mut s, &[(3, 5)], 720);
+    assert_eq!(s.active, Active::from([0, 1]));
+}

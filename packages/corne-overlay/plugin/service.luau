@@ -18,11 +18,21 @@ local function publishAppearance()
   for _, role in ipairs({"surface", "on_surface", "surface_variant", "on_surface_variant", "primary", "on_primary", "outline"}) do
     palette[role] = noctalia.getColor(role)
   end
+  -- Match Noctalia 5.2's floating panel and card opacity values.
+  local mode = noctalia.getSetting("shell.panel.transparency_mode")
+  local backgroundOpacity = ({solid = 1, soft = 0.80, glass = 0.55})[mode] or 1
+  local keyOpacity = ({solid = 1, soft = 0.88, glass = 0.65})[mode] or 1
   local appearance = {
     position = noctalia.getConfig("position"),
     output = output,
     margin = noctalia.getConfig("margin"),
     preview = tonumber(noctalia.getConfig("preview")),
+    always_visible = noctalia.getConfig("always_visible") == true,
+    avoid_caret = noctalia.getConfig("avoid_caret") ~= false,
+    animation_ms = if noctalia.getSetting("shell.animation.enabled") == false then 0
+      else math.floor(180 / math.clamp(noctalia.getSetting("shell.animation.speed") or 1, 0.1, 10)),
+    background_opacity = backgroundOpacity,
+    key_opacity = keyOpacity,
     radius = math.clamp((noctalia.getSetting("shell.corner_radius_scale") or 1) * 12, 0, 24),
     palette = palette,
     font_file = fontFile,

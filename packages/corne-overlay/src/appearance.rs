@@ -78,6 +78,11 @@ pub struct Appearance {
     pub output: String,
     pub margin: i32,
     pub preview: Option<usize>,
+    pub always_visible: bool,
+    pub avoid_caret: bool,
+    pub animation_ms: u64,
+    pub background_opacity: f32,
+    pub key_opacity: f32,
     pub palette: Palette,
     pub radius: f32,
     pub font_file: Option<String>,
@@ -89,6 +94,11 @@ impl Default for Appearance {
             output: String::new(),
             margin: 36,
             preview: None,
+            always_visible: false,
+            avoid_caret: true,
+            animation_ms: 180,
+            background_opacity: 1.0,
+            key_opacity: 1.0,
             palette: Palette::default(),
             radius: 12.0,
             font_file: None,
@@ -104,6 +114,13 @@ impl Appearance {
         ensure!(raw.len() <= 65536, "Appearance file is too large");
         let value: Self = serde_json::from_str(&raw)?;
         ensure!((0..=500).contains(&value.margin), "Margin must be 0–500");
+        ensure!(value.animation_ms <= 2000, "Animation must be 0–2000 ms");
+        ensure!(
+            [value.background_opacity, value.key_opacity]
+                .iter()
+                .all(|v| v.is_finite() && (0.0..=1.0).contains(v)),
+            "Opacity must be 0–1"
+        );
         ensure!(
             value.radius.is_finite() && (0.0..=24.0).contains(&value.radius),
             "Radius must be 0–24"

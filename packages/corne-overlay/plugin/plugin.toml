@@ -1,6 +1,6 @@
 id = "helios/corne-overlay"
 name = "Corne Overlay"
-version = "0.2.0"
+version = "0.3.0"
 plugin_api = 31
 author = "helios"
 icon = "keyboard"
@@ -14,6 +14,13 @@ extensions = [".vil"]
 label_key = "layout.label"
 description_key = "layout.description"
 default = ""
+
+[[setting]]
+key = "avoid_caret"
+type = "bool"
+label_key = "avoid_caret.label"
+description_key = "avoid_caret.description"
+default = true
 
 [[setting]]
 key = "position"
@@ -46,6 +53,13 @@ label_key = "margin.label"
 default = 36
 min = 0
 max = 500
+
+[[setting]]
+key = "always_visible"
+type = "bool"
+label_key = "always_visible.label"
+description_key = "always_visible.description"
+default = false
 
 [[setting]]
 key = "preview"

@@ -43,7 +43,7 @@ impl Layout {
     }
 }
 
-pub fn action(code: &str) -> Option<(usize, bool)> {
+fn action(code: &str) -> Option<(usize, bool)> {
     if let Some(rest) = code.strip_prefix("LT") {
         return Some((rest.split_once('(')?.0.parse().ok()?, true));
     }
@@ -55,11 +55,16 @@ pub fn action(code: &str) -> Option<(usize, bool)> {
     None
 }
 
+struct HeldKey {
+    action: Option<(usize, bool)>,
+    pressed_at: Duration,
+}
+
 pub struct Layers {
     pub layout: Layout,
     pub active: Active,
     pub term: Duration,
-    held: BTreeMap<Position, (String, Duration)>,
+    held: BTreeMap<Position, HeldKey>,
 }
 impl Layers {
     pub fn new(layout: Layout, term: Duration) -> Self {
@@ -77,17 +82,25 @@ impl Layers {
         let additions: Vec<_> = pressed
             .iter()
             .filter(|p| !self.held.contains_key(p))
-            .map(|p| (*p, (self.layout.key(*p, &self.active).to_owned(), now)))
+            .map(|p| {
+                (
+                    *p,
+                    HeldKey {
+                        action: action(self.layout.key(*p, &self.active)),
+                        pressed_at: now,
+                    },
+                )
+            })
             .collect();
         self.held.extend(additions);
         self.activate(now);
     }
     fn activate(&mut self, now: Duration) {
         self.active = Active::from([0]);
-        for (code, start) in self.held.values() {
-            if let Some((layer, delayed)) = action(code) {
+        for key in self.held.values() {
+            if let Some((layer, delayed)) = key.action {
                 if layer < self.layout.layout.len()
-                    && (!delayed || now.saturating_sub(*start) >= self.term)
+                    && (!delayed || now.saturating_sub(key.pressed_at) >= self.term)
                 {
                     self.active.insert(layer);
                 }

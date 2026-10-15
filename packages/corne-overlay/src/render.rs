@@ -124,14 +124,15 @@ pub struct Renderer {
 }
 impl Renderer {
     pub fn set_font(&mut self, path: &str) -> Result<()> {
-        self.font = Font::from_bytes(std::fs::read(path)?, FontSettings::default())
-            .map_err(anyhow::Error::msg)?;
+        self.font = Self::load_font(path)?;
         Ok(())
     }
     pub fn new() -> Result<Self> {
-        let bytes = std::fs::read(env!("CORNE_OVERLAY_FONT"))?;
-        let font = Font::from_bytes(bytes, FontSettings::default()).map_err(anyhow::Error::msg)?;
+        let font = Self::load_font(env!("CORNE_OVERLAY_FONT"))?;
         Ok(Self { font })
+    }
+    fn load_font(path: &str) -> Result<Font> {
+        Font::from_bytes(std::fs::read(path)?, FontSettings::default()).map_err(anyhow::Error::msg)
     }
     fn text(
         &self,
@@ -164,12 +165,11 @@ impl Renderer {
                         continue;
                     }
                     let index = (py as usize * stride + px as usize) * 4;
-                    let a = bitmap[row * m.width + col] as u32;
-                    for (i, color) in color.0.iter().enumerate() {
-                        pixels[index + i] = ((*color as u32 * a
-                            + pixels[index + i] as u32 * (255 - a))
-                            / 255) as u8;
-                    }
+                    blend(
+                        &mut pixels[index..index + 4],
+                        color,
+                        bitmap[row * m.width + col] as f32 / 255.0,
+                    );
                 }
             }
             x += m.advance_width;
@@ -190,6 +190,7 @@ impl Renderer {
             (0, 0, WIDTH as i32, HEIGHT as i32),
             appearance.radius,
             palette.outline,
+            1.0,
         );
         rounded(
             &mut pixels,
@@ -197,7 +198,13 @@ impl Renderer {
             (1, 1, WIDTH as i32 - 2, HEIGHT as i32 - 2),
             (appearance.radius - 1.0).max(0.0),
             palette.surface,
+            1.0,
         );
+        // Fade the complete panel background once; overlapping border/fill must
+        // not accumulate opacity. Text and key cards are composited afterwards.
+        for pixel in pixels.chunks_exact_mut(4) {
+            pixel[3] = (pixel[3] as f32 * appearance.background_opacity).round() as u8;
+        }
         let layer = *state.active.last().unwrap_or(&0);
         let title = match layer {
             0 => "QWERTY".into(),
@@ -238,6 +245,7 @@ impl Renderer {
                 (x, y, 44, 42),
                 appearance.radius * 0.5,
                 color,
+                appearance.key_opacity,
             );
             let text = label(layout.key(pos, &state.active));
             let lines: Vec<_> = text.lines().collect();
@@ -270,7 +278,26 @@ impl Renderer {
         pixels
     }
 }
-fn rounded(pixels: &mut [u8], scale: usize, rect: (i32, i32, i32, i32), radius: f32, color: Color) {
+fn blend(pixel: &mut [u8], color: Color, alpha: f32) {
+    let old = pixel[3] as f32 / 255.0;
+    let total = alpha + old * (1.0 - alpha);
+    if total > 0.0 {
+        for c in 0..3 {
+            pixel[c] = ((color.0[c] as f32 * alpha + pixel[c] as f32 * old * (1.0 - alpha)) / total)
+                .round() as u8;
+        }
+        pixel[3] = (total * 255.0).round() as u8;
+    }
+}
+
+fn rounded(
+    pixels: &mut [u8],
+    scale: usize,
+    rect: (i32, i32, i32, i32),
+    radius: f32,
+    color: Color,
+    opacity: f32,
+) {
     let (x, y, w, h) = rect;
     let radius = radius.min(w as f32 / 2.0).min(h as f32 / 2.0);
     for py in y as usize * scale..(y + h) as usize * scale {
@@ -285,37 +312,10 @@ fn rounded(pixels: &mut [u8], scale: usize, rect: (i32, i32, i32, i32), radius: 
                 ((radius - (dx * dx + dy * dy).sqrt()) * scale as f32 + 0.5).clamp(0.0, 1.0)
             };
             let i = (py * WIDTH as usize * scale + px) * 4;
-            let old = pixels[i + 3] as f32 / 255.0;
-            let total = alpha + old * (1.0 - alpha);
-            if total > 0.0 {
-                for c in 0..3 {
-                    pixels[i + c] = ((color.0[c] as f32 * alpha
-                        + pixels[i + c] as f32 * old * (1.0 - alpha))
-                        / total)
-                        .round() as u8;
-                }
-                pixels[i + 3] = (total * 255.0).round() as u8;
-            }
+            blend(&mut pixels[i..i + 4], color, alpha * opacity);
         }
     }
 }
 #[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn geometry_covers_every_physical_key_once() {
-        let positions = positions();
-        let unique: std::collections::BTreeSet<_> = positions.iter().map(|p| p.0).collect();
-        assert_eq!(positions.len(), 46);
-        assert_eq!(unique.len(), 46);
-        assert!(!unique.contains(&(2, 6)));
-        assert!(!unique.contains(&(3, 2)));
-    }
-    #[test]
-    fn shifted_symbols() {
-        assert_eq!(label("LSFT(KC_SCOLON)"), ":");
-        assert_eq!(label("LSFT(KC_BSLASH)"), "|");
-        assert_eq!(label("LSFT(KC_MINUS)"), "_");
-        assert_eq!(label("LSFT(KC_1)"), "!");
-    }
-}
+#[path = "../checks/render.rs"]
+mod tests;

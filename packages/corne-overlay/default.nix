@@ -1,9 +1,10 @@
-{ lib, rustPlatform, dejavu_fonts, fontconfig }:
+{ lib, rustPlatform, dejavu_fonts, fontconfig, at-spi2-core, glib }:
 rustPlatform.buildRustPackage {
   pname = "corne-overlay";
   version = "0.2.0";
   src = ./.;
   cargoLock.lockFile = ./Cargo.lock;
+  buildInputs = [at-spi2-core glib];
   CORNE_OVERLAY_FONT = "${dejavu_fonts}/share/fonts/truetype/DejaVuSans.ttf";
   postInstall = ''
     pluginDir=$out/share/noctalia/plugins/corne-overlay
