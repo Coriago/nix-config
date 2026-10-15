@@ -40,6 +40,8 @@ in {
           "Mod+S" = "spawn:${noctalia} msg panel-toggle launcher";
         };
         environment = {
+          # Enable Chromium's native accessibility bridge for caret reporting.
+          ACCESSIBILITY_ENABLED = "1";
           GTK_DATA_PREFIX = "${pkgs.adw-gtk3}";
           QT_QPA_PLATFORMTHEME = "qtengine";
           QT_PLUGIN_PATH = "${pkgs.qtengine}/${pkgs.kdePackages.qtbase.qtPluginPrefix}";
@@ -77,6 +79,9 @@ in {
         };
       };
     };
+    # allows for accessability acces in applications
+    services.gnome.at-spi2-core.enable = true;
+
     # The upstream session unit embeds its original package path.
     systemd.user.services.umbriel.serviceConfig.ExecStart = [
       ""

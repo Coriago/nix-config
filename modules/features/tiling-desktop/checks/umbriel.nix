@@ -40,6 +40,7 @@
         assert not (pathlib.Path.home() / ".config/syncumbriel/configExtras.toml").exists()
         env = settings["environment"]
         assert env["QT_QPA_PLATFORMTHEME"] == "qtengine"
+        assert env["ACCESSIBILITY_ENABLED"] == "1"
         pathlib.Path("qt-env").write_text("\n".join(
             f"export {key}={shlex.quote(value)}" for key, value in env.items()
         ))

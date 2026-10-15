@@ -53,6 +53,7 @@ max_visible = 3
 background_opacity = 0.7999999821186066
 
 [plugin_settings."helios/corne-overlay"]
+always_visible = false
 position = "top_right"
 
 [plugin_settings."mindnbytes/nix-status"]

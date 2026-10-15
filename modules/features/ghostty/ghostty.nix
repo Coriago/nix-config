@@ -15,6 +15,8 @@
       ...
     }: {
       inherit pkgs;
+      # Temporary GTK accessibility trial, kept separate for easy removal.
+      package = self'.packages.ghostty-a11y;
       # Preserve upstream defaults and their flags. Escape's search action is
       # performable-only; +list-keybinds/+show-config omit that flag. Recreating
       # their listing would consume Escape even when no terminal search is active.

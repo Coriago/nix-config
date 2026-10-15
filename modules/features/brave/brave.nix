@@ -14,6 +14,11 @@ in {
     packages.mybrave = local.flake.wrappers.brave.wrap {
       inherit pkgs;
       snapshot.enable = true;
+      # Expose web caret geometry to the keyboard overlay through AT-SPI.
+      flags."--force-renderer-accessibility" = {
+        data = "complete";
+        sep = "=";
+      };
       preferences.credentials_enable_autosignin = false;
       extensions = [
         {
