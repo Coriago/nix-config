@@ -3,7 +3,7 @@
     # Use latest kernel
     boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
     nix.settings.substituters = [
-      "https://attic.xuyh0120.win/lantian"
+      "https://attic.xuyh0120.win/lantian?priority=50"
       # "https://cache.xinux.uz"
     ];
     nix.settings.trusted-public-keys = [

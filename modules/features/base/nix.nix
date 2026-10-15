@@ -29,6 +29,10 @@
     nix.settings = {
       nix-path = ["nixpkgs=${inputs.nixpkgs}"];
       auto-optimise-store = true;
+      connect-timeout = 5;
+      download-attempts = 2;
+      stalled-download-timeout = 30;
+      fallback = true;
 
       # Enable flakes
       experimental-features = ["nix-command" "flakes"];
