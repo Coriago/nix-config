@@ -5,12 +5,11 @@
   };
 
   configurations.nixos.heliosmac = {
-    # Unlock the existing encrypted swap partition before its swap unit starts.
-
     imports = with config.flake.modules.nixos; [
       workstation
       boot
       power-usage
     ];
+    liveConfig.enable = true;
   };
 }
