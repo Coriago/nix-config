@@ -1,10 +1,10 @@
 {inputs, ...}: {
-  flake.modules.nixos.base = {
+  flake.modules.nixos.nix = {
     config,
     hostmeta,
     ...
-  }: let 
-    keepGenerations = 8; 
+  }: let
+    keepGenerations = 8;
   in {
     nixpkgs.config.allowUnfree = true;
 
@@ -19,7 +19,7 @@
     boot.loader.systemd-boot.configurationLimit = keepGenerations;
     programs.nh = {
       enable = true;
-      flake = hostmeta.flakePath; 
+      flake = hostmeta.flakePath;
       clean = {
         enable = true;
         extraArgs = "--keep ${toString keepGenerations} --keep-since 3d";

@@ -1,9 +1,22 @@
-{meta, ...}: {
+{
+  config,
+  meta,
+  ...
+}: {
   flake.modules.nixos.base = {
     pkgs,
     hostmeta,
     ...
   }: {
+    imports = with config.flake.modules.nixos; [
+      git
+      home-manager
+      nix
+      sops
+      zsh
+      sync-snap
+    ];
+
     system.stateVersion = hostmeta.stateVersion;
     networking.hostName = hostmeta.hostname;
 
@@ -24,6 +37,7 @@
     security.sudo.wheelNeedsPassword = false; # Passwordless sudo for wheel group
     services.getty.autologinUser = hostmeta.username; # Autologin
     security.polkit.enable = true; # Don't require sudo for reboot or
+    # hostname mdns
     services.avahi = {
       enable = true;
       nssmdns4 = true;

@@ -1,5 +1,12 @@
-{
-  flake.modules.nixos.base = {pkgs, ...}: {
+{config, ...}: {
+  flake.modules.nixos.zsh = {
+    hostmeta,
+    pkgs,
+    ...
+  }: {
+    home-manager.users.${hostmeta.username}.imports = [
+      config.flake.modules.homeManager.zsh
+    ];
     programs.zsh = {
       enable = true;
       enableCompletion = true;
@@ -8,7 +15,7 @@
     environment.pathsToLink = ["/share/zsh"];
   };
 
-  flake.modules.homeManager.base = {...}: {
+  flake.modules.homeManager.zsh = {...}: {
     programs.zsh = {
       enable = true;
       enableCompletion = true;

@@ -1,9 +1,16 @@
-{meta, ...}: {
-  flake.modules.nixos.base = {...}: {
+{
+  config,
+  meta,
+  ...
+}: {
+  flake.modules.nixos.git = {hostmeta, ...}: {
     programs.git.enable = true;
+    home-manager.users.${hostmeta.username}.imports = [
+      config.flake.modules.homeManager.git
+    ];
   };
 
-  flake.modules.homeManager.base = {
+  flake.modules.homeManager.git = {
     config,
     lib,
     pkgs,
