@@ -9,6 +9,7 @@ local: {
       tiling-desktop
       neovim
       tailscale
+      keyboard
     ];
   };
 }
