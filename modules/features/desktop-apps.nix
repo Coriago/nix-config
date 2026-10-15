@@ -12,8 +12,14 @@ local: {
     environment.systemPackages = with pkgs; [
       kdePackages.partitionmanager
       kdePackages.isoimagewriter
-      ark
+      kdePackages.ark
     ];
+    xdg.mime.defaultApplications = {
+      "application/zip" = "org.kde.ark.desktop";
+      "application/x-zip-compressed" = "org.kde.ark.desktop";
+      "application/x-7z-compressed" = "org.kde.ark.desktop"; # Optional: for 7z files
+      "application/x-tar" = "org.kde.ark.desktop"; # Optional: for tarballs
+    };
 
     home-manager.users.${hostmeta.username} = {
       imports = [
