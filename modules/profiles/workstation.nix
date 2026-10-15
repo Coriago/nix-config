@@ -10,6 +10,7 @@ local: {
       neovim
       tailscale
       keyboard
+      linux-compat
     ];
   };
 }
