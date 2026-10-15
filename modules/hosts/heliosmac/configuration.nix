@@ -6,7 +6,10 @@
 
   configurations.nixos.heliosmac = {
     imports = with config.flake.modules.nixos; [
+      base
+      development
       workstation
+      tailscale
       boot
       power-usage
     ];

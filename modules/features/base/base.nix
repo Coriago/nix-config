@@ -1,5 +1,4 @@
-{meta, ...}:
-{
+{meta, ...}: {
   flake.modules.nixos.base = {
     pkgs,
     hostmeta,
@@ -25,6 +24,17 @@
     security.sudo.wheelNeedsPassword = false; # Passwordless sudo for wheel group
     services.getty.autologinUser = hostmeta.username; # Autologin
     security.polkit.enable = true; # Don't require sudo for reboot or
+    services.avahi = {
+      enable = true;
+      nssmdns4 = true;
+      ipv4 = true;
+      ipv6 = true;
+      publish = {
+        enable = true;
+        addresses = true;
+        workstation = true;
+      };
+    };
 
     services.openssh = {
       enable = true;

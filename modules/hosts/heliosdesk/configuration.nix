@@ -6,7 +6,10 @@
 
   configurations.nixos.heliosdesk = {
     imports = with config.flake.modules.nixos; [
+      base
+      development
       workstation
+      tailscale
       boot
       nvidia
       # local-llm

@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.development = {...}: {
+  flake.modules.nixos.direnv = {...}: {
     programs.direnv = {
       enable = true;
       enableZshIntegration = true;
