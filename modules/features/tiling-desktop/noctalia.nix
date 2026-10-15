@@ -84,10 +84,5 @@ in {
     };
     programs.dconf.enable = true;
 
-    services.usbmuxd.enable = true;
-    environment.systemPackages = with pkgs; [
-      libimobiledevice
-      ifuse
-    ];
   };
 }
