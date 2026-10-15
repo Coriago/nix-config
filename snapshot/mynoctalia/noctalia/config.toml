@@ -12,6 +12,7 @@ start = [
 
 [brightness]
 enable_ddcutil = true
+minimum_brightness = 0.009999999776482582
 sync_all_monitors = true
 
 [control_center]
