@@ -95,6 +95,12 @@
     entry = args.config;
   in {
     options = {
+      content = mkOption {
+        type = types.either (types.attrsOf types.anything) (types.listOf types.anything);
+        readOnly = true;
+        default = (savedSnapshot name).content;
+        description = "Parsed saved JSON/TOML at snapshot.sourceDir/destinationPath, before declared settings. Empty attribute set for missing files, raw files, or directories. Independent of export and autoMerge flags; never reads live runtime files.";
+      };
       enable = mkOption {
         type = types.bool;
         default = true;
@@ -180,7 +186,7 @@
     ++ lib.concatMap (v: ["--transform" v]) entry.transform;
   # Internal helper commands are not application configuration.
   generated = lib.filterAttrs (name: _: !(lib.hasPrefix "_syncSnap" name)) config.constructFiles;
-  snapshotSource = name: let
+  savedSnapshot = name: let
     entry = config.snapshot.files.${name};
     source = "${config.snapshot.sourceDir}/${entry.destinationPath}";
     format =
@@ -196,22 +202,30 @@
       if format == "json"
       then builtins.fromJSON contents
       else builtins.fromTOML contents;
+    available = !entry.directory && builtins.elem format ["json" "toml"] && builtins.pathExists source;
+    content =
+      if !available
+      then {}
+      else
+        builtins.addErrorContext "while reading snapshot ${source}: " (
+          builtins.deepSeq parsed (
+            if builtins.isAttrs parsed || builtins.isList parsed
+            then parsed
+            else throw "snapshot must contain an object or array"
+          )
+        );
+  in {inherit available content contents format;};
+  snapshotSource = name: let
+    entry = config.snapshot.files.${name};
+    saved = savedSnapshot name;
   in
     lib.optionals (config.snapshot.autoMerge
       && entry.autoMerge
       && entry.enable
-      && !entry.directory
-      && builtins.elem format ["json" "toml"]
-      && builtins.pathExists source) [
+      && saved.available) [
       {
-        path = builtins.addErrorContext "while importing snapshot ${source}: " (
-          builtins.deepSeq parsed (
-            if builtins.isAttrs parsed || builtins.isList parsed
-            then pkgs.writeText "snapshot-${name}.${format}" contents
-            else throw "snapshot must contain an object or array"
-          )
-        );
-        inherit format;
+        path = builtins.deepSeq saved.content (pkgs.writeText "snapshot-${name}.${saved.format}" saved.contents);
+        inherit (saved) format;
       }
     ];
   invocation = operation: entryArgs: files: let

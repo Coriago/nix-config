@@ -52,6 +52,9 @@ max_visible = 3
 [osd]
 background_opacity = 0.7999999821186066
 
+[plugin_settings."helios/corne-overlay"]
+position = "top_right"
+
 [plugin_settings."mindnbytes/nix-status"]
 details_placement = "floating"
 
@@ -63,6 +66,7 @@ enabled = [
     "noctalia/bitwarden",
     "noctalia/umbriel-companion",
     "prponkshe/umbriel-displays",
+    "helios/corne-overlay",
 ]
 
 [shell]

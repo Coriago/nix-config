@@ -63,6 +63,26 @@
     sync.defaultDir = pkgs.lib.mkForce "\${HOME}/selective-merge";
   };
   missing = merged.wrap {snapshot.sourceDir = pkgs.lib.mkForce "${./checks/snapshots}/absent";};
+  composed = app.wrap ({config, ...}: {
+    snapshot.sourceDir = ./checks/snapshots;
+    sync.defaultDir = "\${HOME}/composed";
+    constructFiles.preferences.content = pkgs.lib.mkForce (builtins.toJSON {
+      array = config.snapshot.files.preferences.content.array ++ [{new = true;}];
+    });
+  });
+  explicitOnly = composed.wrap {
+    snapshot.autoMerge = false;
+    snapshot.files.preferences.enable = false;
+  };
+  rawSnapshot = merged.wrap {snapshot.files.preferences.format = "raw";};
+  directorySnapshot = merged.wrap {snapshot.files.preferences.directory = true;};
+  arraySnapshot = merged.wrap {snapshot.files.preferences.destinationPath = pkgs.lib.mkForce "array.json";};
+  extensionlessSnapshot = merged.wrap {
+    snapshot.files.preferences = {
+      destinationPath = pkgs.lib.mkForce "Preferences";
+      format = "json";
+    };
+  };
   timed = app.wrap {
     sync.defaultDir = "\${HOME}/timed";
     sync.files.preferences = {
@@ -89,9 +109,25 @@
 in
   assert app.configuration.sync.files.preferences.trigger == "onInputsChanged";
   assert builtins.length missing.configuration.sync.files.preferences.sources == 1;
+  assert missing.configuration.snapshot.files.preferences.content == {};
+  assert rawSnapshot.configuration.snapshot.files.preferences.content == {};
+  assert directorySnapshot.configuration.snapshot.files.preferences.content == {};
+  assert arraySnapshot.configuration.snapshot.files.preferences.content == ["saved" 2];
+  assert extensionlessSnapshot.configuration.snapshot.files.preferences.content == {saved = true;};
+  assert merged.configuration.snapshot.files.preferences.content.captured == 42;
+  assert merged.configuration.snapshot.files.other.content
+  == {
+    enabled = false;
+    saved = true;
+  };
+  assert explicitOnly.configuration.snapshot.files.preferences.content.array == [{old = true;}];
     pkgs.runCommand "sync-snap-addon-check" {nativeBuildInputs = [pkgs.jq];} ''
       export HOME="$TMPDIR/home" XDG_CONFIG_HOME="$TMPDIR/config with spaces" XDG_STATE_HOME="$TMPDIR/state"
       mkdir -p "$HOME"
+      ${composed}/bin/fixture-sync
+      jq -e '.captured == 42 and .array == [{"old":true},{"new":true}]' "$HOME/composed/custom/settings.json"
+      ${explicitOnly}/bin/fixture-sync
+      jq -e '.array == [{"old":true},{"new":true}]' "$HOME/composed/custom/settings.json"
       ${timed}/bin/fixture-sync --startup
       printf '{"declared":false}' > "$HOME/timed/custom/settings.json"
       ${timed}/bin/fixture-sync --startup

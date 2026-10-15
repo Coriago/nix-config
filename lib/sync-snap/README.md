@@ -204,6 +204,25 @@ skipping apply.
 
 ## Automatically importing snapshots
 
+`snapshot.files.<name>.content` exposes the parsed saved JSON/TOML as read-only
+Nix data, before declared settings are applied. For explicit list composition:
+
+```nix
+settings.plugins.enabled = lib.unique (
+  (config.snapshot.files.noctaliaConfig.content.plugins.enabled or [])
+  ++ ["helios/corne-overlay"]
+);
+```
+
+It reads `snapshot.sourceDir/destinationPath`, never the live runtime file.
+Missing files, raw files, and directories return `{}`; invalid structured files
+fail when evaluated. JSON array roots remain lists. Reading content is independent
+of export enablement and `autoMerge`. Keep its source path and format independent
+of settings computed from that content to avoid evaluation cycles.
+This does not change either merge stage: lists still replace whole unless you
+explicitly compose them in Nix. GUI additions since the last snapshot are not
+part of this saved input.
+
 `snapshot.autoMerge = true` reads existing JSON/TOML snapshots during Nix
 evaluation, validates their syntax and object/array root, and embeds their bytes
 in the package closure. Each generated sync file looks up the corresponding

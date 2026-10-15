@@ -15,7 +15,22 @@ in {
       type = "app";
       program = lib.getExe self'.packages.mynoctalia;
     };
-    packages.mynoctalia = local.flake.wrappers.noctalia.wrap {
+    packages.mynoctalia = local.flake.wrappers.noctalia.wrap ({config, ...}: let
+      savedPlugins = config.snapshot.files.noctaliaConfig.content.plugins or {};
+      savedSources =
+        savedPlugins.source or [
+          {
+            name = "official";
+            kind = "git";
+            location = "https://github.com/noctalia-dev/official-plugins";
+          }
+          {
+            name = "community";
+            kind = "git";
+            location = "https://github.com/noctalia-dev/community-plugins";
+          }
+        ];
+    in {
       inherit pkgs;
       configHome = "\${XDG_CONFIG_HOME}/syncnoctalia";
       stateHome = "\${XDG_STATE_HOME}/syncnoctalia";
@@ -25,12 +40,17 @@ in {
       settings = {
         shell.launch_apps_as_systemd_services = true;
         plugins = {
-          source = [{
-            name = "corne-overlay";
-            kind = "path";
-            location = "${self'.packages.corne-overlay}/share/noctalia/plugins";
-            enabled = true;
-          }];
+          enabled = lib.unique ((savedPlugins.enabled or []) ++ ["helios/corne-overlay"]);
+          source =
+            builtins.filter (source: source.name != "corne-overlay") savedSources
+            ++ [
+              {
+                name = "corne-overlay";
+                kind = "path";
+                location = "${self'.packages.corne-overlay}/share/noctalia/plugins";
+                enabled = true;
+              }
+            ];
         };
         plugin_settings."helios/corne-overlay".layout_file = "${../hardware/keyboard-markstos.vil}";
         plugin_settings."mindnbytes/nix-status".nixos_configuration = "heliosdesk";
@@ -52,7 +72,7 @@ in {
           data = ["GIO_EXTRA_MODULES" ":" "${pkgs.dconf.lib}/lib/gio/modules"];
         }
       ];
-    };
+    });
   };
 
   flake.modules.nixos.noctalia = {pkgs, ...}: {
@@ -63,5 +83,11 @@ in {
       systemd.target = "umbriel-session.target";
     };
     programs.dconf.enable = true;
+
+    services.usbmuxd.enable = true;
+    environment.systemPackages = with pkgs; [
+      libimobiledevice
+      ifuse
+    ];
   };
 }
