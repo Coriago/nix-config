@@ -21,6 +21,13 @@
       outputLength = 8192;
       baseURL = "http://${meta.localLLM.host.hostname}.${meta.tailscaleDomain}:${toString meta.localLLM.port}/v1";
     };
+    binaryCache = {
+      enable = true;
+      port = 5000;
+      host = meta.primaryHost;
+      url = "http://${meta.binaryCache.host.hostname}.${meta.tailscaleDomain}:${toString meta.binaryCache.port}";
+      publicKey = "myhomelab.net:xtVVBYntb5zLFB4eUUkLIe8OpDNwvDI20i8sDehE9ck=";
+    };
   };
 
   options.meta = lib.mkOption {
@@ -47,6 +54,11 @@
 
       options.localLLM = lib.mkOption {
         description = "Shared local inference server and client settings.";
+        type = lib.types.lazyAttrsOf lib.types.anything;
+      };
+
+      options.binaryCache = lib.mkOption {
+        description = "Shared binary cache server and client settings.";
         type = lib.types.lazyAttrsOf lib.types.anything;
       };
     };

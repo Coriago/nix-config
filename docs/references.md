@@ -11,6 +11,7 @@ references here with a short description and avoid duplicate entries.
 - Context7: https://context7.com/docs/ — documentation lookup and MCP setup; Pi integration: https://context7.com/docs/clients/pi
 - Pi: https://github.com/earendil-works/pi/tree/main/packages/coding-agent/docs — agent configuration, extensions, and native MCP.
 - Bun: https://bun.sh/docs/bundler/executables — standalone executable builds, worker entrypoints, and embedded assets.
+- Harmonia: https://github.com/nix-community/harmonia/blob/harmonia-v3.3.0/README.md — binary cache configuration, signing keys, and clients; the pinned NixOS module uses `services.harmonia.cache` and systemd credentials.
 
 - Umbriel: https://docs.noctalia.dev/umbriel/ — overview; https://docs.noctalia.dev/umbriel/configuration/ — config discovery, includes, precedence, native validation and reload. Prefer the pinned source's `docs/user/configuration.md` and `docs/design/configuration-reload.md` for the installed version.
 - Niri: https://niri-wm.github.io/niri/ — compositor configuration, window management, screencasting, and application compatibility.

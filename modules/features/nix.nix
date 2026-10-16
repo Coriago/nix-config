@@ -1,4 +1,9 @@
-{inputs, ...}: {
+{
+  inputs,
+  lib,
+  meta,
+  ...
+}: {
   flake.modules.nixos.nix = {
     config,
     hostmeta,
@@ -39,26 +44,28 @@
 
       # Additional nix caches to fetch from
       trusted-users = ["${hostmeta.username}" "@wheel"]; # Required to allow for more caches
-      substituters = [
-        "https://cache.nixos.org?priority=10"
-        "https://nix-community.cachix.org"
-        "https://numtide.cachix.org"
-        "https://cache.numtide.com"
-        "https://nixos-raspberrypi.cachix.org"
-        "https://watersucks.cachix.org"
-        "https://ros.cachix.org"
-        "https://nixpkgs-python.cachix.org"
-      ];
-      trusted-public-keys = [
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
-        "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
-        "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
-        "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
-        "myhomelab.net:xtVVBYntb5zLFB4eUUkLIe8OpDNwvDI20i8sDehE9ck=%"
-        "ros.cachix.org-1:dSyZxI8geDCJrwgvCOHDoAfOm5sV1wCPjBkKL+38Rvo="
-        "nixpkgs-python.cachix.org-1:hxjI7pFxTyuTHn2NkvWCrAUcNZLNS3ZAvfYNuYifcEU="
-      ];
+      substituters =
+        lib.optional (meta.binaryCache.enable && hostmeta.hostname != meta.binaryCache.host.hostname) meta.binaryCache.url
+        ++ [
+          # official
+          "https://cache.nixos.org?priority=10"
+          "https://nixpkgs-python.cachix.org"
+
+          # community
+          "https://nix-community.cachix.org"
+          "https://cache.numtide.com"
+
+          # for rpi-selfhost nvmd
+          "https://nixos-raspberrypi.cachix.org"
+        ];
+      trusted-public-keys =
+        lib.optional meta.binaryCache.enable meta.binaryCache.publicKey
+        ++ [
+          "nixpkgs-python.cachix.org-1:hxjI7pFxTyuTHn2NkvWCrAUcNZLNS3ZAvfYNuYifcEU="
+          "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+          "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+          "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
+        ];
     };
 
     # Allows nixos rebuild without password
