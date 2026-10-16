@@ -179,11 +179,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792181057,
-        "narHash": "sha256-hSsJ9v3UCaqwnydt66TU1OIna11p3qR8GjtVDrs+pAk=",
+        "lastModified": 1792183523,
+        "narHash": "sha256-lXpa2V30B+zXyBJuGIbQ0Y8cTDO/Byfbcyp7FZnwSTs=",
         "owner": "Coriago",
         "repo": "nixmox",
-        "rev": "89e42dd2e7b9aaa80aebe6bd2f19baae845abb0e",
+        "rev": "6cc2c5a4d6c276d57acafcaaa5dfc5b6bc2a363d",
         "type": "github"
       },
       "original": {
