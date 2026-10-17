@@ -11,7 +11,6 @@
       workstation
       boot
       nvidia
-      # local-llm
       cachyos-kernel
       gaming
     ];

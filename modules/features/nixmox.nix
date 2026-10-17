@@ -9,6 +9,7 @@ in {
       allowConfigWrite = true;
       gitops.repoUrl = meta.repoUrl;
       autoApply = false;
+      addHost = {};
     };
   };
 }
