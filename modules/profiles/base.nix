@@ -15,6 +15,8 @@
       sops
       zsh
       sync-snap
+      nixmox
+      tailscale
     ];
 
     system.stateVersion = hostmeta.stateVersion;

@@ -9,9 +9,7 @@
       base
       development
       workstation
-      tailscale
       boot
-      power-usage
     ];
     liveConfig.enable = true;
   };

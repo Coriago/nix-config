@@ -9,13 +9,11 @@
       base
       development
       workstation
-      tailscale
       boot
       nvidia
       # local-llm
       cachyos-kernel
       gaming
-      nixmox
     ];
 
     liveConfig.enable = true;
