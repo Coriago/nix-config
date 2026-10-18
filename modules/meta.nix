@@ -10,7 +10,7 @@
     sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBYVacUQ/B11m2ycolJnoIKn4TS1alZKDbe1ssRnWZE2";
     primaryHost = meta.hosts.heliosdesk;
     tailscaleDomain = "li-taipan.ts.net";
-    repoUrl = "https://github.com/Coriago/nix-config.git";
+    repoUrl = "git@github.com:Coriago/nix-config.git";
     repoPath = ".config/nix-config";
     localLLM = {
       host = meta.primaryHost;
