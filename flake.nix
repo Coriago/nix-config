@@ -23,6 +23,10 @@
 
     # Secondary
     ################################
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixos-hardware.inputs.nixpkgs.follows = "nixpkgs";
     import-tree.url = "github:vic/import-tree"; # Recursive import of nix files in a directory
