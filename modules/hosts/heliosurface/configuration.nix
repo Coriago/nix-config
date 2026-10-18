@@ -1,4 +1,4 @@
-{config, ...}: {
+{config, inputs, ...}: {
   meta.hosts."heliosurface" = {
     username = "helios";
     stateVersion = "26.11";
@@ -6,6 +6,7 @@
 
   configurations.nixos."heliosurface" = {
     imports = [
+      inputs.nixos-hardware.nixosModules.microsoft-surface-common
       config.flake.modules.nixos.base
       config.flake.modules.nixos.boot
       config.flake.modules.nixos.diskLayout
@@ -38,6 +39,7 @@
       )
     ];
     diskLayout.device = "/dev/nvme0n1";
+    services.iptsd.enable = true;
     services.nixmox.joinSeed = "100.74.103.111:8080";
   };
 }
