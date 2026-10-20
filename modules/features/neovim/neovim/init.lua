@@ -127,6 +127,11 @@ require('which-key').setup {
 }
 require('tokyonight').setup { styles = { comments = { italic = false } } }
 vim.cmd.colorscheme 'unokai'
+require('render-markdown').setup {
+  latex = { enabled = false }, -- No math parser/converter bundled.
+}
+vim.keymap.set('n', '<leader>tm', '<cmd>RenderMarkdown buf_toggle<CR>',
+  { desc = '[T]oggle [M]arkdown rendering (buffer)' })
 require('todo-comments').setup { signs = false }
 require('mini.ai').setup { n_lines = 500, mappings = { around_next = 'aa', inside_next = 'ii' } }
 require('mini.surround').setup()
@@ -142,8 +147,14 @@ vim.keymap.set('n', '<leader>gf', function() require('snacks').lazygit.log_file(
   { desc = 'Git history of current [F]ile' })
 
 -- Search ---------------------------------------------------------------------
+local search_args = { '--hidden', '--glob', '!.git', '--glob', '!.direnv' }
 require('telescope').setup {
   defaults = { preview = { treesitter = false } },
+  pickers = {
+    find_files = { find_command = vim.list_extend({ 'rg', '--files' }, search_args) },
+    live_grep = { additional_args = search_args },
+    grep_string = { additional_args = search_args },
+  },
   extensions = { ['ui-select'] = { require('telescope.themes').get_dropdown() } },
 }
 require('telescope').load_extension 'fzf'
@@ -152,7 +163,8 @@ local builtin = require 'telescope.builtin'
 for key, item in pairs {
   sh = { builtin.help_tags, '[S]earch [H]elp' },
   sk = { builtin.keymaps, '[S]earch [K]eymaps' },
-  sf = { function() builtin.find_files { hidden = true } end, '[S]earch [F]iles' },
+  sf = { builtin.find_files, '[S]earch [F]iles' },
+  sc = { builtin.git_status, '[S]earch Git [C]hanges' },
   ss = { builtin.builtin, '[S]earch [S]elect Telescope' },
   sw = { builtin.grep_string, '[S]earch current [W]ord' },
   sg = { builtin.live_grep, '[S]earch by [G]rep' },

@@ -114,6 +114,7 @@ in {
         tokyonight-nvim
         todo-comments-nvim
         mini-nvim
+        render-markdown-nvim
         oil-nvim
         oil-git-status-nvim
         snacks-nvim
