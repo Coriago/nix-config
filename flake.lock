@@ -41,11 +41,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792501938,
-        "narHash": "sha256-AKH27hmeZKqExn10QL6CrKVp9zGOz2OUe9p0l4dX8Ck=",
+        "lastModified": 1792505528,
+        "narHash": "sha256-BsLGrgqKJg2o9IsjU4Xvzo8RZV9Fn1GajEasifBwqsI=",
         "owner": "nix-community",
         "repo": "disko",
-        "rev": "9e8f8438f1fd98cfcbdd33e55b512d74ddb0f93d",
+        "rev": "7fdf779611daf0e250889cb27e4f1f602147a8f2",
         "type": "github"
       },
       "original": {
@@ -82,24 +82,6 @@
         "owner": "hercules-ci",
         "repo": "flake-parts",
         "rev": "024633cd702b10285db5cb19b40ad48d2399ba60",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "type": "github"
-      }
-    },
-    "flake-parts_2": {
-      "inputs": {
-        "nixpkgs-lib": "nixpkgs-lib"
-      },
-      "locked": {
-        "lastModified": 1788450739,
-        "narHash": "sha256-glZLQlzIn1fXH6PazR2iUmTo7kzzyYSshrWhLS9TqCU=",
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "rev": "31729ca8cbdb4fa927b34e5f4353e6a83f39e993",
         "type": "github"
       },
       "original": {
@@ -172,22 +154,23 @@
     "nix-cachyos-kernel": {
       "inputs": {
         "flake-compat": "flake-compat",
-        "flake-parts": "flake-parts_2",
+        "flake-parts": [
+          "flake-parts"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1790564970,
-        "narHash": "sha256-ANcKKTLB5oitjAYPp+iWts5clpbowVbDPVvt03P7Hes=",
+        "lastModified": 1792446362,
+        "narHash": "sha256-cjpS9fG+1j5d+w2q2Pjqp8awL4KoMUlPdUeNNxOjOIQ=",
         "owner": "xddxdd",
         "repo": "nix-cachyos-kernel",
-        "rev": "b1332396df6e880d7e3b6b451c6a74132ce8cf66",
+        "rev": "be0be288549209421ab4f67c392a23109cb809a3",
         "type": "github"
       },
       "original": {
         "owner": "xddxdd",
-        "ref": "release",
         "repo": "nix-cachyos-kernel",
         "type": "github"
       }
@@ -245,21 +228,6 @@
         "owner": "nixos",
         "ref": "nixos-unstable",
         "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs-lib": {
-      "locked": {
-        "lastModified": 1788057806,
-        "narHash": "sha256-DTQSMxzDWmT0zhguthvegnVkn7CFqGCv4IHCzk5ZUpM=",
-        "owner": "nix-community",
-        "repo": "nixpkgs.lib",
-        "rev": "596e2e3940e09b2abbeb03f75fa1828c57fcd72c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "nixpkgs.lib",
         "type": "github"
       }
     },

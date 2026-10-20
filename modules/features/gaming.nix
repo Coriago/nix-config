@@ -10,6 +10,7 @@
     };
 
     hardware.xone.enable = true;
+    hardware.xpad-noone.enable = false;
 
     programs.gamescope = {
       enable = false;

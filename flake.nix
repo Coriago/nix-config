@@ -30,8 +30,9 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixos-hardware.inputs.nixpkgs.follows = "nixpkgs";
     import-tree.url = "github:vic/import-tree"; # Recursive import of nix files in a directory
-    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
+    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel";
     nix-cachyos-kernel.inputs.nixpkgs.follows = "nixpkgs";
+    nix-cachyos-kernel.inputs.flake-parts.follows = "flake-parts";
     llm-agents.url = "github:numtide/llm-agents.nix"; # LLM Agents
     llm-agents.inputs.nixpkgs.follows = "nixpkgs";
     llm-agents.inputs.flake-parts.follows = "flake-parts";
