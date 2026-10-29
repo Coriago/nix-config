@@ -21,7 +21,7 @@ vim.opt.timeoutlen = 300
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = '  ', trail = '·', nbsp = '␣' }
 vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 vim.opt.scrolloff = 10
@@ -126,7 +126,7 @@ require('which-key').setup {
   },
 }
 require('tokyonight').setup { styles = { comments = { italic = false } } }
-vim.cmd.colorscheme 'unokai'
+vim.cmd.colorscheme 'tokyonight'
 require('render-markdown').setup {
   latex = { enabled = false }, -- No math parser/converter bundled.
 }

@@ -7,6 +7,7 @@
     imports = with config.flake.modules.nixos; [
       direnv
       neovim
+      lazygit
       pi-agent
     ];
 
@@ -22,7 +23,6 @@
       gh
       fzf
       bubblewrap
-      lazygit
       herdr
 
       inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex

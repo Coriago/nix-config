@@ -62,11 +62,13 @@ details_placement = "floating"
 [plugin_settings."noctalia/umbriel-companion"]
 panel_placement = "floating"
 
+[plugin_settings."prponkshe/umbriel-displays"]
+panel_placement = "floating"
+
 [plugins]
 enabled = [
     "noctalia/bitwarden",
     "noctalia/umbriel-companion",
-    "prponkshe/umbriel-displays",
     "helios/corne-overlay",
 ]
 

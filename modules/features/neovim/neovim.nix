@@ -46,11 +46,19 @@ in {
     self',
     ...
   }: {
-    packages.myneovim = inputs.wrapper-modules.wrappers.neovim.wrap {
+    packages.myneovim = inputs.wrapper-modules.wrappers.neovim.wrap ({wlib, ...}: {
       inherit pkgs;
       settings.config_directory = ./neovim;
       # Keep state/cache separate from any Neovim already on the host.
       env.NVIM_APPNAME = "myneovim";
+      # Snacks adds its theme to this file list, even before the first launch.
+      envDefault.LG_CONFIG_FILE = {
+        data =
+          lib.replaceStrings ["\${XDG_CONFIG_HOME}"] ["\${XDG_CONFIG_HOME:-$HOME/.config}"]
+          self'.packages.mylazygit.configuration.sync.files.lazygitConfig.path;
+        esc-fn = wlib.escapeShellArgWithEnv;
+      };
+      prefixVar = [{data = ["PATH" ":" (lib.makeBinPath [self'.packages.mylazygit])];}];
       info = {
         fallback_rustc = "${pkgs.rustc}/bin/rustc";
         fallback_rust_src = "${pkgs.rustPlatform.rustLibSrc}";
@@ -72,7 +80,6 @@ in {
             (lib.makeBinPath (with pkgs;
               [
                 git
-                lazygit
                 curl
                 ripgrep
                 fd
@@ -157,7 +164,7 @@ in {
             yaml
           ]))
       ];
-    };
+    });
 
     apps.myneovim = {
       type = "app";
