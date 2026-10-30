@@ -33,6 +33,7 @@ local: {
       orca-slicer
       krita
       vlc
+      local.self.packages.${pkgs.stdenv.hostPlatform.system}.nuvio
     ];
 
     home-manager.users.${hostmeta.username} = {...}: {
