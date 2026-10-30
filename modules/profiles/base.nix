@@ -15,7 +15,7 @@
       sops
       zsh
       sync-snap
-      nixmox
+      # nixmox
       tailscale
     ];
 

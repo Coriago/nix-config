@@ -1,4 +1,4 @@
-{inputs, ...}: {
+{
   configurations.nixos.heliosurface = {
     config,
     lib,
@@ -6,7 +6,6 @@
     ...
   }: {
     imports = [
-      inputs.nixos-hardware.nixosModules.microsoft-surface-common
       (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
@@ -18,6 +17,5 @@
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
     hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     diskLayout.device = "/dev/nvme0n1";
-    services.iptsd.enable = true;
   };
 }

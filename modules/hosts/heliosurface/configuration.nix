@@ -13,9 +13,8 @@
       development
       nvidia
       gaming
-      # cachyos-kernel
+      cachyos-kernel
+      surface-kernel
     ];
-
-    # services.nixmox.joinSeed = "100.74.103.111:8080";
   };
 }
