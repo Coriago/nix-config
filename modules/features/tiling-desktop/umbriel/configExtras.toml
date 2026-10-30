@@ -4,6 +4,10 @@ mode = "scrolling"
 [layout.scrolling]
 default_extent_fraction = 0.6666666666666666
 
+[[window_rule]]
+match.app_id = "^steam_app_1091500$"
+confine_pointer = true
+
 # Upstream examples/config.toml bindings. Application launchers live in umbriel.nix.
 [keybinds]
 # Applications and session

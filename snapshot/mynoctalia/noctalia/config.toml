@@ -92,7 +92,7 @@ open_near_click_control_center = true
 transparency_mode = "soft"
 
 [theme]
-builtin = "Gruvbox"
+builtin = "Tokyo-Night"
 community_palette = "Oxocarbon"
 mode = "dark"
 shell_mode = "dark"
