@@ -70,6 +70,7 @@ require('snacks').setup {
   lazygit = { config = { gui = { nerdFontsVersion = '3' } } },
 }
 require('oil').setup {
+  watch_for_changes = true,
   columns = { 'icon' },
   win_options = { signcolumn = 'yes:2' }, -- Git index on the left, working tree on the right.
   view_options = { show_hidden = true },

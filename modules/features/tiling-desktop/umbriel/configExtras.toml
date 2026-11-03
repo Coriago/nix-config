@@ -1,3 +1,8 @@
+[input.touchpad]
+tap = true
+tap_button_map = "left_right_middle"
+click_method = "clickfinger"
+
 [layout]
 mode = "scrolling"
 
