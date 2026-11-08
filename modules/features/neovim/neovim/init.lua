@@ -296,7 +296,22 @@ local servers = {
     },
   },
   pyright = { before_init = project_tools.pyright },
-  gopls = { cmd = project_tools.lsp_command { 'gopls' } },
+  gopls = {
+    cmd = project_tools.lsp_command { 'gopls' },
+    settings = {
+      gopls = {
+        hints = {
+          assignVariableTypes = true,
+          parameterNames = true,
+          rangeVariableTypes = true,
+          compositeLiteralFields = true,
+          compositeLiteralTypes = true,
+          constantValues = true,
+          functionTypeParameters = true,
+        },
+      },
+    },
+  },
   rust_analyzer = {
     cmd = project_tools.lsp_command { 'rust-analyzer' },
     root_dir = function(buf, on_dir)

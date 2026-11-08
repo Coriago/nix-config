@@ -1,12 +1,12 @@
 {
   "bookmark_bar": {
-    "show_on_all_tabs": true
+    "show_on_all_tabs": true,
+    "visibility_state": 0
   },
   "brave": {
     "ai_chat": {
       "autocomplete_provider_enabled": false
     },
-    "always_show_bookmark_bar_on_ntp": false,
     "brave_ads": {
       "sponsored": {
         "enabled": false
