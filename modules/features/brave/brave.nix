@@ -13,6 +13,14 @@ in {
   }: {
     packages.mybrave = local.flake.wrappers.brave.wrap {
       inherit pkgs;
+      # Temporary pin until Brave returns to nixos-unstable.
+      package = (import (builtins.fetchTarball {
+        url = "https://github.com/NixOS/nixpkgs/archive/31ecbaca1bdefa45dffc409f0250bd8039ea0010.tar.gz";
+        sha256 = "1lzqyss0pznfh3az0llsp4a7c8gqcyq8wf96fnl5cnh5b3lic6kn";
+      }) {
+        system = pkgs.stdenv.hostPlatform.system;
+        config.allowUnfree = true;
+      }).brave;
       snapshot.enable = true;
       # Expose web caret geometry to the keyboard overlay through AT-SPI.
       flags."--force-renderer-accessibility" = {

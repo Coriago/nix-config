@@ -22,21 +22,21 @@ confine_pointer = true
 "Mod+C" = "cheatsheet-toggle"
 
 # Audio and the active Noctalia media player
-"XF86AudioRaiseVolume" = "spawn:noctalia msg volume-up"
-"XF86AudioLowerVolume" = "spawn:noctalia msg volume-down"
-"XF86AudioMute" = { action = "spawn:noctalia msg volume-mute", repeat = false }
-"XF86AudioPlay" = { action = "spawn:noctalia msg media toggle", repeat = false }
-"XF86AudioPause" = { action = "spawn:noctalia msg media pause", repeat = false }
-"XF86AudioStop" = { action = "spawn:noctalia msg media stop", repeat = false }
-"XF86AudioNext" = { action = "spawn:noctalia msg media next", repeat = false }
-"XF86AudioPrev" = { action = "spawn:noctalia msg media previous", repeat = false }
+"XF86AudioRaiseVolume" = "spawn noctalia msg volume-up"
+"XF86AudioLowerVolume" = "spawn noctalia msg volume-down"
+"XF86AudioMute" = { action = "spawn noctalia msg volume-mute", repeat = false }
+"XF86AudioPlay" = { action = "spawn noctalia msg media toggle", repeat = false }
+"XF86AudioPause" = { action = "spawn noctalia msg media pause", repeat = false }
+"XF86AudioStop" = { action = "spawn noctalia msg media stop", repeat = false }
+"XF86AudioNext" = { action = "spawn noctalia msg media next", repeat = false }
+"XF86AudioPrev" = { action = "spawn noctalia msg media previous", repeat = false }
 
 # Display brightness and keyboard backlight
-"XF86MonBrightnessUp" = "spawn:noctalia msg brightness-up"
-"XF86MonBrightnessDown" = "spawn:noctalia msg brightness-down"
-"XF86KbdBrightnessUp" = "spawn:noctalia msg keyboard-backlight-up"
-"XF86KbdBrightnessDown" = "spawn:noctalia msg keyboard-backlight-down"
-"XF86KbdLightOnOff" = { action = "spawn:noctalia msg keyboard-backlight-toggle", repeat = false }
+"XF86MonBrightnessUp" = "spawn noctalia msg brightness-up"
+"XF86MonBrightnessDown" = "spawn noctalia msg brightness-down"
+"XF86KbdBrightnessUp" = "spawn noctalia msg keyboard-backlight-up"
+"XF86KbdBrightnessDown" = "spawn noctalia msg keyboard-backlight-down"
+"XF86KbdLightOnOff" = { action = "spawn noctalia msg keyboard-backlight-toggle", repeat = false }
 
 # Focus and movement
 "Mod+H" = "window-focus-left"
@@ -65,11 +65,11 @@ confine_pointer = true
 "Mod+O" = { action = "overview-toggle", repeat = false }
 
 # Workspaces
-"Mod+Q" = "workspace-switch:1"
-"Mod+W" = "workspace-switch:2"
-"Mod+E" = "workspace-switch:3"
-"Mod+R" = "workspace-switch:4"
-"Mod+T" = "workspace-switch:5"
+"Mod+Q" = "workspace-switch 1"
+"Mod+W" = "workspace-switch 2"
+"Mod+E" = "workspace-switch 3"
+"Mod+R" = "workspace-switch 4"
+"Mod+T" = "workspace-switch 5"
 
 # Scratchpad
 # "Mod+Shift+Space" = { action = "window-move-to-scratchpad", repeat = false }

@@ -35,11 +35,10 @@ in {
       configHome = "\${XDG_CONFIG_HOME}/syncnoctalia";
       stateHome = "\${XDG_STATE_HOME}/syncnoctalia";
       snapshot.enable = true;
-      # Keep machine-specific plugin integration out of the portable baseline.
-      snapshot.files.noctaliaConfig.pruneKeyContains = ["^plugin_settings\\..*\\.nixos_configuration$"];
       settings = {
         shell.launch_apps_as_systemd_services = true;
         plugins = {
+          # Custom corne overlay plugin
           enabled = lib.unique ((savedPlugins.enabled or []) ++ ["helios/corne-overlay"]);
           source =
             builtins.filter (source: source.name != "corne-overlay") savedSources

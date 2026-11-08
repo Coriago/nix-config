@@ -35,9 +35,9 @@ in {
         ];
         include.files = [config.constructFiles.umbrielExtraConfig.path];
         keybinds = {
-          "Mod+G" = "spawn:${lib.getExe self'.packages.myghostty}";
-          "Mod+B" = "spawn:${lib.getExe self'.packages.mybrave}";
-          "Mod+S" = "spawn:${noctalia} msg panel-toggle launcher";
+          "Mod+G" = "spawn ${lib.getExe self'.packages.myghostty}";
+          "Mod+B" = "spawn ${lib.getExe self'.packages.mybrave}";
+          "Mod+S" = "spawn ${noctalia} msg panel-toggle launcher";
         };
         environment = {
           # Enable Chromium's native accessibility bridge for caret reporting.
