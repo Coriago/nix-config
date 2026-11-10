@@ -12,6 +12,7 @@
     ];
 
     environment.systemPackages = with pkgs; [
+      # nix
       nixd
       statix
       alejandra
@@ -20,10 +21,22 @@
       nix-inspect
       nix-output-monitor
 
+      # general
       gh
       fzf
       bubblewrap
       herdr
+
+      # python
+      python314
+      uv
+
+      # Go
+      go
+
+      # JS
+      nodejs-slim
+
 
       # inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex
     ];
