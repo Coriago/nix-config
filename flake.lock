@@ -125,6 +125,23 @@
         "type": "github"
       }
     },
+    "linux-surface": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794445465,
+        "narHash": "sha256-JeHqxPruo35gtp7urtWKrKzuQtyxM3glkQGjaWy67SQ=",
+        "owner": "linux-surface",
+        "repo": "linux-surface",
+        "rev": "ea852b4eff5ed641571e13766bda5bd9cf121983",
+        "type": "github"
+      },
+      "original": {
+        "owner": "linux-surface",
+        "ref": "master",
+        "repo": "linux-surface",
+        "type": "github"
+      }
+    },
     "llm-agents": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -217,6 +234,7 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
+        "linux-surface": "linux-surface",
         "llm-agents": "llm-agents",
         "nix-cachyos-kernel": "nix-cachyos-kernel",
         "nixos-hardware": "nixos-hardware",

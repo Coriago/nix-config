@@ -1,16 +1,11 @@
-{
+{inputs, ...}: {
   flake.modules.nixos.surface-kernel = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    source = pkgs.fetchFromGitHub {
-      owner = "linux-surface";
-      repo = "linux-surface";
-      rev = "8c62d84193a38bd097238b192a4f7262db8a9f7e";
-      hash = "sha256-687H05hC6HDdOhJPG9C/bOszSdQy/YCWyf688mMytos=";
-    };
+    source = inputs.linux-surface;
     patches = [
       "0001-secureboot"
       "0002-surface3"
@@ -42,7 +37,8 @@
       map (name: {
         name = "surface-7.3/${name}";
         patch = "${source}/patches/7.3/${name}.patch";
-      }) patches
+      })
+      patches
       ++ [
         {
           name = "surface-7.3-config";
@@ -95,12 +91,62 @@
               INTEL_ATOMISP = lib.kernel.no;
             };
         }
+        {
+          name = "surface-unused-hardware";
+          patch = null;
+          structuredExtraConfig = lib.genAttrs [
+            # Keep i915, the external NVIDIA module, and virtual/USB displays.
+            "DRM_AMDGPU"
+            "DRM_RADEON"
+            "DRM_NOUVEAU"
+            "DRM_XE"
+            "DRM_ACCEL_AMDXDNA"
+            "DRM_ACCEL_HABANALABS"
+            "DRM_ACCEL_IVPU"
+            "DRM_ACCEL_QAIC"
+
+            # Keep cameras, video capture, HDMI CEC, and remote controls.
+            "MEDIA_ANALOG_TV_SUPPORT"
+            "MEDIA_DIGITAL_TV_SUPPORT"
+            "MEDIA_RADIO_SUPPORT"
+
+            # Legacy/specialist Wi-Fi; retain common PCIe and USB adapter families.
+            "WLAN_VENDOR_ADMTEK"
+            "WLAN_VENDOR_ATMEL"
+            "WLAN_VENDOR_INTERSIL"
+            "WLAN_VENDOR_MICROCHIP"
+            "WLAN_VENDOR_MORSEMICRO"
+            "WLAN_VENDOR_PURELIFI"
+            "WLAN_VENDOR_QUANTENNA"
+            "WLAN_VENDOR_SILABS"
+            "WLAN_VENDOR_ST"
+            "WLAN_VENDOR_TI"
+
+            # Physical datacenter RDMA adapters only; keep core/software RDMA,
+            # Ethernet, storage protocols, RAID, filesystems, and BPF/BTF intact.
+            "INFINIBAND_BNXT_RE"
+            "INFINIBAND_BNG_RE"
+            "INFINIBAND_CXGB4"
+            "INFINIBAND_EFA"
+            "INFINIBAND_ERDMA"
+            "INFINIBAND_HFI1"
+            "INFINIBAND_HNS_HIP08"
+            "INFINIBAND_IONIC"
+            "INFINIBAND_IRDMA"
+            "INFINIBAND_MTHCA"
+            "INFINIBAND_OCRDMA"
+            "INFINIBAND_QEDR"
+            "INFINIBAND_USNIC"
+            "MLX4_INFINIBAND"
+            "MLX5_INFINIBAND"
+          ] (_: lib.mkForce lib.kernel.no);
+        }
       ];
 
     services.iptsd.enable = lib.mkDefault true;
-    # IPTSd's add-only rule loses the systemd tag on change, stopping both daemons.
+    # Preserve both across change events; IPTSd stops when its device no longer wants it.
     services.udev.extraRules = lib.mkIf config.services.iptsd.enable ''
-      SUBSYSTEM=="hidraw", KERNELS=="0001:045E:0C5D.*|0001:045E:0C46.*", TAG+="systemd"
+      ACTION!="remove", SUBSYSTEM=="hidraw", KERNELS=="0001:045E:0C5D.*|0001:045E:0C46.*", TAG+="systemd", ENV{SYSTEMD_WANTS}+="iptsd@dev-%k.service"
     '';
     hardware.enableRedistributableFirmware = lib.mkDefault true;
     hardware.sensor.iio.enable = lib.mkDefault true;
