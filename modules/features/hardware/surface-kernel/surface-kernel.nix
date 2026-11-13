@@ -41,6 +41,16 @@
       patches
       ++ [
         {
+          # https://github.com/linux-surface/kernel/pull/179
+          name = "surface-gpu-power";
+          patch = pkgs.fetchurl {
+            name = "surface-gpu-power-04dbd2d.patch";
+            url = "https://github.com/linux-surface/kernel/commit/04dbd2d66ba06e6d5d13c2154c0cacf07d1e17d7.patch";
+            hash = "sha256-b60dip0mxveuzKg2r9PTC4uSuoQlckfXQuX4dR+huog=";
+          };
+          structuredExtraConfig.SURFACE_GPU_POWER = lib.kernel.module;
+        }
+        {
           name = "surface-7.3-config";
           patch = null;
           # Matches configs/surface-7.3.config at the pinned linux-surface revision.
@@ -104,6 +114,42 @@
             "DRM_ACCEL_HABANALABS"
             "DRM_ACCEL_IVPU"
             "DRM_ACCEL_QAIC"
+
+            # AMD-only platform management; keep shared chipset/ACPI support.
+            "AMD_PMC"
+            "AMD_PMF"
+            "AMD_HSMP_ACPI"
+            "AMD_HSMP_PLAT"
+            "AMD_3D_VCACHE"
+            "AMD_HALO_LED"
+            "AMD_ISP_PLATFORM"
+
+            # Other vendors' built-in laptop controls, not external peripherals.
+            "ACERHDF"
+            "ACER_WIRELESS"
+            "ACER_WMI"
+            "ASUS_LAPTOP"
+            "ASUS_WIRELESS"
+            "ASUS_WMI"
+            "ASUS_TF103C_DOCK"
+            "EEEPC_LAPTOP"
+            "X86_PLATFORM_DRIVERS_DELL"
+            "X86_PLATFORM_DRIVERS_HP"
+            "FUJITSU_LAPTOP"
+            "FUJITSU_TABLET"
+            "IDEAPAD_LAPTOP"
+            "LENOVO_WMI_HOTKEY_UTILITIES"
+            "THINKPAD_ACPI"
+            "THINKPAD_LMI"
+            "MSI_EC"
+            "MSI_LAPTOP"
+            "MSI_WMI"
+            "MSI_WMI_PLATFORM"
+            "SAMSUNG_LAPTOP"
+            "ACPI_TOSHIBA"
+            "TOSHIBA_BT_RFKILL"
+            "TOSHIBA_HAPS"
+            "TOSHIBA_WMI"
 
             # Keep cameras, video capture, HDMI CEC, and remote controls.
             "MEDIA_ANALOG_TV_SUPPORT"
