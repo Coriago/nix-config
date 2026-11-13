@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.nvidia = {config, ...}: let
+  flake.modules.nixos.nvidia = {config, lib, ...}: let
     # Prefer a stable NVIDIA driver
     nvidiaPackage = config.boot.kernelPackages.nvidiaPackages.stable;
   in {
@@ -11,7 +11,7 @@
       open = true;
       modesetting.enable = true;
       powerManagement.enable = true;
-      powerManagement.finegrained = false;
+      powerManagement.finegrained = lib.mkDefault false;
       package = nvidiaPackage;
     };
 

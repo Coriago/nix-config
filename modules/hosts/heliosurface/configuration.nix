@@ -11,7 +11,7 @@
       diskLayout
       workstation
       development
-      nvidia
+      nvidia-laptop
       gaming
       cachyos-kernel
       surface-kernel
