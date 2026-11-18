@@ -12,7 +12,7 @@
         state_file = "auto";
         hotkey = {
           enabled = true;
-          key = "SCROLLLOCK";
+          key = "F14";
           mode = "toggle";
         };
         whisper = {

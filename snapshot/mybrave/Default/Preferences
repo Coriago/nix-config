@@ -42,6 +42,7 @@
   },
   "homepage": "https://homepage.backyard-host.com/",
   "homepage_is_newtabpage": false,
+  "https_only_mode_enabled": false,
   "intl": {
     "selected_languages": "en-US,en"
   },

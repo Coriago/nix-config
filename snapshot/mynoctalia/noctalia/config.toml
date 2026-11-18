@@ -18,6 +18,15 @@ sync_all_monitors = true
 [control_center]
 width = 750
 
+[dock]
+auto_hide = true
+auto_hide_reveal_delay_ms = 450
+enabled = true
+icon_size = 34
+reserve_space = false
+show_dots = true
+smart_auto_hide = false
+
 [idle]
 behavior_order = [
     "lock",
