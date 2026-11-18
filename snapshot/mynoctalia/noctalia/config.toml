@@ -58,6 +58,7 @@ position = "top_right"
 
 [plugin_settings."mindnbytes/nix-status"]
 details_placement = "floating"
+nixos_configuration = "heliosdesk"
 
 [plugin_settings."noctalia/umbriel-companion"]
 panel_placement = "floating"

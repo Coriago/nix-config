@@ -6,6 +6,7 @@ local: {
   }: {
     imports = with local.config.flake.modules.nixos; [
       ghostty
+      voxtype
       brave
       ark
       printing
