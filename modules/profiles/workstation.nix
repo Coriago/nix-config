@@ -35,6 +35,7 @@ local: {
       krita
       vlc
       local.self.packages.${pkgs.stdenv.hostPlatform.system}.nuvio
+      qbittorrent
     ];
 
     home-manager.users.${hostmeta.username} = {...}: {
