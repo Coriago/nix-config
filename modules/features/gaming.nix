@@ -1,5 +1,7 @@
-{
-  flake.modules.nixos.gaming = {...}: {
+{self, ...}: {
+  flake.modules.nixos.gaming = {pkgs, ...}: {
+    environment.systemPackages = [self.packages.${pkgs.stdenv.hostPlatform.system}.fritchii];
+
     programs.steam = {
       enable = true;
       remotePlay.openFirewall = true;
