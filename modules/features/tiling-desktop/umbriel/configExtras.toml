@@ -7,7 +7,7 @@ click_method = "clickfinger"
 mode = "scrolling"
 
 [layout.scrolling]
-default_extent_fraction = 0.6666666666666666
+default_extent_fraction = 0.5
 
 [[window_rule]]
 match.app_id = "^steam_app_1091500$"
@@ -20,6 +20,7 @@ confine_pointer = true
 "Mod+Escape" = "session-quit"
 "Mod+Shift+Escape" = { action = "shortcuts-inhibit-toggle", allow_when_inhibited = true, repeat = false }
 "Mod+C" = "cheatsheet-toggle"
+"Mod+D" = "spawn dolphin"
 
 # Audio and the active Noctalia media player
 "XF86AudioRaiseVolume" = "spawn noctalia msg volume-up"

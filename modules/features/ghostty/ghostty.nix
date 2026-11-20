@@ -15,8 +15,6 @@
       ...
     }: {
       inherit pkgs;
-      # Temporary GTK accessibility trial, kept separate for easy removal.
-      # package = self'.packages.ghostty-a11y;
       settings.custom-shader = "${pkgs.fetchurl {
         name = "ghostty-cursor-warp.glsl";
         url = "https://raw.githubusercontent.com/sahaj-b/cursor-shaders/9ad9158a93c0de0c045e1c6b27df37da698bc8af/ghostty/cursor_warp.glsl";
